@@ -104,26 +104,35 @@ const hydroCache = {
 
 /**
  * Masque d'eau statique pour le fleuve Saint-Laurent
- * Polygone simplifié couvrant la zone de Québec - Lévis
+ * Polygone étendu couvrant le fleuve de Québec à l'île d'Orléans
  * Ce masque est TOUJOURS appliqué comme premier filtre
  */
 const SAINT_LAURENT_MASK = {
   name: 'Fleuve Saint-Laurent',
   type: 'river',
-  // Polygone couvrant le fleuve de Québec à l'île d'Orléans
+  // Polygone étendu couvrant tout le fleuve visible sur la carte de Québec
   polygon: [
-    [46.845, -71.30], [46.855, -71.25], [46.865, -71.20], [46.870, -71.15],
-    [46.865, -71.10], [46.855, -71.05], [46.845, -71.00], [46.835, -70.95],
-    [46.815, -70.95], [46.805, -71.00], [46.795, -71.05], [46.785, -71.10],
-    [46.780, -71.15], [46.785, -71.20], [46.790, -71.25], [46.800, -71.30],
-    [46.810, -71.32], [46.825, -71.32], [46.845, -71.30]
+    // Rive nord (de l'ouest vers l'est)
+    [46.870, -71.35], [46.875, -71.30], [46.880, -71.25], [46.882, -71.20],
+    [46.878, -71.15], [46.870, -71.10], [46.865, -71.05], [46.860, -71.00],
+    [46.855, -70.95], [46.850, -70.90], [46.845, -70.85],
+    // Pointe est (vers île d'Orléans)
+    [46.835, -70.80], [46.820, -70.78],
+    // Rive sud de l'île d'Orléans
+    [46.810, -70.80], [46.800, -70.85], [46.795, -70.90],
+    // Rive sud (Lévis, de l'est vers l'ouest)
+    [46.790, -70.95], [46.785, -71.00], [46.780, -71.05], [46.775, -71.10],
+    [46.772, -71.15], [46.775, -71.20], [46.780, -71.25], [46.785, -71.30],
+    [46.795, -71.33], [46.810, -71.35], [46.830, -71.36],
+    // Fermer le polygone
+    [46.850, -71.36], [46.870, -71.35]
   ],
-  // Bounding box pour optimisation
+  // Bounding box étendue
   bounds: {
-    north: 46.870,
-    south: 46.780,
-    east: -70.95,
-    west: -71.32
+    north: 46.882,
+    south: 46.772,
+    east: -70.78,
+    west: -71.36
   }
 };
 
