@@ -344,6 +344,50 @@ const CloudBackupManager = () => {
     }
   };
 
+  // Notification actions
+  const configureNotifications = async () => {
+    if (!notifConfig.recipient_email) {
+      toast.error("Veuillez entrer une adresse email");
+      return;
+    }
+    try {
+      const response = await axios.post(`${API}/api/backup-cloud/notifications/configure`, notifConfig);
+      if (response.data.success) {
+        toast.success("Notifications configurées!");
+        loadNotificationStatus();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur de configuration");
+    }
+  };
+
+  const sendTestEmail = async () => {
+    setSendingTest(true);
+    try {
+      const response = await axios.post(`${API}/api/backup-cloud/notifications/test`);
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur d'envoi");
+    }
+    setSendingTest(false);
+  };
+
+  const sendDailySummary = async () => {
+    setSendingSummary(true);
+    try {
+      const response = await axios.post(`${API}/api/backup-cloud/notifications/send-summary`);
+      if (response.data.success) {
+        toast.success("Résumé envoyé!");
+        loadLogs();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur d'envoi");
+    }
+    setSendingSummary(false);
+  };
+
   const toggleAutoBackup = async (enabled) => {
     try {
       if (enabled) {
