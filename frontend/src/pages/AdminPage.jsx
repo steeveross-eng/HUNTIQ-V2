@@ -83,6 +83,7 @@ import MarketingAIAdmin from "@/components/MarketingAIAdmin";
 import CategoriesManager from "@/components/CategoriesManager";
 import PromptManager from "@/components/PromptManager";
 import BackupManager from "@/components/BackupManager";
+import CloudBackupManager from "@/components/CloudBackupManager";
 import PartnershipAdmin from "@/components/PartnershipAdmin";
 import { SaleModeBadge, AutoCategorizeButton } from "@/components/SharedComponents";
 import { useLanguage } from "@/contexts/LanguageContext";
