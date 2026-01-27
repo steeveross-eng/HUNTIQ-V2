@@ -195,17 +195,21 @@ async function fetchWaterFeatures(bounds) {
     }
     
     const data = await response.json();
-    const features = data.features || [];
+    const apiFeatures = data.features || [];
+    
+    // Fusionner avec le masque du Saint-Laurent
+    waterFeatures = [...waterFeatures, ...apiFeatures];
     
     // Mettre en cache
-    hydroCache.set(bounds, features);
+    hydroCache.set(bounds, waterFeatures);
     
-    console.log(`[WaterExclusion] ${features.length} water features loaded`);
-    return features;
+    console.log(`[BIONIC_water_mask_v3] ${waterFeatures.length} surfaces d'eau (dont masque Saint-Laurent)`);
+    return waterFeatures;
     
   } catch (error) {
     console.error('[WaterExclusion] Error fetching water features:', error);
-    return [];
+    // Retourner au moins le masque du Saint-Laurent
+    return waterFeatures;
   }
 }
 
