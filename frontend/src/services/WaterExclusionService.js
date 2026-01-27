@@ -177,8 +177,21 @@ function isPointOnIleOrleans(lat, lng) {
 
 /**
  * Vérifie si un point est dans l'un des masques du fleuve Saint-Laurent
+ * MAIS PAS sur l'île d'Orléans (qui est de la terre)
  */
 function isPointInSaintLaurent(lat, lng) {
+  // D'abord, vérifier si le point est sur l'île d'Orléans (terre)
+  if (isPointOnIleOrleans(lat, lng)) {
+    return { inWater: false, mask: null };
+  }
+  
+  // Ensuite, vérifier si le point est dans les bounds généraux du fleuve
+  // Le fleuve est entre: lat 46.77-46.93, lng -71.35 à -70.50
+  if (lat < 46.77 || lat > 46.93 || lng < -71.35 || lng > -70.50) {
+    return { inWater: false, mask: null };
+  }
+  
+  // Vérifier chaque masque d'eau
   for (const mask of SAINT_LAURENT_MASKS) {
     // Vérification rapide des bounds
     if (lat < mask.bounds.south || lat > mask.bounds.north ||
