@@ -381,8 +381,9 @@ async def test_notification():
     if not config:
         raise HTTPException(status_code=400, detail="Notifications non configurées")
     
-    if not RESEND_AVAILABLE or not RESEND_API_KEY:
-        raise HTTPException(status_code=400, detail="Resend non configuré. Ajoutez RESEND_API_KEY dans .env")
+    api_key = await get_resend_api_key()
+    if not RESEND_AVAILABLE or not api_key:
+        raise HTTPException(status_code=400, detail="Resend non configuré. Entrez votre clé API dans l'onglet Notifications")
     
     # Send test email
     html = """
