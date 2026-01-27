@@ -584,6 +584,9 @@ const MonTerritoireBionicPage = () => {
   const [cursorPosition, setCursorPosition] = useState(null);
   const [cursorData, setCursorData] = useState(null);
   const [showCursorInfo, setShowCursorInfo] = useState(true);
+  const [cursorElevation, setCursorElevation] = useState(null);
+  const elevationCacheRef = useRef({});
+  const elevationTimeoutRef = useRef(null);
   
   // Quick waypoint - enregistrement instantané en un clic
   const [quickWaypointMode, setQuickWaypointMode] = useState(false);
