@@ -1815,36 +1815,52 @@ const MonTerritoireBionicPage = () => {
                     top: `${(cursorPosition.pixel?.y || 0) + 160}px`,
                   }}
                 >
-                  {/* Conteneur avec flèche pointant vers le curseur */}
+                  {/* Conteneur avec flèche pointant vers le point précis */}
                   <div className="relative">
-                    {/* Ligne de connexion vers le point précis */}
+                    {/* Pointe de flèche SVG vers le point GPS précis */}
                     <svg 
-                      className="absolute -left-3 -top-3" 
-                      width="40" 
-                      height="40" 
-                      style={{ overflow: 'visible' }}
+                      className="absolute" 
+                      width="50" 
+                      height="50"
+                      style={{ 
+                        left: '-12px', 
+                        top: '-12px',
+                        overflow: 'visible' 
+                      }}
                     >
-                      {/* Ligne pointillée */}
-                      <line 
-                        x1="0" y1="0" 
-                        x2="20" y2="20" 
-                        stroke="#f5a623" 
-                        strokeWidth="2" 
-                        strokeDasharray="3,2"
-                        opacity="0.8"
-                      />
-                      {/* Point précis GPS (le vrai point de mesure) */}
-                      <circle cx="0" cy="0" r="6" fill="#f5a623" opacity="0.3">
-                        <animate attributeName="r" values="6;10;6" dur="1.5s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
+                      {/* Cercle externe animé (pulse) */}
+                      <circle cx="0" cy="0" r="8" fill="none" stroke="#f5a623" strokeWidth="2" opacity="0.4">
+                        <animate attributeName="r" values="8;14;8" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.4;0;0.4" dur="1.5s" repeatCount="indefinite"/>
                       </circle>
-                      <circle cx="0" cy="0" r="4" fill="#f5a623" opacity="0.6"/>
-                      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+                      
+                      {/* Flèche/ligne vers la bulle */}
+                      <path 
+                        d="M 0 0 L 18 18" 
+                        stroke="#f5a623" 
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))"
+                      />
+                      
+                      {/* Triangle pointe de flèche au point GPS */}
+                      <polygon 
+                        points="0,-6 5,4 -5,4" 
+                        fill="#f5a623"
+                        transform="rotate(45)"
+                        filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))"
+                      />
+                      
+                      {/* Point central blanc (le point GPS exact) */}
+                      <circle cx="0" cy="0" r="3" fill="#ffffff" filter="drop-shadow(0 0 3px rgba(245,166,35,0.8))"/>
                     </svg>
                     
-                    {/* Corps de la bulle d'info avec coin coupé */}
+                    {/* Corps de la bulle d'info */}
                     <div 
-                      className="ml-4 mt-4 bg-black/95 backdrop-blur-sm px-3 py-2 border-l-2 border-[#f5a623] shadow-lg shadow-black/50 rounded-r-lg"
+                      className="ml-5 mt-5 bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623]/60 shadow-xl shadow-black/60 rounded-lg"
+                      style={{
+                        borderTopLeftRadius: '2px'
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
