@@ -1044,7 +1044,14 @@ const AdminPage = ({ onProductsUpdate }) => {
           {/* PROMPT Tab - Documentation & Features */}
           {/* Backup Tab (formerly Prompt) */}
           <TabsContent value="backup" className="space-y-6">
-            <BackupManager />
+            {/* Cloud Backup Manager - MongoDB Atlas + GCS + ZIP */}
+            <CloudBackupManager />
+            
+            {/* Legacy Backup Manager */}
+            <div className="mt-8 pt-8 border-t border-border">
+              <h3 className="text-lg font-semibold text-white mb-4">Backup Local (Code & Prompts)</h3>
+              <BackupManager />
+            </div>
           </TabsContent>
 
           {/* Access Control Tab */}
