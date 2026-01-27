@@ -200,6 +200,21 @@ const CloudBackupManager = () => {
     }
   };
 
+  const loadNotificationStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/api/backup-cloud/notifications/status`);
+      setNotifStatus(response.data);
+      if (response.data.config) {
+        setNotifConfig({
+          ...notifConfig,
+          ...response.data.config
+        });
+      }
+    } catch (error) {
+      console.error("Error loading notification status:", error);
+    }
+  };
+
   const loadAtlasGuide = async () => {
     try {
       const response = await axios.get(`${API}/api/backup-cloud/guides/mongodb-atlas`);
@@ -227,6 +242,7 @@ const CloudBackupManager = () => {
     loadZipInfo();
     loadScheduleStatus();
     loadLogs();
+    loadNotificationStatus();
     
     // Refresh every 30 seconds
     const interval = setInterval(() => {
