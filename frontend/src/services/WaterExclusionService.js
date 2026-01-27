@@ -103,7 +103,59 @@ const hydroCache = {
 };
 
 /**
+ * Masque d'eau statique pour le fleuve Saint-Laurent
+ * Polygone simplifié couvrant la zone de Québec - Lévis
+ * Ce masque est TOUJOURS appliqué comme premier filtre
+ */
+const SAINT_LAURENT_MASK = {
+  name: 'Fleuve Saint-Laurent',
+  type: 'river',
+  // Polygone couvrant le fleuve de Québec à l'île d'Orléans
+  polygon: [
+    [46.845, -71.30], [46.855, -71.25], [46.865, -71.20], [46.870, -71.15],
+    [46.865, -71.10], [46.855, -71.05], [46.845, -71.00], [46.835, -70.95],
+    [46.815, -70.95], [46.805, -71.00], [46.795, -71.05], [46.785, -71.10],
+    [46.780, -71.15], [46.785, -71.20], [46.790, -71.25], [46.800, -71.30],
+    [46.810, -71.32], [46.825, -71.32], [46.845, -71.30]
+  ],
+  // Bounding box pour optimisation
+  bounds: {
+    north: 46.870,
+    south: 46.780,
+    east: -70.95,
+    west: -71.32
+  }
+};
+
+/**
+ * Vérifie si un point est dans le masque du fleuve Saint-Laurent
+ */
+function isPointInSaintLaurent(lat, lng) {
+  // Vérification rapide des bounds
+  if (lat < SAINT_LAURENT_MASK.bounds.south || lat > SAINT_LAURENT_MASK.bounds.north ||
+      lng < SAINT_LAURENT_MASK.bounds.west || lng > SAINT_LAURENT_MASK.bounds.east) {
+    return false;
+  }
+  
+  // Test point-in-polygon
+  const polygon = SAINT_LAURENT_MASK.polygon;
+  let inside = false;
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [yi, xi] = polygon[i];
+    const [yj, xj] = polygon[j];
+    
+    if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  
+  return inside;
+}
+
+/**
  * Récupère les surfaces d'eau pour une zone donnée
+ * Inclut TOUJOURS le masque du fleuve Saint-Laurent
  */
 async function fetchWaterFeatures(bounds) {
   // Vérifier le cache
@@ -119,7 +171,7 @@ async function fetchWaterFeatures(bounds) {
   
   if (!north || !south || !east || !west) {
     console.warn('[WaterExclusion] Invalid bounds provided');
-    return [];
+    return [SAINT_LAURENT_MASK]; // Toujours retourner le masque du fleuve
   }
   
   const centerLat = (north + south) / 2;
@@ -129,6 +181,9 @@ async function fetchWaterFeatures(bounds) {
   const latDist = Math.abs(north - south) * 111320;
   const lngDist = Math.abs(east - west) * 111320 * Math.cos(centerLat * Math.PI / 180);
   const radius = Math.max(latDist, lngDist) / 2 + 2000;
+  
+  // Commencer avec le masque du Saint-Laurent
+  let waterFeatures = [SAINT_LAURENT_MASK];
   
   try {
     const response = await fetch(
