@@ -1048,6 +1048,34 @@ const MonTerritoireBionicPage = () => {
     toast.success('Waypoint créé avec succès !');
   }, [newWaypoint, mapCenter, addWaypoint]);
   
+  // Fonction pour récupérer l'altitude depuis Open-Meteo API
+  const fetchElevation = useCallback(async (lat, lng) => {
+    // Arrondir les coordonnées pour le cache (précision ~100m)
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+    
+    // Vérifier le cache
+    if (elevationCacheRef.current[cacheKey]) {
+      setCursorElevation(elevationCacheRef.current[cacheKey]);
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const elevation = data.elevation?.[0] || null;
+        if (elevation !== null) {
+          elevationCacheRef.current[cacheKey] = Math.round(elevation);
+          setCursorElevation(Math.round(elevation));
+        }
+      }
+    } catch (error) {
+      console.log('[GPS LIVE] Erreur élévation:', error);
+    }
+  }, []);
+  
   // Gestion du curseur sur la carte - données au "bout de la flèche"
   const handleCursorMove = useCallback((position) => {
     setCursorPosition(position);
@@ -1055,6 +1083,14 @@ const MonTerritoireBionicPage = () => {
     // Calculer les données pour cette position
     const lat = position.lat;
     const lng = position.lng;
+    
+    // Récupérer l'altitude avec debounce (éviter trop de requêtes)
+    if (elevationTimeoutRef.current) {
+      clearTimeout(elevationTimeoutRef.current);
+    }
+    elevationTimeoutRef.current = setTimeout(() => {
+      fetchElevation(lat, lng);
+    }, 300); // Attendre 300ms avant de faire la requête
     
     // Distance depuis la position utilisateur
     let distanceFromUser = null;
