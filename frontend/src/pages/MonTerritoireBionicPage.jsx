@@ -1882,8 +1882,20 @@ const MonTerritoireBionicPage = () => {
               
               {/* Contrôles carte */}
               <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
-                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => setMapZoom(z => Math.min(18, z + 1))}>+</Button>
-                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => setMapZoom(z => Math.max(5, z - 1))}>-</Button>
+                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => {
+                  // Utiliser le centre actuel de la carte pour le zoom
+                  if (currentMapCenter) {
+                    setMapCenter([currentMapCenter.lat, currentMapCenter.lng]);
+                  }
+                  setMapZoom(z => Math.min(18, z + 1));
+                }}>+</Button>
+                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => {
+                  // Utiliser le centre actuel de la carte pour le zoom
+                  if (currentMapCenter) {
+                    setMapCenter([currentMapCenter.lat, currentMapCenter.lng]);
+                  }
+                  setMapZoom(z => Math.max(5, z - 1));
+                }}>-</Button>
                 <Button size="sm" className={`${userPosition ? 'bg-blue-600' : 'bg-black/80'} text-white border border-gray-700 h-8 w-8 p-0`} onClick={centerOnUser}>
                   <LocateFixed className="h-4 w-4" />
                 </Button>
