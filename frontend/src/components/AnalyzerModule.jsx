@@ -848,56 +848,57 @@ const AnalyzerModule = () => {
           </div>
           <h1 className="golden-text text-2xl md:text-3xl font-bold mb-2">Analysez votre Pourvoyeur et Produits</h1>
           <p className="text-gray-400 text-sm max-w-xl mx-auto">
-            Notre IA analysera la composition, l'efficacité et comparera aux meilleurs produits du marché.
-    setSmartDetection(null);
-    setActiveView("input");
-  };
-  
-  const handleStickyAnalyze = () => {
-    if (activeView === "results") {
-      resetAnalysis();
-    } else {
-      handleAnalyze();
-    }
-  };
-  
-  const handleStickyCompare = () => {
-    setShowCompareModal(true);
-  };
-  
-  return (
-    <main className="pt-20 min-h-screen bg-background relative pb-24 md:pb-8">
-      {/* Sticky Sidebar Buttons */}
-      <StickySidebarButtons
-        onAnalyzeClick={handleStickyAnalyze}
-        onCompareClick={handleStickyCompare}
-        isAnalyzing={analyzing}
-        hasDetectedProduct={smartDetection?.category_confidence > 50}
-        detectedProduct={smartDetection}
-      />
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:pr-32">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-[#f5a623]/10 px-4 py-2 rounded-full mb-4">
-            <FlaskConical className="h-5 w-5 text-[#f5a623]" />
-            <span className="text-[#f5a623] font-semibold">Click & Analyse Intelligent</span>
-            <Sparkles className="h-4 w-4 text-[#f5a623] animate-pulse" />
-          </div>
-          <h1 className="golden-text text-4xl font-bold mb-4">Analysez votre attractant</h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Détection automatique • Catégorisation intelligente • Analyse instantanée • 
-            Recommandations personnalisées
+            Notre IA analysera la composition, l&apos;efficacité et comparera aux meilleurs produits du marché.
           </p>
-          {/* Refresh Button */}
-          <Button 
-            variant="outline" 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="mt-3"
-            data-testid="refresh-analyzer"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto">
+          {activeView === "input" ? (
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-white">URL du produit ou texte à analyser</Label>
+                    <Input 
+                      placeholder="Collez l'URL ou décrivez le produit..."
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAnalyze}
+                    disabled={analyzing || !inputText.trim()}
+                    className="w-full btn-golden text-black"
+                  >
+                    {analyzing ? "Analyse en cours..." : "Analyser"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <h3 className="text-white text-lg font-semibold mb-4">Résultats de l&apos;analyse</h3>
+                {analysisResult && (
+                  <div className="space-y-4">
+                    <p className="text-gray-300">{analysisResult.summary || "Analyse complétée"}</p>
+                    <Button onClick={() => setActiveView("input")} variant="outline">
+                      Nouvelle analyse
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default AnalyzerModule;
             {t('common_refresh')}
           </Button>
         </div>
