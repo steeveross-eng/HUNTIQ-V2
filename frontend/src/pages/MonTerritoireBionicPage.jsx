@@ -1817,32 +1817,38 @@ const MonTerritoireBionicPage = () => {
                 >
                   {/* Conteneur avec flèche pointant vers le curseur */}
                   <div className="relative">
-                    {/* Pointe de la flèche (triangle) - Point précis GPS */}
-                    <div 
-                      className="absolute -left-2 -top-2 w-0 h-0"
-                      style={{
-                        borderLeft: '8px solid transparent',
-                        borderRight: '8px solid transparent',
-                        borderBottom: '12px solid rgba(245, 166, 35, 0.9)',
-                        transform: 'rotate(-45deg)',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
-                      }}
-                    />
-                    {/* Point précis lumineux */}
-                    <div className="absolute -left-1 -top-1 w-2 h-2 bg-[#f5a623] rounded-full animate-ping opacity-75" />
-                    <div className="absolute -left-0.5 -top-0.5 w-1 h-1 bg-white rounded-full" />
+                    {/* Ligne de connexion vers le point précis */}
+                    <svg 
+                      className="absolute -left-3 -top-3" 
+                      width="40" 
+                      height="40" 
+                      style={{ overflow: 'visible' }}
+                    >
+                      {/* Ligne pointillée */}
+                      <line 
+                        x1="0" y1="0" 
+                        x2="20" y2="20" 
+                        stroke="#f5a623" 
+                        strokeWidth="2" 
+                        strokeDasharray="3,2"
+                        opacity="0.8"
+                      />
+                      {/* Point précis GPS (le vrai point de mesure) */}
+                      <circle cx="0" cy="0" r="6" fill="#f5a623" opacity="0.3">
+                        <animate attributeName="r" values="6;10;6" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
+                      </circle>
+                      <circle cx="0" cy="0" r="4" fill="#f5a623" opacity="0.6"/>
+                      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+                    </svg>
                     
-                    {/* Corps de la bulle d'info */}
+                    {/* Corps de la bulle d'info avec coin coupé */}
                     <div 
-                      className="ml-3 mt-3 bg-black/90 backdrop-blur-sm px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50"
-                      style={{
-                        borderRadius: '4px 12px 12px 12px',
-                        clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 15px)'
-                      }}
+                      className="ml-4 mt-4 bg-black/95 backdrop-blur-sm px-3 py-2 border-l-2 border-[#f5a623] shadow-lg shadow-black/50 rounded-r-lg"
                     >
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[#f5a623] text-xs font-bold">GPS LIVE</span>
+                        <span className="text-[#f5a623] text-xs font-bold tracking-wider">GPS LIVE</span>
                       </div>
                       <div className="text-white font-mono text-sm mt-1">
                         {cursorData.lat.toFixed(5)}°N
