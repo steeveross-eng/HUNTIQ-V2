@@ -1771,14 +1771,14 @@ const MonTerritoireBionicPage = () => {
                 {/* Waypoints actifs (visibles selon mode confidentialité) */}
                 {isPrivateDataVisible && activeWaypoints.map(wp => (
                   <React.Fragment key={wp.id}>
-                    {/* Cercle de couverture 2000 pi² (rayon = 7.69m) */}
+                    {/* Cercle de couverture 2000 pieds de diamètre (rayon = 305m) */}
                     <Circle
                       center={[wp.lat, wp.lng]}
-                      radius={7.69}
+                      radius={305}
                       pathOptions={{ 
                         color: selectedWaypointForZones?.id === wp.id ? '#22c55e' : '#f5a623', 
                         fillColor: selectedWaypointForZones?.id === wp.id ? '#22c55e' : '#f5a623', 
-                        fillOpacity: 0.2, 
+                        fillOpacity: 0.15, 
                         weight: 2 
                       }}
                     />
@@ -1793,7 +1793,7 @@ const MonTerritoireBionicPage = () => {
                         <div className="text-center">
                           <div className="font-bold">{wp.name}</div>
                           <div className="text-xs text-gray-500">{PLACE_TYPES.find(t => t.id === wp.type)?.name}</div>
-                          <div className="text-xs text-gray-400 mt-1">Couverture: 2000 pi²</div>
+                          <div className="text-xs text-gray-400 mt-1">Couverture: 2000 pi</div>
                           <button 
                             className="mt-2 px-2 py-1 bg-[#f5a623] text-black text-xs rounded"
                             onClick={() => selectWaypointAsTarget(wp)}
