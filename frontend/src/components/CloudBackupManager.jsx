@@ -102,6 +102,18 @@ const CloudBackupManager = () => {
   
   // Logs state
   const [logs, setLogs] = useState([]);
+  
+  // Notification state
+  const [notifStatus, setNotifStatus] = useState(null);
+  const [notifConfig, setNotifConfig] = useState({
+    enabled: true,
+    recipient_email: "",
+    send_daily_summary: true,
+    send_on_failure: true,
+    summary_hour: 8
+  });
+  const [sendingTest, setSendingTest] = useState(false);
+  const [sendingSummary, setSendingSummary] = useState(false);
 
   // Helpers
   const formatBytes = (bytes) => {
