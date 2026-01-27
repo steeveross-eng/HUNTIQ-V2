@@ -364,10 +364,11 @@ async def configure_notifications(config: NotificationConfig):
 async def get_notification_status():
     """Get notification configuration status"""
     config = await backup_config.find_one({"type": "notification"}, {"_id": 0})
+    api_key = await get_resend_api_key()
     
     return {
         "configured": config is not None,
-        "resend_available": RESEND_AVAILABLE and bool(RESEND_API_KEY),
+        "resend_available": RESEND_AVAILABLE and bool(api_key),
         "config": config
     }
 
