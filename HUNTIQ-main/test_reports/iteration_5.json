@@ -1,0 +1,65 @@
+{
+  "summary": "Completed testing of 'Parcours Guidé' (Guided Route) feature. All 12 backend API tests passed (100%). Frontend UI tests verified: 'Générer parcours' button appears with 2+ waypoints, guided route panel displays probabilities in %, optimization modes work correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_guided_route.py",
+    "/app/test_reports/pytest/pytest_guided_route.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "API POST /api/territory/analysis/guided-route correctly returns all required fields: route_id, total_distance_km, estimated_time_hours, average_probability",
+    "waypoint_order contains probability (%), probability_level (high/medium/low), and color (#22c55e green, #eab308 yellow, #ef4444 red)",
+    "segments contain distance_km, probability_score, and recommendations as specified",
+    "highest_probability_zone correctly identifies the best zone with probability percentage",
+    "All 3 optimization modes work: balanced, probability, distance",
+    "Error handling correct: returns 400 with message when <2 waypoints",
+    "Frontend 'Générer parcours' button correctly shows waypoint count and is disabled when <2 waypoints",
+    "Guided route panel displays KM, DURÉE, MOY. PROB stats with probability percentages"
+  ],
+  "updated_files": [
+    "/app/tests/test_guided_route.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "seed_data_creation": "Test user 'test-guided-route-user' has 3 waypoints (Point Alpha, Point Beta, Point Gamma). Additional TEST_ prefixed waypoints created for current user testing.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Guided Route feature fully tested. Backend API returns optimized route with probability analysis. Frontend displays route panel with stats (distance, duration, average probability) and individual waypoint probabilities. Environmental factors (water, forest, altitude) are MOCKED using random.seed based on coordinates.",
+  "features_tested": {
+    "backend_api": {
+      "POST /api/territory/analysis/guided-route (balanced)": "PASS - Returns optimized route with probability analysis",
+      "POST /api/territory/analysis/guided-route (probability)": "PASS - Prioritizes high probability zones",
+      "POST /api/territory/analysis/guided-route (distance)": "PASS - Minimizes total distance",
+      "waypoint_order structure": "PASS - Contains id, name, lat, lng, probability (%), probability_level, color",
+      "segments structure": "PASS - Contains from_waypoint, to_waypoint, distance_km, probability_score, recommendations",
+      "highest_probability_zone": "PASS - Correctly identifies best zone with probability",
+      "probability_levels_and_colors": "PASS - high (>=70%) green, medium (50-69%) yellow, low (<50%) red",
+      "error_less_than_2_waypoints": "PASS - Returns 400 with appropriate error message",
+      "all_species_supported": "PASS - orignal, chevreuil, ours all work",
+      "route_summary_content": "PASS - Contains km, points, probability %",
+      "start_from_current_position": "PASS - Can start route from GPS position"
+    },
+    "frontend_territory_page": {
+      "parcours_guide_section": "PASS - Section visible with 'IA' badge when 2+ waypoints exist",
+      "generer_parcours_button": "PASS - Shows waypoint count, enabled when 2+ waypoints",
+      "optimization_dropdown": "PASS - 3 options: Équilibré, Maximiser probabilité, Distance minimale",
+      "guided_route_panel": "PASS - Displays on map after generation",
+      "stats_bar": "PASS - Shows KM, DURÉE, MOY. PROB with values",
+      "meilleure_zone_section": "PASS - Shows best zone name and probability %",
+      "waypoint_list": "PASS - Each waypoint shows probability % with colored badge",
+      "segment_info": "PASS - Shows distance to next waypoint",
+      "toast_notification": "PASS - Shows 'Meilleure zone: [name] - [X]% de probabilité'"
+    }
+  },
+  "mocked_apis_note": "Environmental factors (water_distance, altitude, forest_type, is_transition, has_coulee) are MOCKED using random.seed based on coordinates. Real implementation would require GIS integration for actual geographic data."
+}

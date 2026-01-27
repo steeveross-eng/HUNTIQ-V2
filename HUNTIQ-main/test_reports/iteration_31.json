@@ -1,0 +1,76 @@
+{
+  "summary": "Hydrography water exclusion feature for BIONIC zones tested and verified. Fixed bug in detect_region() that incorrectly included USA NHD for eastern Quebec positions (e.g., Rimouski). All 15 backend API tests pass. Frontend 'Exclusion Eau' panel working correctly with toggle, tolerance display (5m), and loading indicator.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_hydrography_api.py",
+    "/app/test_reports/pytest/pytest_hydrography_v2.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/hydrography_service.py"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "100% - All UI elements verified"
+  },
+  "test_credentials": {
+    "test_user": "Auto-login (Test User)"
+  },
+  "seed_data_creation": "None - Used real hydrographic data from external services",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Hydrography water exclusion feature fully tested. Bug fixed in detect_region() for eastern Quebec positions. Backend uses 4 official hydrographic sources (Quebec MRNF, Canada CanVec, USA NHD, OSM fallback) with automatic region detection. Frontend panel shows in right sidebar on /mon-territoire-bionic page.",
+  "features_tested": {
+    "api_hydro_filter_zones": {
+      "status": "PASS",
+      "endpoint": "POST /api/hydro/filter-zones",
+      "description": "Correctly filters zones in Saint-Laurent river. z_fleuve_1 and z_bassin excluded, z_quebec_1, z_fleuve_2, z_levis_1 kept."
+    },
+    "detect_region_usa_nhd_exclusion": {
+      "status": "PASS (after fix)",
+      "description": "USA NHD correctly excluded for Quebec/Canada positions. Fixed bug for Rimouski (48.0, -68.0)."
+    },
+    "fetch_water_features_osm": {
+      "status": "PASS",
+      "description": "Returns 215+ water features for Quebec City area including Saint-Laurent river."
+    },
+    "is_point_in_water": {
+      "status": "PASS",
+      "description": "Correctly detects point (46.82, -71.20) as in water - 'Estuaire fluvial du Saint-Laurent'."
+    },
+    "frontend_exclusion_eau_panel": {
+      "status": "PASS",
+      "description": "Panel visible in right sidebar with cyan styling, toggle ON/OFF, tolerance 5m display."
+    },
+    "integration_bionic_zones_filtering": {
+      "status": "PASS",
+      "description": "BIONIC zones in middle of river are filtered out. 50 zones displayed on land."
+    }
+  },
+  "bug_fixed": {
+    "issue": "detect_region() incorrectly included USA NHD for eastern Quebec positions",
+    "location": "/app/backend/hydrography_service.py lines 280-314",
+    "root_cause": "The exclusion logic had a gap: positions like Rimouski (48.0, -68.0) fell through all conditions because lng=-68.0 is NOT > -67.0 and NOT < -71.0",
+    "fix_applied": "Simplified condition to exclude USA NHD for all positions north of 45° latitude and east of -80° longitude",
+    "verification": "All 8 test positions now correctly identify USA NHD availability"
+  },
+  "test_positions_verified": [
+    {"name": "Quebec City", "lat": 46.82, "lng": -71.20, "usa_nhd": false, "result": "PASS"},
+    {"name": "Montreal", "lat": 45.5, "lng": -73.5, "usa_nhd": false, "result": "PASS"},
+    {"name": "New York", "lat": 40.7, "lng": -74.0, "usa_nhd": true, "result": "PASS"},
+    {"name": "Rimouski", "lat": 48.0, "lng": -68.0, "usa_nhd": false, "result": "PASS (after fix)"},
+    {"name": "Thetford Mines", "lat": 46.0, "lng": -70.0, "usa_nhd": false, "result": "PASS"},
+    {"name": "Rivière-du-Loup", "lat": 47.5, "lng": -69.0, "usa_nhd": false, "result": "PASS"},
+    {"name": "Gaspé", "lat": 48.5, "lng": -64.5, "usa_nhd": false, "result": "PASS"},
+    {"name": "Toronto area", "lat": 44.0, "lng": -79.0, "usa_nhd": true, "result": "PASS"}
+  ]
+}
