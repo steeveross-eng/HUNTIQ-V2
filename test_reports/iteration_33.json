@@ -1,0 +1,77 @@
+{
+  "summary": "Frontend testing for BIONIC conditional zone generation and map selector options. 4 out of 5 tests PASSED. One BUG found: 'Écoforestier (Québec)' option is still present in the map selector and should be removed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "EcoforestryLayers.jsx - BASE_MAPS",
+        "issue": "'Écoforestier (Québec)' option is still present in the map selector. According to requirements, this option should be REMOVED. Only 'Satellite', 'Terrain', and 'Standard' should be available.",
+        "selector": "BASE_MAPS.ecoforestry (lines 432-441)",
+        "priority": "HIGH",
+        "file": "/app/frontend/src/components/territoire/EcoforestryLayers.jsx"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_33.json"
+  ],
+  "action_items": [
+    "Remove 'ecoforestry' entry from BASE_MAPS in /app/frontend/src/components/territoire/EcoforestryLayers.jsx (lines 432-441)"
+  ],
+  "critical_code_review_comments": [
+    "EcoforestryLayers.jsx line 432-441: 'ecoforestry' option should be removed from BASE_MAPS as per user requirements"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend only testing)",
+    "frontend": "80% (4/5 tests passed)"
+  },
+  "test_credentials": {
+    "test_user": "Test Chasseur (auto-login)"
+  },
+  "seed_data_creation": "Created and deleted test waypoint 'Test Waypoint BIONIC' at coordinates (46.8139, -71.2080)",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "BIONIC conditional zone generation works correctly. Zones are only generated when waypoints are active. Water exclusion is permanent and working. The only remaining issue is removing the 'Écoforestier' option from the map selector.",
+  "features_tested": {
+    "test_1_zones_default_zero": {
+      "status": "PASS",
+      "description": "By default, ZONES = 0 when no waypoints are active. Verified on page load."
+    },
+    "test_2_analyse_inactive_message": {
+      "status": "PASS",
+      "description": "'Analyse inactive' message is displayed with instruction 'Ajoutez un ou plusieurs waypoints pour activer l'analyse BIONIC™ des zones fauniques'"
+    },
+    "test_3_waypoint_activates_zones": {
+      "status": "PASS",
+      "description": "Created waypoint 'Test Waypoint BIONIC' at (46.8139, -71.2080). After creation, ZONES = 27 (50 generated, 23 excluded by water filter). Green zones visible on map around waypoint."
+    },
+    "test_4_ecoforestier_option_removed": {
+      "status": "FAIL",
+      "description": "'Écoforestier (Québec)' option is STILL PRESENT in the map selector. Should be removed. Only Satellite, Terrain, and Standard should be available.",
+      "evidence": "Screenshot shows 3 options: Satellite, Terrain (Actif), Écoforestier (Québec)"
+    },
+    "test_5_water_exclusion_permanent": {
+      "status": "PASS",
+      "description": "'Exclusion Eau' section shows 'PERMANENT' badge in cyan. No toggle to disable. Console log confirms: '[BIONIC] Exclusion eau PERMANENTE: 23 zones exclues sur 50'"
+    }
+  },
+  "screenshots": [
+    ".screenshots/bionic_page_initial.png - Initial page load showing ZONES = 0",
+    ".screenshots/bionic_tests_1_2_3.png - Verification of Analyse inactive and Exclusion Eau PERMANENT",
+    ".screenshots/bionic_fonds_tab.png - Map selector showing Écoforestier option (BUG)",
+    ".screenshots/bionic_after_add.png - After waypoint creation showing ZONES = 27",
+    ".screenshots/bionic_carte_with_waypoint.png - Map with BIONIC zones around waypoint"
+  ],
+  "code_fix_required": {
+    "file": "/app/frontend/src/components/territoire/EcoforestryLayers.jsx",
+    "action": "Remove lines 432-441 (ecoforestry entry from BASE_MAPS)",
+    "current_code": "ecoforestry: { id: 'ecoforestry', name: 'Écoforestier (Québec)', type: 'wms', ... }",
+    "expected": "Only satellite and terrain options should remain in BASE_MAPS"
+  }
+}

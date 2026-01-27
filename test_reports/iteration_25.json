@@ -1,0 +1,87 @@
+{
+  "summary": "Frontend testing completed for BIONIC micro-zones features on Mon Territoire BIONIC page. All 9 requested features verified working: Mode Micro (circles), Mode Classique (hexagons), Cercles concentriques toggle, Corridors & Tampons toggle, Seuil minimum slider, Mode privé toggle, mode switching, badge counter updates, and page load.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "MonTerritoireBionicPage - Zone Tooltips",
+        "issues": ["Zone tooltips may be difficult to trigger on overlapping zones due to pointer event interception - this is expected Leaflet behavior for stacked elements"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_25.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "BionicMicroZones component correctly implements circular zones with Leaflet Circle elements",
+    "Zone filtering by minPercentage works correctly - higher threshold = fewer zones displayed",
+    "Privacy mode toggle correctly shows/hides waypoints and places with appropriate text feedback",
+    "Mode switching between Micro and Classique updates the badge counter correctly",
+    "CSS styles for bionic-zone-circle include drop-shadow for visual depth"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A - Frontend only testing",
+    "frontend": "100% - All 9 features working"
+  },
+  "test_credentials": {
+    "test_user": "test@example.com (Auto-login)"
+  },
+  "seed_data_creation": "None required",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "BIONIC micro-zones features are fully functional. The AFFICHAGE ZONES panel in the left sidebar contains: Micro/Classique mode buttons, Cercles concentriques toggle, Corridors & Tampons toggle, Seuil min. slider (30-80%), and Mode privé toggle. The ZONES badge in top-right shows count and current mode.",
+  "features_tested": {
+    "mode_micro_circles": {
+      "status": "PASS",
+      "notes": "Circular zones render with thin outlines, terrain visible through transparency. Badge shows 'ZONES 50 Micro'"
+    },
+    "mode_classique_hexagons": {
+      "status": "PASS",
+      "notes": "Hexagonal zones render with colored fills. Badge shows 'ZONES 100 Classique'"
+    },
+    "cercles_concentriques_toggle": {
+      "status": "PASS",
+      "notes": "Toggle switches between checked/unchecked states correctly"
+    },
+    "corridors_tampons_toggle": {
+      "status": "PASS",
+      "notes": "Toggle switches between checked/unchecked states correctly"
+    },
+    "seuil_minimum_slider": {
+      "status": "PASS",
+      "notes": "Slider range 30-80%. At 50%: 50 zones, at 70%: 43 zones, at 80%: 34 zones - filtering works correctly"
+    },
+    "mode_prive_toggle": {
+      "status": "PASS",
+      "notes": "Toggle works. When ON: shows 'Données personnelles masquées'. When OFF: shows 'Waypoints et lieux visibles'"
+    },
+    "mode_switching": {
+      "status": "PASS",
+      "notes": "Clicking Micro/Classique buttons switches display mode and updates badge"
+    },
+    "badge_counter_update": {
+      "status": "PASS",
+      "notes": "Badge shows zone count and mode indicator (e.g., '50 Micro' or '100 Classique')"
+    },
+    "page_load": {
+      "status": "PASS",
+      "notes": "Mon Territoire BIONIC page loads correctly with map, zones, and all controls visible"
+    }
+  },
+  "screenshots_captured": [
+    "01_page_loaded.png - Initial page load with micro zones",
+    "02_classic_mode.png - Classique mode with hexagonal zones",
+    "03_micro_mode.png - Micro mode with circular zones",
+    "04_concentric_off.png - Cercles concentriques toggle OFF",
+    "05_slider_70.png - Seuil minimum at 70%",
+    "05b_slider_80.png - Seuil minimum at 80%",
+    "08_privacy_on.png - Mode privé toggle ON"
+  ]
+}
