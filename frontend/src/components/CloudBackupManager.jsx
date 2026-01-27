@@ -1029,6 +1029,165 @@ const CloudBackupManager = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="space-y-4">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Mail className="h-5 w-5 text-pink-400" />
+                Notifications par Email
+              </CardTitle>
+              <CardDescription>
+                Recevez un résumé quotidien de vos backups via Resend
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Status */}
+              {notifStatus?.configured ? (
+                <div className="bg-pink-500/10 rounded-lg p-4 border border-pink-500/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-6 w-6 text-pink-400" />
+                      <div>
+                        <p className="text-pink-400 font-medium">Notifications configurées</p>
+                        <p className="text-sm text-gray-400">{notifStatus.config?.recipient_email}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={sendTestEmail} 
+                        disabled={sendingTest}
+                        variant="outline"
+                        size="sm"
+                      >
+                        {sendingTest ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+                        Test
+                      </Button>
+                      <Button 
+                        onClick={sendDailySummary} 
+                        disabled={sendingSummary}
+                        className="bg-pink-600 hover:bg-pink-700"
+                        size="sm"
+                      >
+                        {sendingSummary ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
+                        Envoyer résumé
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-yellow-500/10 rounded-lg p-4 border border-yellow-500/30">
+                  <div className="flex items-center gap-2 text-yellow-400 mb-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    <span className="font-medium">Configuration requise</span>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Configurez votre email pour recevoir les résumés quotidiens
+                  </p>
+                </div>
+              )}
+
+              {/* Resend API Status */}
+              <div className={`rounded-lg p-3 ${notifStatus?.resend_available ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
+                <div className="flex items-center gap-2">
+                  {notifStatus?.resend_available ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 text-green-400" />
+                      <span className="text-sm text-green-400">Resend API configurée</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 text-red-400" />
+                      <span className="text-sm text-red-400">Resend API non configurée - Ajoutez RESEND_API_KEY dans .env</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Configuration Form */}
+              <div className="space-y-4">
+                <div>
+                  <Label>Email de destination</Label>
+                  <Input
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={notifConfig.recipient_email}
+                    onChange={(e) => setNotifConfig({...notifConfig, recipient_email: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <div>
+                      <p className="text-white text-sm">Résumé quotidien</p>
+                      <p className="text-xs text-gray-500">1 email/jour avec le statut</p>
+                    </div>
+                    <Switch
+                      checked={notifConfig.send_daily_summary}
+                      onCheckedChange={(v) => setNotifConfig({...notifConfig, send_daily_summary: v})}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <div>
+                      <p className="text-white text-sm">Alertes d&apos;échec</p>
+                      <p className="text-xs text-gray-500">Notification immédiate en cas d&apos;erreur</p>
+                    </div>
+                    <Switch
+                      checked={notifConfig.send_on_failure}
+                      onCheckedChange={(v) => setNotifConfig({...notifConfig, send_on_failure: v})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Heure d&apos;envoi du résumé</Label>
+                  <select
+                    value={notifConfig.summary_hour}
+                    onChange={(e) => setNotifConfig({...notifConfig, summary_hour: parseInt(e.target.value)})}
+                    className="mt-1 w-full p-2 bg-background border border-border rounded-md text-white"
+                  >
+                    {Array.from({length: 24}, (_, i) => (
+                      <option key={i} value={i}>{i}:00</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Heure UTC pour l&apos;envoi automatique</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={notifConfig.enabled}
+                    onCheckedChange={(v) => setNotifConfig({...notifConfig, enabled: v})}
+                  />
+                  <Label>Activer les notifications</Label>
+                </div>
+
+                <Button onClick={configureNotifications} className="bg-pink-600 hover:bg-pink-700">
+                  <Bell className="h-4 w-4 mr-2" />
+                  Enregistrer la configuration
+                </Button>
+              </div>
+
+              {/* Setup Guide */}
+              <div className="bg-background rounded-lg p-4 mt-6">
+                <h4 className="text-white font-medium mb-3">📧 Configuration Resend</h4>
+                <ol className="text-sm text-gray-400 space-y-2">
+                  <li>1. Créez un compte sur <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">resend.com</a></li>
+                  <li>2. Allez dans Dashboard → API Keys → Create API Key</li>
+                  <li>3. Copiez la clé (commence par <code className="bg-gray-800 px-1 rounded">re_...</code>)</li>
+                  <li>4. Ajoutez dans <code className="bg-gray-800 px-1 rounded">/app/backend/.env</code>:</li>
+                  <li className="ml-4"><code className="bg-gray-800 px-2 py-1 rounded block mt-1">RESEND_API_KEY=re_votre_cle_ici</code></li>
+                  <li>5. Redémarrez le backend</li>
+                </ol>
+                <p className="text-xs text-gray-500 mt-3">
+                  💡 Resend offre 3000 emails/mois gratuits
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Atlas Guide Modal */}
