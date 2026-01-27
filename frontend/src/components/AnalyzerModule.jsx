@@ -709,10 +709,29 @@ const AnalyzerModule = () => {
 
   const [activeView, setActiveView] = useState("input"); // input, analyzing, results
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [inputText, setInputText] = useState("");
+  const [analysisResult, setAnalysisResult] = useState(null);
   
   // Smart detection state
   const [smartDetection, setSmartDetection] = useState(null);
   const [isDetecting, setIsDetecting] = useState(false);
+  
+  // Analysis handler
+  const handleAnalyze = async () => {
+    if (!inputText.trim()) return;
+    setAnalyzing(true);
+    setActiveView("analyzing");
+    try {
+      const response = await axios.post(`${API}/analyze/smart`, { input: inputText });
+      setAnalysisResult(response.data);
+      setActiveView("results");
+    } catch (error) {
+      console.error("Error analyzing:", error);
+      toast.error("Erreur lors de l'analyse");
+      setActiveView("input");
+    }
+    setAnalyzing(false);
+  };
   
   // Load categories on mount
   useEffect(() => {
