@@ -1045,6 +1045,128 @@ const MonTerritoireBionicPage = () => {
     toast.success('Waypoint créé avec succès !');
   }, [newWaypoint, mapCenter, addWaypoint]);
   
+  // Gestion du curseur sur la carte - données au "bout de la flèche"
+  const handleCursorMove = useCallback((position) => {
+    setCursorPosition(position);
+    
+    // Calculer les données pour cette position
+    const lat = position.lat;
+    const lng = position.lng;
+    
+    // Distance depuis la position utilisateur
+    let distanceFromUser = null;
+    if (userPosition) {
+      const R = 6371; // km
+      const dLat = (lat - userPosition.lat) * Math.PI / 180;
+      const dLng = (lng - userPosition.lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(userPosition.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      distanceFromUser = R * c;
+    }
+    
+    // Trouver le waypoint le plus proche
+    let nearestWaypoint = null;
+    let nearestDistance = Infinity;
+    activeWaypoints.forEach(wp => {
+      const d = Math.sqrt(Math.pow(wp.lat - lat, 2) + Math.pow(wp.lng - lng, 2));
+      if (d < nearestDistance) {
+        nearestDistance = d;
+        nearestWaypoint = wp;
+      }
+    });
+    
+    // Trouver le lieu enregistré le plus proche
+    let nearestPlace = null;
+    let nearestPlaceDistance = Infinity;
+    savedPlaces.forEach(place => {
+      const d = Math.sqrt(Math.pow(place.lat - lat, 2) + Math.pow(place.lng - lng, 2));
+      if (d < nearestPlaceDistance) {
+        nearestPlaceDistance = d;
+        nearestPlace = place;
+      }
+    });
+    
+    setCursorData({
+      lat,
+      lng,
+      distanceFromUser,
+      nearestWaypoint: nearestDistance < 0.01 ? nearestWaypoint : null,
+      nearestPlace: nearestPlaceDistance < 0.01 ? nearestPlace : null
+    });
+  }, [userPosition, activeWaypoints, savedPlaces]);
+  
+  const handleCursorLeave = useCallback(() => {
+    setCursorPosition(null);
+    setCursorData(null);
+  }, []);
+  
+  // Enregistrement instantané d'un waypoint en un clic (Quick Mode)
+  const handleQuickWaypointSave = useCallback(() => {
+    if (!cursorPosition) {
+      toast.error('Déplacez votre curseur sur la carte');
+      return;
+    }
+    
+    const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+    const wpName = `Point ${timestamp}`;
+    
+    addWaypoint({
+      name: wpName,
+      lat: cursorPosition.lat,
+      lng: cursorPosition.lng,
+      type: 'observation',
+      active: true,
+      quickSave: true,
+      timestamp: new Date().toISOString()
+    });
+    
+    toast.success(`Waypoint "${wpName}" enregistré !`);
+  }, [cursorPosition, addWaypoint]);
+  
+  // Enregistrement instantané depuis position GPS
+  const handleQuickWaypointFromGPS = useCallback(() => {
+    if (userPosition) {
+      const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+      const wpName = `Ma position ${timestamp}`;
+      
+      addWaypoint({
+        name: wpName,
+        lat: userPosition.lat,
+        lng: userPosition.lng,
+        type: 'observation',
+        active: true,
+        quickSave: true,
+        fromGPS: true,
+        timestamp: new Date().toISOString()
+      });
+      
+      toast.success(`Position GPS enregistrée !`);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+          const wpName = `Ma position ${timestamp}`;
+          
+          addWaypoint({
+            name: wpName,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            type: 'observation',
+            active: true,
+            quickSave: true,
+            fromGPS: true,
+            timestamp: new Date().toISOString()
+          });
+          
+          toast.success(`Position GPS enregistrée !`);
+        },
+        () => toast.error('Impossible d\'obtenir votre position GPS')
+      );
+    }
+  }, [userPosition, addWaypoint]);
+
   // Callback pour créer un waypoint en cliquant sur la carte
   const handleMapClickForWaypoint = useCallback((lat, lng) => {
     // Pré-remplir les coordonnées et ouvrir le dialog
