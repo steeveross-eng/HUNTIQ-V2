@@ -239,8 +239,9 @@ async function fetchWaterFeatures(bounds) {
   const lngDist = Math.abs(east - west) * 111320 * Math.cos(centerLat * Math.PI / 180);
   const radius = Math.max(latDist, lngDist) / 2 + 2000;
   
-  // Commencer avec le masque du Saint-Laurent
-  let waterFeatures = [SAINT_LAURENT_MASK];
+  // Les masques du Saint-Laurent sont vérifiés directement dans isPointInWater
+  // Ici on récupère les autres surfaces d'eau (lacs, étangs, etc.)
+  let waterFeatures = [];
   
   try {
     const response = await fetch(
@@ -254,13 +255,12 @@ async function fetchWaterFeatures(bounds) {
     const data = await response.json();
     const apiFeatures = data.features || [];
     
-    // Fusionner avec le masque du Saint-Laurent
-    waterFeatures = [...waterFeatures, ...apiFeatures];
+    waterFeatures = apiFeatures;
     
     // Mettre en cache
     hydroCache.set(bounds, waterFeatures);
     
-    console.log(`[BIONIC_water_mask_v3] ${waterFeatures.length} surfaces d'eau (dont masque Saint-Laurent)`);
+    console.log(`[BIONIC_water_mask_v3] ${waterFeatures.length} surfaces d'eau de l'API + masques statiques`);
     return waterFeatures;
     
   } catch (error) {
