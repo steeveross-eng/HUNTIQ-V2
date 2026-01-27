@@ -351,8 +351,14 @@ function checkZoneTouchesWater(centerLat, centerLng, radiusMeters, waterFeatures
 }
 
 /**
- * Filtre les zones via l'API backend (plus précis mais plus lent)
- * Utilisé pour les analyses complètes
+ * BIONIC_water_mask_v3 - Filtre les zones via l'API backend
+ * 
+ * Applique le masque hydrique absolu multi-sources:
+ * - Exclusion si intersection avec eau
+ * - Exclusion si dans buffer 5m
+ * - Exclusion si centroïde dans l'eau
+ * - Exclusion si chevauchement > 1%
+ * - Repositionnement des scores parfaits sur rebord
  */
 export async function filterZonesViaAPI(zones, bounds) {
   if (!zones || zones.length === 0) {
@@ -374,10 +380,16 @@ export async function filterZonesViaAPI(zones, bounds) {
           center: z.center || [z.lat, z.lng],
           radiusMeters: z.radiusMeters || 100,
           moduleId: z.moduleId,
-          percentage: z.percentage
+          percentage: z.percentage,
+          score: z.score || z.percentage // Pour repositionnement score 100
         })),
         bounds: { north, south, east, west },
-        tolerance_meters: CONFIG.SHORE_TOLERANCE_METERS
+        // BIONIC_water_mask_v3 parameters
+        tolerance_meters: CONFIG.WATER_BUFFER_METERS,
+        line_buffer_meters: CONFIG.HYDRO_LINE_BUFFER_METERS,
+        overlap_threshold: CONFIG.OVERLAP_EXCLUSION_THRESHOLD,
+        snap_max_distance: CONFIG.SNAP_TO_EDGE_MAX_DISTANCE,
+        ruleset: 'BIONIC_water_mask_v3'
       })
     });
     
