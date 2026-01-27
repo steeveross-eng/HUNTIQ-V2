@@ -1647,6 +1647,9 @@ const MonTerritoireBionicPage = () => {
                   <MapClickHandler onMapClick={handleMapClickForWaypoint} enabled={true} />
                 )}
                 
+                {/* Tracker de position du curseur pour GPS LIVE */}
+                <CursorTracker onCursorMove={handleCursorMove} onCursorLeave={handleCursorLeave} />
+                
                 {/* Zones BIONIC - Mode Micro-délimitation (cercles fins) */}
                 {zoneDisplayMode === 'micro' && (
                   <BionicMicroZones
