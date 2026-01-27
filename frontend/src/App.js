@@ -1171,20 +1171,8 @@ function App() {
   // Check if admin is authenticated (allow bypass)
   const isAdminAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
 
-  // Show loading while checking status
-  if (checkingStatus) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Logo size="large" />
-          <p className="text-gray-400 mt-4">Vérification...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Show maintenance page if in maintenance mode and not admin
-  if (siteStatus.maintenance_mode && !isAdminAuthenticated) {
+  if (siteStatus?.maintenance_mode && !isAdminAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center max-w-lg">
