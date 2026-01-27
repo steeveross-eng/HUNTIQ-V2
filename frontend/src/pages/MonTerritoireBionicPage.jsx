@@ -1820,8 +1820,8 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
-              {/* GPS LIVE - Affichage en forme de flèche suivant le curseur */}
-              {cursorPosition && cursorData && (
+              {/* GPS LIVE - Affichage en forme de flèche suivant le curseur (seulement si activé) */}
+              {gpsLiveEnabled && cursorPosition && cursorData && (
                 <div 
                   className="fixed pointer-events-none z-[10000]"
                   style={{
