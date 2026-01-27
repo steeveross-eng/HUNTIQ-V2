@@ -182,18 +182,21 @@ const SAINT_LAURENT_MASKS = [
     bounds: { north: 46.892, south: 46.865, east: -70.58, west: -70.92 }
   },
   // ZONE 5: Zone de convergence devant Sainte-Pétronille (CRITIQUE)
+  // Cette zone DOIT couvrir toute l'eau autour de la pointe de l'île
   {
     name: 'Fleuve - Pointe Sainte-Pétronille',
     type: 'river',
     polygon: [
-      // Zone circulaire autour de la pointe ouest de l'île
-      [46.868, -71.00], [46.872, -70.97], [46.870, -70.93],
-      [46.865, -70.90], [46.858, -70.88], [46.850, -70.88],
-      [46.842, -70.90], [46.838, -70.93], [46.838, -70.97],
-      [46.842, -71.00], [46.848, -71.02], [46.858, -71.03],
-      [46.865, -71.02], [46.868, -71.00]
+      // Grand arc autour de la pointe ouest de l'île d'Orléans
+      // Couvre le fleuve de tous les côtés sauf l'île elle-même
+      [46.880, -71.02], [46.882, -70.98], [46.880, -70.94],
+      [46.875, -70.90], [46.868, -70.86], [46.858, -70.84],
+      [46.848, -70.84], [46.838, -70.86], [46.830, -70.90],
+      [46.825, -70.94], [46.822, -70.98], [46.825, -71.02],
+      [46.830, -71.06], [46.840, -71.08], [46.855, -71.08],
+      [46.868, -71.06], [46.875, -71.04], [46.880, -71.02]
     ],
-    bounds: { north: 46.872, south: 46.838, east: -70.88, west: -71.03 }
+    bounds: { north: 46.882, south: 46.822, east: -70.84, west: -71.08 }
   },
   // ZONE 6: Extension est après l'île
   {
