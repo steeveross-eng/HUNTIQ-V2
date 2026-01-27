@@ -1999,37 +1999,6 @@ const MonTerritoireBionicPage = () => {
                   </h2>
                 </div>
                 
-                {/* Boutons d'action rapide */}
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <Button 
-                    onClick={handleQuickWaypointFromGPS}
-                    className="bg-green-600 hover:bg-green-700 text-white h-12"
-                    data-testid="quick-gps-waypoint"
-                  >
-                    <Navigation className="h-4 w-4 mr-2" />
-                    <div className="text-left">
-                      <div className="text-xs">Ma position</div>
-                      <div className="text-[10px] opacity-80">GPS instantané</div>
-                    </div>
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      setQuickWaypointMode(!quickWaypointMode);
-                      if (!quickWaypointMode) {
-                        toast.info('Mode rapide activé', { description: 'Cliquez sur la carte pour enregistrer' });
-                      }
-                    }}
-                    className={`${quickWaypointMode ? 'bg-orange-500 hover:bg-orange-600' : 'bg-[#f5a623] hover:bg-[#f5a623]/80'} text-black h-12`}
-                    data-testid="quick-map-waypoint"
-                  >
-                    <Crosshair className="h-4 w-4 mr-2" />
-                    <div className="text-left">
-                      <div className="text-xs">{quickWaypointMode ? 'Mode actif' : 'Clic carte'}</div>
-                      <div className="text-[10px] opacity-80">Enregistrement rapide</div>
-                    </div>
-                  </Button>
-                </div>
-                
                 {/* Position actuelle de l'utilisateur */}
                 <div className="bg-blue-900/20 rounded-lg p-3 border border-blue-500/30">
                   <div className="flex items-center justify-between">
@@ -2056,7 +2025,7 @@ const MonTerritoireBionicPage = () => {
                   <div className="text-center text-gray-500 py-8">
                     <MapPin className="h-12 w-12 mx-auto mb-3 opacity-30" />
                     <p>Aucun waypoint</p>
-                    <p className="text-xs mt-1">Utilisez les boutons ci-dessus pour ajouter</p>
+                    <p className="text-xs mt-1">Utilisez le bouton &quot;Enregistrer un Waypoint&quot;</p>
                   </div>
                 ) : (
                   waypoints.map(wp => {
