@@ -1,13 +1,14 @@
 """
 Cloud Backup Manager - MongoDB Atlas + Google Cloud Storage + ZIP Export
 Automated backup system for HUNTIQ/BIONIC platform
+With Daily Email Notifications via Resend
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import os
 import json
 import hashlib
@@ -18,11 +19,22 @@ import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from io import BytesIO
 
+# Resend for email notifications
+try:
+    import resend
+    RESEND_AVAILABLE = True
+except ImportError:
+    RESEND_AVAILABLE = False
+
 router = APIRouter(prefix="/api/backup-cloud", tags=["backup-cloud"])
 
 # MongoDB connections
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'bionic_db')
+
+# Resend configuration
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 
 # Atlas connection (will be configured via API)
 ATLAS_URL = os.environ.get('MONGODB_ATLAS_URL', '')
