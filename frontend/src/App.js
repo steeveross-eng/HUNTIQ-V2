@@ -27,6 +27,7 @@ import EmailAdmin from "@/components/EmailAdmin";
 import FeatureControlsAdmin from "@/components/FeatureControlsAdmin";
 import ResetPasswordPage from "@/components/ResetPasswordPage";
 import AdminPage from "@/pages/AdminPage";
+import FormationsPage from "@/pages/FormationsPage";
 import { AuthProvider, UserMenu, useAuth } from "@/components/GlobalAuth";
 import { LanguageProvider, useLanguage, LanguageSwitcher } from "@/contexts/LanguageContext";
 import BionicLogo from "@/components/BionicLogo";
