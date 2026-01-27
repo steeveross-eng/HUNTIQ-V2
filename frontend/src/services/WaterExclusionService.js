@@ -23,14 +23,38 @@
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
-// Configuration permanente - water_exclusion_v2 (non modifiable)
+// ═══════════════════════════════════════════════════════════════════
+// RULESET: BIONIC_water_mask_v3
+// Masque hydrique absolu multi-sources pour BIONIC™
+// ═══════════════════════════════════════════════════════════════════
 const CONFIG = Object.freeze({
-  SHORE_TOLERANCE_METERS: 2,      // Buffer de 2m selon ruleset v2
-  CACHE_DURATION_MS: 300000,      // 5 minutes de cache
-  MIN_ZONE_AREA_AFTER_CLIP: 0.3,  // Zone conservée si >30% reste après clipping
-  FETCH_RADIUS_METERS: 15000,     // Rayon de récupération des données hydro (augmenté)
-  ENABLED: true,                   // TOUJOURS ACTIF - Ne peut pas être modifié
-  SNAP_TO_EDGE_MAX_DISTANCE: 50,  // Distance max pour repositionnement sur rebord (m)
+  // Buffer de 5m autour de toutes les surfaces d'eau
+  WATER_BUFFER_METERS: 5,
+  
+  // Buffer de 3m pour les cours d'eau linéaires
+  HYDRO_LINE_BUFFER_METERS: 3,
+  
+  // Seuil d'exclusion: zone exclue si >1% de chevauchement avec l'eau
+  OVERLAP_EXCLUSION_THRESHOLD: 0.01,
+  
+  // Distance max pour repositionnement score parfait sur rebord
+  SNAP_TO_EDGE_MAX_DISTANCE: 50,
+  
+  // Cache et performance
+  CACHE_DURATION_MS: 300000,        // 5 minutes
+  FETCH_RADIUS_METERS: 15000,       // 15 km
+  
+  // Service PERMANENT - Ne peut pas être désactivé
+  ENABLED: true,
+  
+  // Sources hydriques supportées (priorité décroissante)
+  HYDRO_SOURCES: [
+    'HYDRO_POLY_OFF',    // Polygones officiels (lacs, fleuves)
+    'HYDRO_LINE_OFF',    // Linéaires officiels (rivières, ruisseaux)
+    'HYDRO_WETLANDS',    // Zones humides / milieux hydriques
+    'HYDRO_RASTER_MASK', // Masque raster converti
+    'OSM_FALLBACK'       // OpenStreetMap fallback
+  ]
 });
 
 // Cache global des données hydrographiques
