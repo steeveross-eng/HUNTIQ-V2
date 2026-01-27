@@ -1806,7 +1806,7 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
-              {/* GPS LIVE - Affichage flottant suivant le curseur */}
+              {/* GPS LIVE - Affichage en forme de flèche suivant le curseur */}
               {cursorPosition && cursorData && (
                 <div 
                   className="fixed pointer-events-none z-[10000]"
@@ -1815,30 +1815,55 @@ const MonTerritoireBionicPage = () => {
                     top: `${(cursorPosition.pixel?.y || 0) + 160}px`,
                   }}
                 >
-                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50 ml-4 mt-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[#f5a623] text-xs font-bold">GPS LIVE</span>
-                    </div>
-                    <div className="text-white font-mono text-sm mt-1">
-                      {cursorData.lat.toFixed(5)}°N
-                    </div>
-                    <div className="text-white font-mono text-sm">
-                      {Math.abs(cursorData.lng).toFixed(5)}°O
-                    </div>
-                    {cursorElevation !== null && (
-                      <div className="text-green-400 font-mono text-sm flex items-center gap-1">
-                        <Mountain className="h-3 w-3" />
-                        {cursorElevation} m
+                  {/* Conteneur avec flèche pointant vers le curseur */}
+                  <div className="relative">
+                    {/* Pointe de la flèche (triangle) - Point précis GPS */}
+                    <div 
+                      className="absolute -left-2 -top-2 w-0 h-0"
+                      style={{
+                        borderLeft: '8px solid transparent',
+                        borderRight: '8px solid transparent',
+                        borderBottom: '12px solid rgba(245, 166, 35, 0.9)',
+                        transform: 'rotate(-45deg)',
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                      }}
+                    />
+                    {/* Point précis lumineux */}
+                    <div className="absolute -left-1 -top-1 w-2 h-2 bg-[#f5a623] rounded-full animate-ping opacity-75" />
+                    <div className="absolute -left-0.5 -top-0.5 w-1 h-1 bg-white rounded-full" />
+                    
+                    {/* Corps de la bulle d'info */}
+                    <div 
+                      className="ml-3 mt-3 bg-black/90 backdrop-blur-sm px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50"
+                      style={{
+                        borderRadius: '4px 12px 12px 12px',
+                        clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 15px)'
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[#f5a623] text-xs font-bold">GPS LIVE</span>
                       </div>
-                    )}
-                    {cursorData.distanceFromUser && (
-                      <div className="text-blue-400 text-xs mt-1 border-t border-gray-700 pt-1">
-                        📍 {cursorData.distanceFromUser < 1 
-                          ? `${(cursorData.distanceFromUser * 1000).toFixed(0)} m` 
-                          : `${cursorData.distanceFromUser.toFixed(2)} km`}
+                      <div className="text-white font-mono text-sm mt-1">
+                        {cursorData.lat.toFixed(5)}°N
                       </div>
-                    )}
+                      <div className="text-white font-mono text-sm">
+                        {Math.abs(cursorData.lng).toFixed(5)}°O
+                      </div>
+                      {cursorElevation !== null && (
+                        <div className="text-green-400 font-mono text-sm flex items-center gap-1">
+                          <Mountain className="h-3 w-3" />
+                          {cursorElevation} m
+                        </div>
+                      )}
+                      {cursorData.distanceFromUser && (
+                        <div className="text-blue-400 text-xs mt-1 border-t border-gray-700 pt-1">
+                          📍 {cursorData.distanceFromUser < 1 
+                            ? `${(cursorData.distanceFromUser * 1000).toFixed(0)} m` 
+                            : `${cursorData.distanceFromUser.toFixed(2)} km`}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
