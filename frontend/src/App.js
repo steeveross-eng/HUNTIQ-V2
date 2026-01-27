@@ -39,7 +39,7 @@ import ProductDiscoveryAdmin from "@/components/ProductDiscoveryAdmin";
 import ReferralModule from "@/components/ReferralModule";
 import ReferralAdminPanel from "@/components/ReferralAdminPanel";
 import DynamicReferralWidget from "@/components/DynamicReferralWidget";
-import { ShopPage, ComparePage } from "@/pages";
+// ShopPage and ComparePage are defined locally below
 import { 
   ShoppingCart, 
   FlaskConical, 
