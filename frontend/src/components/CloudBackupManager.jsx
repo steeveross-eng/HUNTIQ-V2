@@ -1232,17 +1232,14 @@ const CloudBackupManager = () => {
 
               {/* Setup Guide */}
               <div className="bg-background rounded-lg p-4 mt-6">
-                <h4 className="text-white font-medium mb-3">📧 Configuration Resend</h4>
+                <h4 className="text-white font-medium mb-3">📧 Comment obtenir une clé API Resend</h4>
                 <ol className="text-sm text-gray-400 space-y-2">
-                  <li>1. Créez un compte sur <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">resend.com</a></li>
+                  <li>1. Créez un compte gratuit sur <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">resend.com</a></li>
                   <li>2. Allez dans Dashboard → API Keys → Create API Key</li>
-                  <li>3. Copiez la clé (commence par <code className="bg-gray-800 px-1 rounded">re_...</code>)</li>
-                  <li>4. Ajoutez dans <code className="bg-gray-800 px-1 rounded">/app/backend/.env</code>:</li>
-                  <li className="ml-4"><code className="bg-gray-800 px-2 py-1 rounded block mt-1">RESEND_API_KEY=re_votre_cle_ici</code></li>
-                  <li>5. Redémarrez le backend</li>
+                  <li>3. Copiez la clé et collez-la dans le champ ci-dessus</li>
                 </ol>
                 <p className="text-xs text-gray-500 mt-3">
-                  💡 Resend offre 3000 emails/mois gratuits
+                  💡 Resend offre 3000 emails/mois gratuits - parfait pour les résumés quotidiens!
                 </p>
               </div>
             </CardContent>
