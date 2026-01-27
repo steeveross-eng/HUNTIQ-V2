@@ -3030,7 +3030,7 @@ const TerritoryMap = ({ userId, userName, onLogout, navigateToCoords, onNavigati
             )}
 
             {/* Camera Markers */}
-            {showCameras && cameras.map((camera) => (
+            {showCameras && cameras && cameras.length > 0 && cameras.map((camera) => (
               camera.latitude && camera.longitude && (
                 <Marker
                   key={camera.id}
