@@ -510,7 +510,7 @@ function pointInPolygonWithDistance(lat, lng, polygon) {
     }
     
     // Calculer distance au segment
-    const dist = distanceToSegment(lat, lng, xi, yi, xj, yj);
+    const dist = distancePointToSegment(lat, lng, xi, yi, xj, yj);
     if (dist < minDistance) minDistance = dist;
   }
   
