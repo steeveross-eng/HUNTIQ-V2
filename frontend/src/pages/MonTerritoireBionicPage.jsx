@@ -1951,13 +1951,42 @@ const MonTerritoireBionicPage = () => {
                   <h2 className="text-white font-semibold flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-[#f5a623]" />
                     Waypoints actifs
+                    <Badge className="bg-[#f5a623] text-black">{activeWaypoints.length}</Badge>
                   </h2>
-                  <span className="text-xs text-gray-500">
-                    Utilisez le bouton "Enregistrer un Waypoint" ci-dessus
-                  </span>
                 </div>
                 
-                {/* Position actuelle */}
+                {/* Boutons d'action rapide */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <Button 
+                    onClick={handleQuickWaypointFromGPS}
+                    className="bg-green-600 hover:bg-green-700 text-white h-12"
+                    data-testid="quick-gps-waypoint"
+                  >
+                    <Navigation className="h-4 w-4 mr-2" />
+                    <div className="text-left">
+                      <div className="text-xs">Ma position</div>
+                      <div className="text-[10px] opacity-80">GPS instantané</div>
+                    </div>
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setQuickWaypointMode(!quickWaypointMode);
+                      if (!quickWaypointMode) {
+                        toast.info('Mode rapide activé', { description: 'Cliquez sur la carte pour enregistrer' });
+                      }
+                    }}
+                    className={`${quickWaypointMode ? 'bg-orange-500 hover:bg-orange-600' : 'bg-[#f5a623] hover:bg-[#f5a623]/80'} text-black h-12`}
+                    data-testid="quick-map-waypoint"
+                  >
+                    <Crosshair className="h-4 w-4 mr-2" />
+                    <div className="text-left">
+                      <div className="text-xs">{quickWaypointMode ? 'Mode actif' : 'Clic carte'}</div>
+                      <div className="text-[10px] opacity-80">Enregistrement rapide</div>
+                    </div>
+                  </Button>
+                </div>
+                
+                {/* Position actuelle de l'utilisateur */}
                 <div className="bg-blue-900/20 rounded-lg p-3 border border-blue-500/30">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1966,30 +1995,36 @@ const MonTerritoireBionicPage = () => {
                     </div>
                     <Switch checked={watchingPosition} onCheckedChange={(checked) => checked ? startWatchingPosition() : stopWatchingPosition()} className="data-[state=checked]:bg-blue-500" />
                   </div>
-                  {userPosition && (
-                    <div className="mt-2 text-xs text-gray-400">
-                      {userPosition.lat.toFixed(6)}, {userPosition.lng.toFixed(6)}
-                      {userPosition.accuracy && <span className="ml-2">±{Math.round(userPosition.accuracy)}m</span>}
+                  {userPosition ? (
+                    <div className="mt-2 text-xs text-gray-400 flex items-center justify-between">
+                      <span>{userPosition.lat.toFixed(6)}, {userPosition.lng.toFixed(6)}</span>
+                      {userPosition.accuracy && <span className="text-blue-400">±{Math.round(userPosition.accuracy)}m</span>}
                     </div>
+                  ) : (
+                    <div className="mt-2 text-xs text-gray-500">Position non disponible - activez le GPS</div>
                   )}
                 </div>
               </div>
               
-              {/* Liste */}
+              {/* Liste des waypoints */}
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {waypoints.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <MapPin className="h-12 w-12 mx-auto mb-3 opacity-30" />
                     <p>Aucun waypoint</p>
-                    <p className="text-xs mt-1">Ajoutez votre premier waypoint</p>
+                    <p className="text-xs mt-1">Utilisez les boutons ci-dessus pour ajouter</p>
                   </div>
                 ) : (
                   waypoints.map(wp => {
                     const typeInfo = PLACE_TYPES.find(t => t.id === wp.type);
+                    const distanceFromUser = userPosition ? 
+                      Math.sqrt(Math.pow((wp.lat - userPosition.lat) * 111, 2) + Math.pow((wp.lng - userPosition.lng) * 111 * Math.cos(userPosition.lat * Math.PI / 180), 2)) : null;
+                    
                     return (
                       <div 
                         key={wp.id} 
-                        className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} transition-all hover:bg-gray-800`}
+                        className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} transition-all hover:bg-gray-800 cursor-pointer`}
+                        onClick={() => setMapCenter([wp.lat, wp.lng])}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
@@ -1997,10 +2032,18 @@ const MonTerritoireBionicPage = () => {
                               {typeInfo?.icon || '📍'}
                             </div>
                             <div>
-                              <div className="text-white font-medium">{wp.name}</div>
+                              <div className="text-white font-medium flex items-center gap-2">
+                                {wp.name}
+                                {wp.quickSave && <Badge className="bg-green-500/20 text-green-400 text-[8px]">Rapide</Badge>}
+                              </div>
                               <div className="text-xs text-gray-400 mt-0.5">{typeInfo?.name}</div>
-                              <div className="text-[10px] text-gray-500 mt-1">
-                                {wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}
+                              <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                                <span>{wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}</span>
+                                {distanceFromUser && (
+                                  <span className="text-blue-400">
+                                    {distanceFromUser < 1 ? `${(distanceFromUser * 1000).toFixed(0)}m` : `${distanceFromUser.toFixed(1)}km`}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -2008,14 +2051,24 @@ const MonTerritoireBionicPage = () => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => openShareDialog(wp)} 
+                              onClick={(e) => { e.stopPropagation(); openShareDialog(wp); }} 
                               className="text-[#f5a623] hover:text-[#f5a623]/80 h-8 w-8 p-0"
                               title="Partager"
                             >
                               <Share2 className="h-4 w-4" />
                             </Button>
-                            <Switch checked={wp.active} onCheckedChange={() => toggleWaypointActive(wp.id)} className="data-[state=checked]:bg-[#f5a623]" />
-                            <Button variant="ghost" size="sm" onClick={() => handleDeleteWaypoint(wp.id)} className="text-red-400 hover:text-red-300 h-8 w-8 p-0">
+                            <Switch 
+                              checked={wp.active} 
+                              onCheckedChange={() => toggleWaypointActive(wp.id)} 
+                              className="data-[state=checked]:bg-[#f5a623]" 
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => { e.stopPropagation(); handleDeleteWaypoint(wp.id); }} 
+                              className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2027,10 +2080,26 @@ const MonTerritoireBionicPage = () => {
               </div>
             </div>
             
-            {/* Carte des waypoints */}
+            {/* Carte des waypoints avec affichage du curseur */}
             <div className="flex-1 relative">
               <MapContainer center={mapCenter} zoom={11} className="h-full w-full" zoomControl={false}>
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                <CursorTracker onCursorMove={handleCursorMove} onCursorLeave={handleCursorLeave} />
+                
+                {/* Handler pour le mode clic rapide */}
+                {quickWaypointMode && (
+                  <MapClickHandler onMapClick={(lat, lng) => {
+                    const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+                    addWaypoint({
+                      name: `Point ${timestamp}`,
+                      lat, lng,
+                      type: 'observation',
+                      active: true,
+                      quickSave: true
+                    });
+                    toast.success('Waypoint enregistré !');
+                  }} />
+                )}
                 
                 {userPosition && (
                   <Marker position={[userPosition.lat, userPosition.lng]} icon={createCustomIcon('#3b82f6', 'user')}>
@@ -2058,6 +2127,65 @@ const MonTerritoireBionicPage = () => {
                   );
                 })}
               </MapContainer>
+              
+              {/* Info curseur - "Bout de la flèche" */}
+              {showCursorInfo && cursorData && (
+                <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-gray-700 max-w-xs z-[1000]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crosshair className="h-4 w-4 text-[#f5a623]" />
+                    <span className="text-white text-sm font-medium">Position curseur</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto h-6 w-6 p-0 text-gray-400"
+                      onClick={() => setShowCursorInfo(false)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Coordonnées:</span>
+                      <span className="text-white font-mono">{cursorData.lat.toFixed(5)}, {cursorData.lng.toFixed(5)}</span>
+                    </div>
+                    {cursorData.distanceFromUser && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Distance:</span>
+                        <span className="text-blue-400">
+                          {cursorData.distanceFromUser < 1 
+                            ? `${(cursorData.distanceFromUser * 1000).toFixed(0)} m` 
+                            : `${cursorData.distanceFromUser.toFixed(2)} km`}
+                        </span>
+                      </div>
+                    )}
+                    {cursorData.nearestWaypoint && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Proche de:</span>
+                        <span className="text-[#f5a623]">{cursorData.nearestWaypoint.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  {quickWaypointMode && (
+                    <Button 
+                      className="w-full mt-2 bg-[#f5a623] hover:bg-[#f5a623]/80 text-black h-8 text-xs"
+                      onClick={handleQuickWaypointSave}
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Enregistrer ici
+                    </Button>
+                  )}
+                </div>
+              )}
+              
+              {/* Indicateur mode rapide */}
+              {quickWaypointMode && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 z-[1000]">
+                  <Crosshair className="h-4 w-4 animate-pulse" />
+                  Mode enregistrement rapide - Cliquez sur la carte
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white hover:bg-orange-600" onClick={() => setQuickWaypointMode(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
