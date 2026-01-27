@@ -791,10 +791,11 @@ async def update_main_zip():
 # Global flag for background task
 auto_backup_running = False
 auto_backup_task = None
+last_daily_summary_date = None
 
 async def auto_backup_loop():
     """Background task for automatic backups"""
-    global auto_backup_running
+    global auto_backup_running, last_daily_summary_date
     
     while auto_backup_running:
         try:
@@ -806,6 +807,17 @@ async def auto_backup_loop():
                 
                 # Update main ZIP
                 await update_main_zip()
+                
+                # Check if we need to send daily summary
+                notif_config = await backup_config.find_one({"type": "notification"})
+                if notif_config and notif_config.get("enabled") and notif_config.get("send_daily_summary"):
+                    now = datetime.now(timezone.utc)
+                    summary_hour = notif_config.get("summary_hour", 8)
+                    
+                    # Send summary once per day at the configured hour
+                    if now.hour == summary_hour and last_daily_summary_date != now.date():
+                        await send_daily_summary()
+                        last_daily_summary_date = now.date()
                 
                 # Wait for interval
                 await asyncio.sleep(zip_interval * 60)
