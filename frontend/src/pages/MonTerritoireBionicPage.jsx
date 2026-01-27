@@ -2153,7 +2153,7 @@ const MonTerritoireBionicPage = () => {
                       <div 
                         key={wp.id} 
                         className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} transition-all hover:bg-gray-800 cursor-pointer`}
-                        onClick={() => setMapCenter([wp.lat, wp.lng])}
+                        onClick={() => { setMapCenter([wp.lat, wp.lng]); setMapZoom(15); }}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
