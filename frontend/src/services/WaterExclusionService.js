@@ -272,12 +272,13 @@ async function fetchWaterFeatures(bounds) {
 
 /**
  * Vérifie si un point est dans l'eau
- * BIONIC_water_mask_v3: Vérifie d'abord le masque statique du fleuve
+ * BIONIC_water_mask_v3: Vérifie d'abord les masques statiques du fleuve
  */
 function isPointInWater(lat, lng, waterFeatures) {
-  // PRIORITÉ 1: Vérifier le masque statique du fleuve Saint-Laurent
-  if (isPointInSaintLaurent(lat, lng)) {
-    return { inWater: true, feature: SAINT_LAURENT_MASK };
+  // PRIORITÉ 1: Vérifier les masques statiques du fleuve Saint-Laurent
+  const stLaurentCheck = isPointInSaintLaurent(lat, lng);
+  if (stLaurentCheck.inWater) {
+    return { inWater: true, feature: stLaurentCheck.mask };
   }
   
   // PRIORITÉ 2: Vérifier les autres surfaces d'eau
