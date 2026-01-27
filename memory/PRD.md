@@ -163,6 +163,12 @@
 
 ## Test Results
 
+**Iteration 35 - Dropdown Bug Fix (27 Jan 2026)**
+- Bug: Le dropdown "Enregistrer un Waypoint" ne s'ouvrait pas visuellement
+- Cause: Conflit de z-index avec les éléments Leaflet (carte)
+- Fix: Ajout de `z-[9999]` au DropdownMenuContent dans MonTerritoireBionicPage.jsx
+- Status: ✅ Corrigé et testé
+
 **Iteration 34 - Cloud Backup System**
 - Backend: 100% (12/12 APIs working)
 - Frontend: 100% (All UI components working)
