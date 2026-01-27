@@ -4355,6 +4355,14 @@ try:
 except ImportError as e:
     print(f"Backup Manager module not available: {e}")
 
+# Include Cloud Backup Manager (MongoDB Atlas + GCS + ZIP)
+try:
+    from backup_cloud import router as backup_cloud_router
+    app.include_router(backup_cloud_router)
+    print("Cloud Backup Manager loaded (Atlas + GCS + ZIP)")
+except ImportError as e:
+    print(f"Cloud Backup Manager not available: {e}")
+
 # Include Maintenance Controller Module (Secure & Persistent)
 try:
     from maintenance_controller import router as maintenance_router
