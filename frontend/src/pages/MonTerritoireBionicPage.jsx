@@ -93,13 +93,28 @@ const createCustomIcon = (color, iconType = 'default') => {
 };
 
 // Composant pour centrer la carte
-const MapController = ({ center, zoom }) => {
+const MapController = ({ center, zoom, preserveView }) => {
   const map = useMap();
+  const lastCenter = useRef(center);
+  const lastZoom = useRef(zoom);
+  
   useEffect(() => {
-    if (center) {
-      map.setView(center, zoom || 12);
+    if (!center) return;
+    
+    // Vérifier si c'est un changement de centre significatif
+    const centerChanged = !lastCenter.current || 
+      Math.abs(center[0] - lastCenter.current[0]) > 0.0001 ||
+      Math.abs(center[1] - lastCenter.current[1]) > 0.0001;
+    
+    const zoomChanged = zoom !== lastZoom.current;
+    
+    if (centerChanged || zoomChanged) {
+      map.setView(center, zoom || 12, { animate: true });
+      lastCenter.current = center;
+      lastZoom.current = zoom;
     }
   }, [center, zoom, map]);
+  
   return null;
 };
 
