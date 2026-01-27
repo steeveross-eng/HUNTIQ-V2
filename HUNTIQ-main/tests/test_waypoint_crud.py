@@ -7,7 +7,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://water-smart-1.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bionic-waypoints.preview.emergentagent.com').rstrip('/')
 TEST_USER_ID = f"test_user_{uuid.uuid4().hex[:8]}"
 
 class TestWaypointCRUD:

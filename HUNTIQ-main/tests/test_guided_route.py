@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://water-smart-1.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bionic-waypoints.preview.emergentagent.com')
 
 # Test user with pre-created waypoints (Point Alpha, Point Beta, Point Gamma)
 TEST_USER_ID = "test-guided-route-user"
