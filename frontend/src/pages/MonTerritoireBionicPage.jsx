@@ -1826,6 +1826,12 @@ const MonTerritoireBionicPage = () => {
                     <div className="text-white font-mono text-sm">
                       {Math.abs(cursorData.lng).toFixed(5)}°O
                     </div>
+                    {cursorElevation !== null && (
+                      <div className="text-green-400 font-mono text-sm flex items-center gap-1">
+                        <Mountain className="h-3 w-3" />
+                        {cursorElevation} m
+                      </div>
+                    )}
                     {cursorData.distanceFromUser && (
                       <div className="text-blue-400 text-xs mt-1 border-t border-gray-700 pt-1">
                         📍 {cursorData.distanceFromUser < 1 
