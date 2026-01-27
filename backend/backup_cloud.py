@@ -147,12 +147,18 @@ async def get_resend_status():
 
 async def send_backup_email(subject: str, html_content: str, recipient: str):
     """Send backup notification email via Resend"""
-    if not RESEND_AVAILABLE or not RESEND_API_KEY:
-        print("Resend not configured - skipping email")
+    if not RESEND_AVAILABLE:
+        print("Resend library not installed - skipping email")
+        return False
+    
+    # Get API key from DB or environment
+    api_key = await get_resend_api_key()
+    if not api_key:
+        print("Resend API key not configured - skipping email")
         return False
     
     try:
-        resend.api_key = RESEND_API_KEY
+        resend.api_key = api_key
         params = {
             "from": SENDER_EMAIL,
             "to": [recipient],
