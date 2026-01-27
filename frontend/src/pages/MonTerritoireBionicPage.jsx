@@ -559,6 +559,14 @@ const MonTerritoireBionicPage = () => {
   // Mode création de waypoint par clic sur la carte
   const [mapClickMode, setMapClickMode] = useState(false);
   
+  // Curseur sur la carte - données au "bout de la flèche"
+  const [cursorPosition, setCursorPosition] = useState(null);
+  const [cursorData, setCursorData] = useState(null);
+  const [showCursorInfo, setShowCursorInfo] = useState(true);
+  
+  // Quick waypoint - enregistrement instantané en un clic
+  const [quickWaypointMode, setQuickWaypointMode] = useState(false);
+  
   // Panneaux
   const [showLayersPanel, setShowLayersPanel] = useState(true);
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(true);
