@@ -228,7 +228,7 @@ async function fetchWaterFeatures(bounds) {
   
   if (!north || !south || !east || !west) {
     console.warn('[WaterExclusion] Invalid bounds provided');
-    return [SAINT_LAURENT_MASK]; // Toujours retourner le masque du fleuve
+    return []; // Les masques statiques sont vérifiés directement dans isPointInWater
   }
   
   const centerLat = (north + south) / 2;
