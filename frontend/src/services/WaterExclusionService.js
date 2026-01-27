@@ -104,113 +104,80 @@ const hydroCache = {
 
 /**
  * Masques d'eau statiques pour le fleuve Saint-Laurent
- * Couvre TOUT le fleuve visible sur la carte de Québec incluant l'île d'Orléans
+ * Version corrigée basée sur les coordonnées réelles observées
  * 
- * IMPORTANT: Les coordonnées sont [latitude, longitude]
- * Le fleuve coule du sud-ouest au nord-est
+ * Sainte-Pétronille est environ à: 46.855, -71.13
+ * Le waypoint génère des zones dans un rayon autour de ce point
  */
 const SAINT_LAURENT_MASKS = [
-  // ZONE 1: Fleuve principal entre Québec et Lévis (ouest)
+  // ZONE PRINCIPALE: Tout le fleuve entre Québec-Lévis-Beauport
+  // Couvre une grande zone pour capturer toutes les zones sur l'eau
   {
-    name: 'Fleuve Saint-Laurent - Ouest',
+    name: 'Fleuve Saint-Laurent - Zone principale',
     type: 'river',
     polygon: [
-      // Rive nord (Québec) - ouest vers est
-      [46.835, -71.28], [46.840, -71.23], [46.845, -71.18], [46.848, -71.13],
-      [46.850, -71.08], [46.852, -71.03],
-      // Transition vers rive sud
-      [46.830, -71.03], [46.815, -71.05],
-      // Rive sud (Lévis) - est vers ouest
-      [46.805, -71.08], [46.800, -71.13], [46.798, -71.18], [46.800, -71.23],
-      [46.805, -71.28], [46.815, -71.30],
-      // Fermer
-      [46.825, -71.30], [46.835, -71.28]
+      // Rive nord (Beauport vers Québec)
+      [46.880, -71.30], [46.882, -71.25], [46.880, -71.20], [46.875, -71.15],
+      [46.868, -71.10], [46.860, -71.05], [46.855, -71.00],
+      // Pointe vers île d'Orléans (Sainte-Pétronille est à ~46.855, -71.13)
+      // IMPORTANT: L'île commence vers 46.858, -71.12
+      [46.855, -70.95], [46.855, -70.90],
+      // Transition vers rive sud (en passant AU SUD de l'île)
+      [46.845, -70.88], [46.835, -70.90], [46.825, -70.95],
+      [46.818, -71.00], [46.812, -71.05], [46.808, -71.10],
+      // Rive sud (Lévis) - vers l'ouest
+      [46.805, -71.15], [46.805, -71.20], [46.810, -71.25],
+      [46.818, -71.28], [46.830, -71.30], [46.850, -71.32],
+      [46.870, -71.31], [46.880, -71.30]
     ],
-    bounds: { north: 46.852, south: 46.798, east: -71.03, west: -71.30 }
+    bounds: { north: 46.882, south: 46.805, east: -70.88, west: -71.32 }
   },
-  // ZONE 2: Fleuve devant Beauport / entrée chenal nord
+  // ZONE 2: Eau au NORD de Sainte-Pétronille (entre île et Beauport)
   {
-    name: 'Fleuve Saint-Laurent - Beauport',
+    name: 'Chenal Nord - Beauport/île d\'Orléans',
     type: 'river',
     polygon: [
-      // Nord (Beauport)
-      [46.870, -71.05], [46.875, -71.00], [46.878, -70.95], [46.875, -70.90],
-      [46.868, -70.87],
-      // Vers le sud
-      [46.855, -70.87], [46.848, -70.88],
-      // Sud (vers île d'Orléans)
-      [46.845, -70.90], [46.848, -70.95], [46.852, -71.00],
-      [46.858, -71.03], [46.865, -71.05],
-      [46.870, -71.05]
+      // Du côté Beauport vers le chenal nord
+      [46.885, -71.08], [46.890, -71.02], [46.892, -70.95], [46.890, -70.88],
+      [46.885, -70.82], [46.878, -70.78],
+      // Côté nord de l'île d'Orléans
+      [46.868, -70.78], [46.865, -70.82], [46.863, -70.88],
+      [46.865, -70.95], [46.868, -71.02], [46.872, -71.08],
+      [46.878, -71.10], [46.885, -71.08]
     ],
-    bounds: { north: 46.878, south: 46.845, east: -70.87, west: -71.05 }
+    bounds: { north: 46.892, south: 46.863, east: -70.78, west: -71.10 }
   },
-  // ZONE 3: Chenal sud - entre île d'Orléans et rive sud (Lévis)
+  // ZONE 3: Eau au SUD de Sainte-Pétronille (entre île et Lévis)
   {
-    name: 'Fleuve - Chenal Sud (île d\'Orléans - Lévis)',
+    name: 'Chenal Sud - île d\'Orléans/Lévis',
     type: 'river',
     polygon: [
-      // Côté île d'Orléans (nord du chenal)
-      [46.848, -71.00], [46.852, -70.95], [46.855, -70.90], [46.858, -70.85],
-      [46.860, -70.80], [46.858, -70.75], [46.855, -70.70],
+      // Côté sud de l'île d'Orléans (Sainte-Pétronille)
+      [46.852, -71.15], [46.855, -71.10], [46.858, -71.05], [46.860, -71.00],
+      [46.858, -70.95], [46.855, -70.90], [46.850, -70.85],
       // Pointe est
-      [46.845, -70.68],
-      // Côté Lévis (sud du chenal)
-      [46.828, -70.70], [46.820, -70.75], [46.815, -70.80], [46.812, -70.85],
-      [46.810, -70.90], [46.815, -70.95], [46.825, -71.00],
+      [46.842, -70.82],
+      // Côté Lévis
+      [46.832, -70.85], [46.825, -70.90], [46.820, -70.95],
+      [46.818, -71.00], [46.820, -71.05], [46.825, -71.10],
+      [46.832, -71.15], [46.842, -71.17],
       // Fermer
-      [46.835, -71.02], [46.845, -71.00], [46.848, -71.00]
+      [46.850, -71.16], [46.852, -71.15]
     ],
-    bounds: { north: 46.860, south: 46.810, east: -70.68, west: -71.02 }
+    bounds: { north: 46.860, south: 46.818, east: -70.82, west: -71.17 }
   },
-  // ZONE 4: Chenal nord - entre île d'Orléans et Beauport
+  // ZONE 4: Extension eau vers l'est (après île d'Orléans)
   {
-    name: 'Fleuve - Chenal Nord (île d\'Orléans - Beauport)',
+    name: 'Fleuve Est - après île d\'Orléans',
     type: 'river',
     polygon: [
-      // Côté Beauport (nord)
-      [46.885, -70.88], [46.890, -70.82], [46.892, -70.75], [46.890, -70.68],
-      [46.885, -70.62],
-      // Pointe est
-      [46.878, -70.58], [46.870, -70.58],
-      // Côté île d'Orléans (sud)
-      [46.865, -70.62], [46.868, -70.68], [46.870, -70.75], [46.868, -70.82],
-      [46.865, -70.88], [46.868, -70.92],
-      // Fermer vers l'ouest
-      [46.875, -70.90], [46.882, -70.88], [46.885, -70.88]
+      [46.892, -70.78], [46.895, -70.70], [46.892, -70.62], [46.885, -70.55],
+      [46.872, -70.52], [46.858, -70.52], [46.845, -70.55],
+      [46.835, -70.62], [46.832, -70.70], [46.838, -70.78],
+      [46.852, -70.82], [46.868, -70.82], [46.882, -70.80],
+      [46.892, -70.78]
     ],
-    bounds: { north: 46.892, south: 46.865, east: -70.58, west: -70.92 }
-  },
-  // ZONE 5: Zone de convergence devant Sainte-Pétronille (CRITIQUE)
-  // Cette zone DOIT couvrir toute l'eau autour de la pointe de l'île
-  {
-    name: 'Fleuve - Pointe Sainte-Pétronille',
-    type: 'river',
-    polygon: [
-      // Grand arc autour de la pointe ouest de l'île d'Orléans
-      // Couvre le fleuve de tous les côtés sauf l'île elle-même
-      [46.880, -71.02], [46.882, -70.98], [46.880, -70.94],
-      [46.875, -70.90], [46.868, -70.86], [46.858, -70.84],
-      [46.848, -70.84], [46.838, -70.86], [46.830, -70.90],
-      [46.825, -70.94], [46.822, -70.98], [46.825, -71.02],
-      [46.830, -71.06], [46.840, -71.08], [46.855, -71.08],
-      [46.868, -71.06], [46.875, -71.04], [46.880, -71.02]
-    ],
-    bounds: { north: 46.882, south: 46.822, east: -70.84, west: -71.08 }
-  },
-  // ZONE 6: Extension est après l'île
-  {
-    name: 'Fleuve Saint-Laurent - Est',
-    type: 'river',
-    polygon: [
-      [46.895, -70.58], [46.900, -70.50], [46.898, -70.42],
-      [46.890, -70.35], [46.878, -70.32],
-      [46.860, -70.32], [46.845, -70.35], [46.832, -70.42],
-      [46.825, -70.50], [46.830, -70.58],
-      [46.845, -70.60], [46.865, -70.60], [46.880, -70.58],
-      [46.895, -70.58]
-    ],
-    bounds: { north: 46.900, south: 46.825, east: -70.32, west: -70.60 }
+    bounds: { north: 46.895, south: 46.832, east: -70.52, west: -70.82 }
   }
 ];
 
