@@ -524,9 +524,6 @@ const FeaturesSection = () => {
     </section>
   );
 };
-    </section>
-  );
-};
 
 // Cart Sheet
 const CartSheet = ({ isOpen, onOpenChange, cartItems, onUpdateQuantity, onRemoveItem }) => {
