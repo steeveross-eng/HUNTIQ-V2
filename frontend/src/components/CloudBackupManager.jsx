@@ -114,6 +114,11 @@ const CloudBackupManager = () => {
   });
   const [sendingTest, setSendingTest] = useState(false);
   const [sendingSummary, setSendingSummary] = useState(false);
+  
+  // Resend API key state
+  const [resendApiKey, setResendApiKey] = useState("");
+  const [resendStatus, setResendStatus] = useState(null);
+  const [savingApiKey, setSavingApiKey] = useState(false);
 
   // Helpers
   const formatBytes = (bytes) => {
