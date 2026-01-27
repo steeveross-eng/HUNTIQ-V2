@@ -1,6 +1,7 @@
 /**
  * CloudBackupManager - Interface complète de backup cloud
  * MongoDB Atlas + Google Cloud Storage + ZIP automatique
+ * With Email Notifications via Resend
  */
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -15,6 +16,13 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +58,10 @@ import {
   Server,
   FolderArchive,
   Timer,
-  Zap
+  Zap,
+  Mail,
+  Bell,
+  Send
 } from "lucide-react";
 import { toast } from "sonner";
 
