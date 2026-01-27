@@ -23,13 +23,14 @@
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
-// Configuration permanente (non modifiable)
+// Configuration permanente - water_exclusion_v2 (non modifiable)
 const CONFIG = Object.freeze({
-  SHORE_TOLERANCE_METERS: 5,      // Distance minimale du rivage
+  SHORE_TOLERANCE_METERS: 2,      // Buffer de 2m selon ruleset v2
   CACHE_DURATION_MS: 300000,      // 5 minutes de cache
   MIN_ZONE_AREA_AFTER_CLIP: 0.3,  // Zone conservée si >30% reste après clipping
-  FETCH_RADIUS_METERS: 10000,     // Rayon de récupération des données hydro
+  FETCH_RADIUS_METERS: 15000,     // Rayon de récupération des données hydro (augmenté)
   ENABLED: true,                   // TOUJOURS ACTIF - Ne peut pas être modifié
+  SNAP_TO_EDGE_MAX_DISTANCE: 50,  // Distance max pour repositionnement sur rebord (m)
 });
 
 // Cache global des données hydrographiques
