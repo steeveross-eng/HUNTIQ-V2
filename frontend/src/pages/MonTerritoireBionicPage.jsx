@@ -2211,8 +2211,9 @@ const MonTerritoireBionicPage = () => {
             
             {/* Carte des waypoints avec affichage du curseur */}
             <div className="flex-1 relative">
-              <MapContainer center={mapCenter} zoom={11} className="h-full w-full" zoomControl={false}>
+              <MapContainer center={mapCenter} zoom={mapZoom} className="h-full w-full" zoomControl={false}>
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                <MapController center={mapCenter} zoom={mapZoom} />
                 <CursorTracker onCursorMove={handleCursorMove} onCursorLeave={handleCursorLeave} />
                 
                 {/* Handler pour le mode clic rapide */}
@@ -2239,20 +2240,33 @@ const MonTerritoireBionicPage = () => {
                 {waypoints.map(wp => {
                   const typeInfo = PLACE_TYPES.find(t => t.id === wp.type);
                   return (
-                    <Marker 
-                      key={wp.id} 
-                      position={[wp.lat, wp.lng]} 
-                      icon={createCustomIcon(wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 'waypoint')}
-                      opacity={wp.active ? 1 : 0.5}
-                    >
-                      <Popup>
-                        <div className="text-center">
-                          <div className="font-bold">{wp.name}</div>
-                          <div className="text-xs">{typeInfo?.icon} {typeInfo?.name}</div>
-                          <Badge className={wp.active ? 'bg-green-500' : 'bg-gray-500'}>{wp.active ? 'Actif' : 'Inactif'}</Badge>
-                        </div>
-                      </Popup>
-                    </Marker>
+                    <React.Fragment key={wp.id}>
+                      {/* Cercle de couverture 2000 pieds de diamètre */}
+                      <Circle
+                        center={[wp.lat, wp.lng]}
+                        radius={305}
+                        pathOptions={{ 
+                          color: wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 
+                          fillColor: wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 
+                          fillOpacity: 0.15, 
+                          weight: 2 
+                        }}
+                      />
+                      <Marker 
+                        position={[wp.lat, wp.lng]} 
+                        icon={createCustomIcon(wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 'waypoint')}
+                        opacity={wp.active ? 1 : 0.5}
+                      >
+                        <Popup>
+                          <div className="text-center">
+                            <div className="font-bold">{wp.name}</div>
+                            <div className="text-xs">{typeInfo?.icon} {typeInfo?.name}</div>
+                            <div className="text-xs text-gray-500 mt-1">Couverture: 2000 pi</div>
+                            <Badge className={wp.active ? 'bg-green-500' : 'bg-gray-500'}>{wp.active ? 'Actif' : 'Inactif'}</Badge>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    </React.Fragment>
                   );
                 })}
               </MapContainer>
