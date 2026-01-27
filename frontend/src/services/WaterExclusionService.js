@@ -460,14 +460,65 @@ export async function filterZonesFromWater(zones, bounds) {
     const [lat, lng] = center;
     const radius = zone.radiusMeters || 100;
     
-    // RÈGLE 1: EXCL_CENTROID_IN_WATER
-    const { inWater, feature } = isPointInWater(lat, lng, waterFeatures);
-    if (inWater) {
+    // RÈGLE 1: EXCL_CENTROID_IN_WATER - Centre dans l'eau (masques statiques + API)
+    const centerCheck = isPointInWater(lat, lng, waterFeatures);
+    if (centerCheck.inWater) {
       excludedCount++;
       excludedDetails.push({
         zone_id: zone.id,
         reason: 'EXCL_CENTROID_IN_WATER',
-        water_type: feature?.type,
+        water_type: centerCheck.feature?.type,
+        water_name: centerCheck.feature?.name
+      });
+      continue;
+    }
+    
+    // RÈGLE 2: EXCL_PERIMETER_IN_WATER - Vérifier 8 points sur le périmètre
+    let perimeterInWater = false;
+    let perimeterWaterFeature = null;
+    const radiusDeg = radius / 111320;
+    
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * 2 * Math.PI;
+      const checkLat = lat + radiusDeg * Math.cos(angle);
+      const checkLng = lng + (radiusDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle);
+      
+      const perimCheck = isPointInWater(checkLat, checkLng, waterFeatures);
+      if (perimCheck.inWater) {
+        perimeterInWater = true;
+        perimeterWaterFeature = perimCheck.feature;
+        break;
+      }
+    }
+    
+    if (perimeterInWater) {
+      excludedCount++;
+      excludedDetails.push({
+        zone_id: zone.id,
+        reason: 'EXCL_PERIMETER_IN_WATER',
+        water_type: perimeterWaterFeature?.type,
+        water_name: perimeterWaterFeature?.name
+      });
+      continue;
+    }
+    
+    // RÈGLE 3: EXCL_INTERSECTS_WATER - Vérification supplémentaire avec buffer
+    const touchesWater = checkZoneTouchesWaterWithBuffer(lat, lng, radius, waterFeatures, CONFIG.WATER_BUFFER_METERS);
+    
+    if (touchesWater?.inBuffer) {
+      // Zone dans le buffer de 5m - EXCLURE
+      excludedCount++;
+      excludedDetails.push({
+        zone_id: zone.id,
+        reason: 'EXCL_WITHIN_5M_WATER',
+        water_type: touchesWater.type,
+        water_name: touchesWater.name
+      });
+      continue;
+    }
+    
+    // Zone sur terre - CONSERVER
+    filteredZones.push(zone);
         water_name: feature?.name
       });
       continue;
