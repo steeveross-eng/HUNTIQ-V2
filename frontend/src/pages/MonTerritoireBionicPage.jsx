@@ -585,6 +585,7 @@ const MonTerritoireBionicPage = () => {
   const [cursorData, setCursorData] = useState(null);
   const [showCursorInfo, setShowCursorInfo] = useState(true);
   const [cursorElevation, setCursorElevation] = useState(null);
+  const [gpsLiveEnabled, setGpsLiveEnabled] = useState(false); // GPS LIVE désactivé par défaut
   const elevationCacheRef = useRef({});
   const elevationTimeoutRef = useRef(null);
   
