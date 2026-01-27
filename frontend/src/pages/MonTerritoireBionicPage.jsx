@@ -1898,6 +1898,15 @@ const MonTerritoireBionicPage = () => {
                 >
                   <Leaf className="h-4 w-4" />
                 </Button>
+                {/* Bouton GPS LIVE */}
+                <Button 
+                  size="sm" 
+                  className={`${gpsLiveEnabled ? 'bg-[#f5a623] text-black' : 'bg-black/80 text-white'} border border-gray-700 h-8 w-8 p-0`}
+                  onClick={() => setGpsLiveEnabled(!gpsLiveEnabled)}
+                  title={gpsLiveEnabled ? 'Désactiver GPS LIVE' : 'Activer GPS LIVE'}
+                >
+                  <Crosshair className="h-4 w-4" />
+                </Button>
               </div>
               
               {/* PANNEAU DE CONTRÔLE ÉCOFORESTIER */}
