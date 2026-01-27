@@ -518,10 +518,10 @@ const CloudBackupManager = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 bg-card">
+        <TabsList className="grid w-full grid-cols-6 bg-card">
           <TabsTrigger value="overview" className="data-[state=active]:bg-[#f5a623] data-[state=active]:text-black">
             <Settings className="h-4 w-4 mr-2" />
-            Vue d'ensemble
+            Vue d&apos;ensemble
           </TabsTrigger>
           <TabsTrigger value="atlas" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
             <Database className="h-4 w-4 mr-2" />
@@ -538,6 +538,10 @@ const CloudBackupManager = () => {
           <TabsTrigger value="schedule" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <Timer className="h-4 w-4 mr-2" />
             Auto Backup
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-pink-500 data-[state=active]:text-white">
+            <Mail className="h-4 w-4 mr-2" />
+            Notifications
           </TabsTrigger>
         </TabsList>
 
