@@ -220,6 +220,37 @@ const CloudBackupManager = () => {
     }
   };
 
+  const loadResendStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/api/backup-cloud/resend/status`);
+      setResendStatus(response.data);
+    } catch (error) {
+      console.error("Error loading Resend status:", error);
+    }
+  };
+
+  const saveResendApiKey = async () => {
+    if (!resendApiKey || !resendApiKey.startsWith("re_")) {
+      toast.error("La clé API doit commencer par 're_'");
+      return;
+    }
+    setSavingApiKey(true);
+    try {
+      const response = await axios.post(`${API}/api/backup-cloud/resend/configure`, {
+        api_key: resendApiKey
+      });
+      if (response.data.success) {
+        toast.success("Clé API Resend sauvegardée!");
+        setResendApiKey("");
+        loadResendStatus();
+        loadNotificationStatus();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur de sauvegarde");
+    }
+    setSavingApiKey(false);
+  };
+
   const loadAtlasGuide = async () => {
     try {
       const response = await axios.get(`${API}/api/backup-cloud/guides/mongodb-atlas`);
@@ -248,6 +279,7 @@ const CloudBackupManager = () => {
     loadScheduleStatus();
     loadLogs();
     loadNotificationStatus();
+    loadResendStatus();
     
     // Refresh every 30 seconds
     const interval = setInterval(() => {
