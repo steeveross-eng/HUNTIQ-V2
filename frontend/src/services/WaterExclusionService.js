@@ -248,10 +248,16 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 }
 
 /**
- * FONCTION PRINCIPALE: Filtre les zones pour exclure celles dans l'eau
+ * BIONIC_water_mask_v3 - FONCTION PRINCIPALE
+ * Filtre les zones pour exclure celles dans/près de l'eau
  * 
- * Cette fonction est appelée AUTOMATIQUEMENT lors de la génération des zones.
- * Elle ne peut PAS être désactivée.
+ * Règles d'exclusion (appliquées dans l'ordre):
+ * 1. EXCL_CENTROID_IN_WATER - Centre dans l'eau
+ * 2. EXCL_INTERSECTS_WATER - Intersection avec eau
+ * 3. EXCL_WITHIN_5M_WATER - Dans buffer 5m
+ * 4. EXCL_OVERLAP_GT_1_PERCENT - Chevauchement > 1%
+ * 
+ * Cette fonction est PERMANENTE et ne peut PAS être désactivée.
  * 
  * @param {Array} zones - Liste des zones à filtrer
  * @param {Object} bounds - Limites de la carte
@@ -261,45 +267,85 @@ export async function filterZonesFromWater(zones, bounds) {
   if (!zones || zones.length === 0) {
     return { 
       filteredZones: [], 
-      stats: { total: 0, kept: 0, excluded: 0, clipped: 0 }
+      stats: { total: 0, kept: 0, excluded: 0, clipped: 0, ruleset: 'BIONIC_water_mask_v3' }
     };
   }
   
-  // Récupérer les surfaces d'eau
+  // Récupérer les surfaces d'eau multi-sources
   const waterFeatures = await fetchWaterFeatures(bounds);
   
   if (waterFeatures.length === 0) {
-    // Aucune donnée d'eau disponible - conserver toutes les zones
-    // (peut-être problème de connexion)
+    // Aucune donnée d'eau disponible
     return {
       filteredZones: zones,
-      stats: { total: zones.length, kept: zones.length, excluded: 0, clipped: 0, noData: true }
+      stats: { 
+        total: zones.length, 
+        kept: zones.length, 
+        excluded: 0, 
+        clipped: 0, 
+        noData: true,
+        ruleset: 'BIONIC_water_mask_v3'
+      }
     };
   }
   
   const filteredZones = [];
+  const excludedDetails = [];
   let excludedCount = 0;
   let clippedCount = 0;
+  let adjustedCount = 0;
   
   for (const zone of zones) {
     const center = zone.center || [zone.lat, zone.lng];
     const [lat, lng] = center;
+    const radius = zone.radiusMeters || 100;
     
-    // Vérifier si le centre est dans l'eau
+    // RÈGLE 1: EXCL_CENTROID_IN_WATER
     const { inWater, feature } = isPointInWater(lat, lng, waterFeatures);
-    
     if (inWater) {
       excludedCount++;
-      continue; // Zone entièrement exclue
+      excludedDetails.push({
+        zone_id: zone.id,
+        reason: 'EXCL_CENTROID_IN_WATER',
+        water_type: feature?.type,
+        water_name: feature?.name
+      });
+      continue;
     }
     
-    // Vérifier si la zone touche l'eau (pour clipping potentiel)
-    const radius = zone.radiusMeters || 100;
-    const touchesWater = checkZoneTouchesWater(lat, lng, radius, waterFeatures);
+    // RÈGLE 2 & 3: EXCL_INTERSECTS_WATER & EXCL_WITHIN_5M_WATER
+    const touchesWater = checkZoneTouchesWaterWithBuffer(lat, lng, radius, waterFeatures, CONFIG.WATER_BUFFER_METERS);
     
-    if (touchesWater) {
-      // La zone touche l'eau mais le centre est sur terre
-      // On la conserve mais on marque qu'elle a été ajustée
+    if (touchesWater?.inBuffer) {
+      // Zone dans le buffer de 5m - EXCLURE
+      excludedCount++;
+      excludedDetails.push({
+        zone_id: zone.id,
+        reason: 'EXCL_WITHIN_5M_WATER',
+        water_type: touchesWater.type,
+        water_name: touchesWater.name,
+        distance_to_water: touchesWater.distance
+      });
+      continue;
+    }
+    
+    if (touchesWater?.intersects) {
+      // Zone touche l'eau mais centre sur terre
+      // Vérifier le chevauchement (RÈGLE 4)
+      const overlapRatio = estimateOverlapRatio(lat, lng, radius, waterFeatures);
+      
+      if (overlapRatio > CONFIG.OVERLAP_EXCLUSION_THRESHOLD) {
+        // Chevauchement > 1% - EXCLURE
+        excludedCount++;
+        excludedDetails.push({
+          zone_id: zone.id,
+          reason: 'EXCL_OVERLAP_GT_1_PERCENT',
+          overlap_percent: (overlapRatio * 100).toFixed(1)
+        });
+        continue;
+      }
+      
+      // Zone touchant l'eau mais acceptable - MARQUER comme clippée
       clippedCount++;
       filteredZones.push({
         ...zone,
@@ -307,7 +353,7 @@ export async function filterZonesFromWater(zones, bounds) {
         _waterFeatureName: touchesWater.name
       });
     } else {
-      // Zone entièrement sur terre
+      // Zone entièrement sur terre - CONSERVER
       filteredZones.push(zone);
     }
   }
@@ -317,7 +363,11 @@ export async function filterZonesFromWater(zones, bounds) {
     kept: filteredZones.length,
     excluded: excludedCount,
     clipped: clippedCount,
+    adjusted: adjustedCount,
     waterFeaturesCount: waterFeatures.length,
+    bufferMeters: CONFIG.WATER_BUFFER_METERS,
+    ruleset: 'BIONIC_water_mask_v3',
+    excludedDetails: excludedDetails.slice(0, 10) // Limiter pour performance
     tolerance: CONFIG.SHORE_TOLERANCE_METERS
   };
   
