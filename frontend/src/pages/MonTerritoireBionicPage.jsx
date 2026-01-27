@@ -95,42 +95,38 @@ const createCustomIcon = (color, iconType = 'default') => {
 // Composant pour centrer la carte
 const MapController = ({ center, zoom }) => {
   const map = useMap();
-  const prevCenter = useRef(center);
-  const isInitialized = useRef(false);
+  const prevCenterRef = useRef(null);
+  const prevZoomRef = useRef(null);
   
   useEffect(() => {
     if (!center) return;
     
-    // Premier rendu - initialiser la carte
-    if (!isInitialized.current) {
-      map.setView(center, zoom || 12);
-      prevCenter.current = center;
-      isInitialized.current = true;
-      return;
-    }
+    const currentMapCenter = map.getCenter();
+    const currentMapZoom = map.getZoom();
     
-    // Vérifier si c'est un changement de centre significatif
-    const centerChanged = prevCenter.current && (
-      Math.abs(center[0] - prevCenter.current[0]) > 0.001 ||
-      Math.abs(center[1] - prevCenter.current[1]) > 0.001
+    // Détecter si le centre a changé significativement
+    const centerChanged = !prevCenterRef.current || (
+      Math.abs(center[0] - prevCenterRef.current[0]) > 0.0005 ||
+      Math.abs(center[1] - prevCenterRef.current[1]) > 0.0005
     );
     
-    // Si le centre a changé, recentrer avec le nouveau zoom
-    if (centerChanged) {
-      map.setView(center, zoom || map.getZoom(), { animate: true });
-      prevCenter.current = center;
-    }
-  }, [center, map]);
-  
-  // Gérer le zoom séparément
-  useEffect(() => {
-    if (!isInitialized.current) return;
+    // Détecter si le zoom a changé
+    const zoomChanged = prevZoomRef.current !== null && zoom !== prevZoomRef.current;
     
-    const currentZoom = map.getZoom();
-    if (zoom && zoom !== currentZoom) {
+    if (centerChanged && zoomChanged) {
+      // Les deux ont changé - faire setView
+      map.setView(center, zoom, { animate: true });
+    } else if (centerChanged) {
+      // Seulement le centre - garder le zoom actuel
+      map.setView(center, currentMapZoom, { animate: true });
+    } else if (zoomChanged) {
+      // Seulement le zoom - garder le centre actuel
       map.setZoom(zoom, { animate: true });
     }
-  }, [zoom, map]);
+    
+    prevCenterRef.current = center;
+    prevZoomRef.current = zoom;
+  }, [center, zoom, map]);
   
   return null;
 };
