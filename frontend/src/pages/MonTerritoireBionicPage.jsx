@@ -95,42 +95,42 @@ const createCustomIcon = (color, iconType = 'default') => {
 // Composant pour centrer la carte
 const MapController = ({ center, zoom }) => {
   const map = useMap();
-  const lastCenter = useRef(null);
-  const lastZoom = useRef(null);
-  const isFirstRender = useRef(true);
+  const prevCenter = useRef(center);
+  const isInitialized = useRef(false);
   
   useEffect(() => {
     if (!center) return;
     
-    // Premier rendu - centrer sur la position initiale
-    if (isFirstRender.current) {
+    // Premier rendu - initialiser la carte
+    if (!isInitialized.current) {
       map.setView(center, zoom || 12);
-      lastCenter.current = center;
-      lastZoom.current = zoom;
-      isFirstRender.current = false;
+      prevCenter.current = center;
+      isInitialized.current = true;
       return;
     }
     
-    // Vérifier si c'est un changement de centre significatif (pas juste le zoom)
-    const centerChanged = lastCenter.current && (
-      Math.abs(center[0] - lastCenter.current[0]) > 0.001 ||
-      Math.abs(center[1] - lastCenter.current[1]) > 0.001
+    // Vérifier si c'est un changement de centre significatif
+    const centerChanged = prevCenter.current && (
+      Math.abs(center[0] - prevCenter.current[0]) > 0.001 ||
+      Math.abs(center[1] - prevCenter.current[1]) > 0.001
     );
     
-    const zoomChanged = zoom !== lastZoom.current;
+    // Si le centre a changé, recentrer avec le nouveau zoom
+    if (centerChanged) {
+      map.setView(center, zoom || map.getZoom(), { animate: true });
+      prevCenter.current = center;
+    }
+  }, [center, map]);
+  
+  // Gérer le zoom séparément
+  useEffect(() => {
+    if (!isInitialized.current) return;
     
-    // Si SEULEMENT le zoom a changé, utiliser setZoom pour zoomer sur le centre actuel
-    if (zoomChanged && !centerChanged) {
+    const currentZoom = map.getZoom();
+    if (zoom && zoom !== currentZoom) {
       map.setZoom(zoom, { animate: true });
-      lastZoom.current = zoom;
     }
-    // Si le centre a changé (ou les deux), recentrer
-    else if (centerChanged) {
-      map.setView(center, zoom || lastZoom.current || 12, { animate: true });
-      lastCenter.current = center;
-      lastZoom.current = zoom;
-    }
-  }, [center, zoom, map]);
+  }, [zoom, map]);
   
   return null;
 };
