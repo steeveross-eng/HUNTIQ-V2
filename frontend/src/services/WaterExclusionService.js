@@ -103,122 +103,134 @@ const hydroCache = {
 };
 
 /**
- * Masques d'eau statiques pour le fleuve Saint-Laurent
- * APPROCHE SIMPLIFIÉE: Un grand polygone qui couvre TOUT le fleuve visible
- * SAUF l'île d'Orléans et la terre ferme
+ * BIONIC_water_mask_v3 - Masque hydrographique intelligent
  * 
- * Position approximative du waypoint: 46.855, -71.12 (Sainte-Pétronille)
+ * NOUVELLE APPROCHE: Au lieu de définir des polygones complexes,
+ * on considère que TOUTE la zone entre les latitudes 46.77-46.93 et 
+ * longitudes -71.35 à -70.50 est POTENTIELLEMENT de l'eau,
+ * SAUF les points explicitement sur terre (île d'Orléans interne)
  */
-const SAINT_LAURENT_MASKS = [
-  // MASQUE UNIQUE: Couvre tout le fleuve sauf l'île d'Orléans
-  // L'île d'Orléans est approximativement entre:
-  // - Ouest: -71.12 à -70.58 (longitude)
-  // - Nord: 46.92 (latitude max)
-  // - Sud: 46.82 (latitude min)
-  {
-    name: 'Fleuve Saint-Laurent - Zone complète',
-    type: 'river',
-    // Grand polygone englobant avec "trou" pour l'île d'Orléans
-    // Définit les limites EXTÉRIEURES du fleuve
-    polygon: [
-      // Rive nord (de l'ouest vers l'est) - ligne côtière nord
-      [46.88, -71.35], [46.89, -71.30], [46.90, -71.25], [46.91, -71.20],
-      [46.92, -71.15], [46.93, -71.10], [46.93, -71.05], [46.93, -71.00],
-      [46.93, -70.95], [46.93, -70.90], [46.93, -70.85], [46.93, -70.80],
-      [46.93, -70.75], [46.93, -70.70], [46.93, -70.65], [46.93, -70.60],
-      [46.93, -70.55], [46.92, -70.50],
-      // Rive sud (de l'est vers l'ouest) - ligne côtière Lévis
-      [46.80, -70.50], [46.79, -70.55], [46.78, -70.60], [46.77, -70.65],
-      [46.77, -70.70], [46.77, -70.75], [46.77, -70.80], [46.77, -70.85],
-      [46.77, -70.90], [46.78, -70.95], [46.79, -71.00], [46.80, -71.05],
-      [46.80, -71.10], [46.80, -71.15], [46.80, -71.20], [46.81, -71.25],
-      [46.82, -71.30], [46.84, -71.35],
-      // Fermer le polygone
-      [46.86, -71.35], [46.88, -71.35]
-    ],
-    bounds: { north: 46.93, south: 46.77, east: -70.50, west: -71.35 }
-  }
+
+// Coordonnées approximatives des centres de terres connues dans la zone
+const KNOWN_LAND_AREAS = [
+  // Île d'Orléans - points centraux seulement
+  { lat: 46.865, lng: -70.95, radiusKm: 1.5, name: 'Île d\'Orléans - Centre' },
+  { lat: 46.855, lng: -70.80, radiusKm: 1.2, name: 'Île d\'Orléans - Est' },
+  { lat: 46.845, lng: -70.68, radiusKm: 1.0, name: 'Île d\'Orléans - Pointe Est' },
 ];
 
-// Polygone représentant l'île d'Orléans (zone à EXCLURE des masques d'eau)
-// RÉDUIT pour être plus conservateur - seulement le coeur de l'île
-const ILE_ORLEANS_POLYGON = [
-  // Contour RÉDUIT de l'île d'Orléans - seulement la partie centrale
-  [46.858, -71.08], [46.862, -71.03], [46.866, -70.98], [46.870, -70.92],
-  [46.872, -70.85], [46.870, -70.78], [46.866, -70.72], [46.860, -70.66],
-  [46.852, -70.62], [46.844, -70.62], [46.836, -70.66], [46.832, -70.72],
-  [46.832, -70.80], [46.835, -70.88], [46.840, -70.96], [46.846, -71.02],
-  [46.852, -71.07], [46.858, -71.08]
-];
+// Lignes de côtes simplifiées (latitude approximative des rives)
+const SHORELINES = {
+  // Rive nord (Québec, Beauport) - latitude minimale de la terre
+  northShore: {
+    minLat: 46.85, // Tout en dessous de cette latitude est eau (côté nord)
+    maxLng: -71.10 // À l'est de cette longitude
+  },
+  // Rive sud (Lévis) - latitude maximale de la terre  
+  southShore: {
+    maxLat: 46.82, // Tout au-dessus de cette latitude est eau (côté sud)
+    maxLng: -71.05
+  }
+};
 
 /**
- * Vérifie si un point est sur l'île d'Orléans
+ * Vérifie si un point est sur une zone de terre connue
  */
-function isPointOnIleOrleans(lat, lng) {
-  // Vérification rapide des bounds de l'île
-  if (lat < 46.82 || lat > 46.89 || lng < -71.15 || lng > -70.55) {
-    return false;
-  }
-  
-  let inside = false;
-  const polygon = ILE_ORLEANS_POLYGON;
-  
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [yi, xi] = polygon[i];
-    const [yj, xj] = polygon[j];
-    
-    if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
-      inside = !inside;
+function isPointOnKnownLand(lat, lng) {
+  for (const land of KNOWN_LAND_AREAS) {
+    const distKm = haversineDistance(lat, lng, land.lat, land.lng);
+    if (distKm <= land.radiusKm) {
+      return true;
     }
   }
-  
-  return inside;
+  return false;
 }
 
 /**
- * Vérifie si un point est dans l'un des masques du fleuve Saint-Laurent
- * MAIS PAS sur l'île d'Orléans (qui est de la terre)
+ * Vérifie si un point est dans le fleuve Saint-Laurent
+ * Approche simplifiée: si le point est dans la zone du fleuve
+ * et n'est PAS sur une terre connue, c'est de l'eau
  */
 function isPointInSaintLaurent(lat, lng) {
-  // D'abord, vérifier si le point est sur l'île d'Orléans (terre)
-  if (isPointOnIleOrleans(lat, lng)) {
-    return { inWater: false, mask: null };
-  }
-  
-  // Ensuite, vérifier si le point est dans les bounds généraux du fleuve
-  // Le fleuve est entre: lat 46.77-46.93, lng -71.35 à -70.50
+  // Vérifier d'abord si c'est dans la zone générale du fleuve
+  // (entre Québec et Lévis, incluant l'île d'Orléans)
   if (lat < 46.77 || lat > 46.93 || lng < -71.35 || lng > -70.50) {
     return { inWater: false, mask: null };
   }
   
-  // Vérifier chaque masque d'eau
-  for (const mask of SAINT_LAURENT_MASKS) {
-    // Vérification rapide des bounds
-    if (lat < mask.bounds.south || lat > mask.bounds.north ||
-        lng < mask.bounds.west || lng > mask.bounds.east) {
-      continue;
+  // Vérifier si c'est sur une terre connue
+  if (isPointOnKnownLand(lat, lng)) {
+    return { inWater: false, mask: null };
+  }
+  
+  // RÈGLE PRINCIPALE pour la zone Sainte-Pétronille / Pointe ouest de l'île:
+  // La pointe ouest de l'île d'Orléans est à environ -71.12
+  // Si le point est à l'OUEST de -71.08 et dans la zone latitudinale de l'île,
+  // vérifier plus précisément
+  
+  // Zone de la pointe ouest (Sainte-Pétronille)
+  if (lng < -71.05 && lng > -71.20 && lat > 46.82 && lat < 46.88) {
+    // Cette zone est principalement de l'eau SAUF un petit triangle de terre
+    // La terre de Sainte-Pétronille est approximativement:
+    // Triangle entre (46.855, -71.13), (46.862, -71.08), (46.848, -71.08)
+    
+    // Vérifier si on est dans ce triangle de terre
+    const inStPetronilleLand = isPointInTriangle(
+      lat, lng,
+      46.855, -71.13,  // Pointe ouest
+      46.864, -71.06,  // Nord-est
+      46.846, -71.06   // Sud-est
+    );
+    
+    if (inStPetronilleLand) {
+      return { inWater: false, mask: null };
     }
     
-    // Test point-in-polygon
-    const polygon = mask.polygon;
-    let inside = false;
-    
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const [yi, xi] = polygon[i];
-      const [yj, xj] = polygon[j];
-      
-      if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
-        inside = !inside;
-      }
-    }
-    
-    if (inside) {
-      return { inWater: true, mask };
-    }
+    // Sinon, c'est de l'eau
+    return { inWater: true, mask: { name: 'Fleuve - Zone Sainte-Pétronille', type: 'river' } };
+  }
+  
+  // Zone entre Québec et Lévis (à l'ouest de l'île)
+  if (lng < -71.15 && lat > 46.80 && lat < 46.88) {
+    return { inWater: true, mask: { name: 'Fleuve - Québec/Lévis', type: 'river' } };
+  }
+  
+  // Chenal sud (entre île et Lévis)
+  if (lat < 46.83 && lat > 46.77 && lng > -71.15 && lng < -70.55) {
+    return { inWater: true, mask: { name: 'Chenal Sud', type: 'river' } };
+  }
+  
+  // Chenal nord (entre île et Beauport)
+  if (lat > 46.88 && lat < 46.93 && lng > -71.05 && lng < -70.55) {
+    return { inWater: true, mask: { name: 'Chenal Nord', type: 'river' } };
   }
   
   return { inWater: false, mask: null };
 }
+
+/**
+ * Vérifie si un point est dans un triangle
+ */
+function isPointInTriangle(px, py, ax, ay, bx, by, cx, cy) {
+  const v0x = cx - ax, v0y = cy - ay;
+  const v1x = bx - ax, v1y = by - ay;
+  const v2x = px - ax, v2y = py - ay;
+  
+  const dot00 = v0x * v0x + v0y * v0y;
+  const dot01 = v0x * v1x + v0y * v1y;
+  const dot02 = v0x * v2x + v0y * v2y;
+  const dot11 = v1x * v1x + v1y * v1y;
+  const dot12 = v1x * v2x + v1y * v2y;
+  
+  const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+  const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+  const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+  
+  return (u >= 0) && (v >= 0) && (u + v < 1);
+}
+
+// Garder le masque vide pour compatibilité
+const SAINT_LAURENT_MASKS = [];
 
 /**
  * Récupère les surfaces d'eau pour une zone donnée
