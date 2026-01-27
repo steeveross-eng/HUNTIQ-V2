@@ -83,6 +83,284 @@ class BackupSchedule(BaseModel):
     enabled: bool = True
 
 
+class NotificationConfig(BaseModel):
+    enabled: bool = True
+    recipient_email: EmailStr
+    send_daily_summary: bool = True
+    send_on_failure: bool = True
+    summary_hour: int = 8  # Hour of day to send summary (0-23)
+
+
+# ==================== EMAIL NOTIFICATIONS ====================
+
+async def send_backup_email(subject: str, html_content: str, recipient: str):
+    """Send backup notification email via Resend"""
+    if not RESEND_AVAILABLE or not RESEND_API_KEY:
+        print("Resend not configured - skipping email")
+        return False
+    
+    try:
+        resend.api_key = RESEND_API_KEY
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [recipient],
+            "subject": subject,
+            "html": html_content
+        }
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        
+        # Log email sent
+        await backup_logs.insert_one({
+            "type": "email_notification",
+            "timestamp": datetime.now(timezone.utc),
+            "recipient": recipient,
+            "subject": subject,
+            "status": "success",
+            "email_id": result.get("id")
+        })
+        
+        return True
+    except Exception as e:
+        print(f"Email send error: {e}")
+        await backup_logs.insert_one({
+            "type": "email_notification",
+            "timestamp": datetime.now(timezone.utc),
+            "recipient": recipient,
+            "subject": subject,
+            "status": "error",
+            "error": str(e)
+        })
+        return False
+
+
+def generate_daily_summary_html(stats: dict, logs: list) -> str:
+    """Generate HTML email for daily backup summary"""
+    today = datetime.now(timezone.utc).strftime("%d %B %Y")
+    
+    # Count stats
+    atlas_syncs = sum(1 for l in logs if l.get("type") == "atlas_sync" and l.get("status") == "success")
+    gcs_uploads = sum(1 for l in logs if l.get("type") == "gcs_upload" and l.get("status") == "success")
+    zip_updates = sum(1 for l in logs if l.get("type") == "zip_create" and l.get("status") == "success")
+    failures = sum(1 for l in logs if l.get("status") == "error")
+    
+    # Status colors
+    status_color = "#22c55e" if failures == 0 else "#ef4444"
+    status_text = "✅ Tous les backups réussis" if failures == 0 else f"⚠️ {failures} échec(s) détecté(s)"
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body style="font-family: Arial, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 20px; margin: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1a1a1a; border-radius: 12px; padding: 30px; border: 1px solid #333;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #f5a623; margin: 0; font-size: 28px;">🦌 HUNTIQ Backup</h1>
+                <p style="color: #888; margin-top: 5px;">Résumé quotidien - {today}</p>
+            </div>
+            
+            <!-- Status Banner -->
+            <div style="background-color: {status_color}20; border: 1px solid {status_color}; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 25px;">
+                <p style="margin: 0; font-size: 18px; color: {status_color};">{status_text}</p>
+            </div>
+            
+            <!-- Stats Grid -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                    <td style="padding: 15px; background-color: #22c55e20; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="margin: 0; font-size: 24px; color: #22c55e; font-weight: bold;">{zip_updates}</p>
+                        <p style="margin: 5px 0 0 0; color: #888; font-size: 12px;">ZIP Updates</p>
+                    </td>
+                    <td style="width: 10px;"></td>
+                    <td style="padding: 15px; background-color: #3b82f620; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="margin: 0; font-size: 24px; color: #3b82f6; font-weight: bold;">{atlas_syncs}</p>
+                        <p style="margin: 5px 0 0 0; color: #888; font-size: 12px;">Atlas Syncs</p>
+                    </td>
+                    <td style="width: 10px;"></td>
+                    <td style="padding: 15px; background-color: #8b5cf620; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="margin: 0; font-size: 24px; color: #8b5cf6; font-weight: bold;">{gcs_uploads}</p>
+                        <p style="margin: 5px 0 0 0; color: #888; font-size: 12px;">GCS Uploads</p>
+                    </td>
+                </tr>
+            </table>
+            
+            <!-- Services Status -->
+            <div style="background-color: #111; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                <h3 style="color: #f5a623; margin: 0 0 15px 0; font-size: 16px;">État des Services</h3>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #fff;">MongoDB Atlas</td>
+                        <td style="padding: 8px 0; text-align: right; color: {'#22c55e' if stats.get('atlas') else '#888'};">
+                            {'🟢 Configuré' if stats.get('atlas') else '⚪ Non configuré'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #fff; border-top: 1px solid #333;">Google Cloud Storage</td>
+                        <td style="padding: 8px 0; text-align: right; color: {'#22c55e' if stats.get('gcs') else '#888'}; border-top: 1px solid #333;">
+                            {'🟢 Configuré' if stats.get('gcs') else '⚪ Non configuré'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #fff; border-top: 1px solid #333;">Auto Backup</td>
+                        <td style="padding: 8px 0; text-align: right; color: {'#22c55e' if stats.get('schedule', {}).get('running') else '#888'}; border-top: 1px solid #333;">
+                            {'🟢 Actif' if stats.get('schedule', {}).get('running') else '⚪ Inactif'}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- ZIP Info -->
+            <div style="background-color: #8b5cf620; border: 1px solid #8b5cf6; border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+                <p style="margin: 0; color: #8b5cf6; font-weight: bold;">📦 Dernier Backup ZIP</p>
+                <p style="margin: 10px 0 0 0; color: #fff;">
+                    HUNTIQ_BACKUP.zip - {stats.get('zip', {}).get('size_bytes', 0) / 1024:.1f} KB
+                </p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="text-align: center; padding-top: 20px; border-top: 1px solid #333;">
+                <p style="color: #666; font-size: 12px; margin: 0;">
+                    HUNTIQ / Chasse Bionic™ - Système de backup automatisé
+                </p>
+                <p style="color: #666; font-size: 11px; margin: 5px 0 0 0;">
+                    Pour modifier vos préférences: Admin > Backup > Notifications
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html
+
+
+async def send_daily_summary():
+    """Send daily backup summary email"""
+    config = await backup_config.find_one({"type": "notification"})
+    
+    if not config or not config.get("enabled") or not config.get("send_daily_summary"):
+        return
+    
+    # Get stats
+    stats = await get_backup_stats_internal()
+    
+    # Get logs from last 24 hours
+    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
+    logs = await backup_logs.find(
+        {"timestamp": {"$gte": yesterday}},
+        {"_id": 0}
+    ).to_list(length=1000)
+    
+    # Generate and send email
+    html = generate_daily_summary_html(stats, logs)
+    await send_backup_email(
+        subject=f"🦌 HUNTIQ Backup - Résumé du {datetime.now().strftime('%d/%m/%Y')}",
+        html_content=html,
+        recipient=config["recipient_email"]
+    )
+
+
+async def get_backup_stats_internal():
+    """Get backup stats for internal use"""
+    atlas_config = await backup_config.find_one({"type": "atlas"}, {"_id": 0, "connection_string": 0})
+    gcs_config = await backup_config.find_one({"type": "gcs"}, {"_id": 0, "credentials": 0})
+    schedule_config = await backup_config.find_one({"type": "schedule"}, {"_id": 0})
+    zip_config = await backup_config.find_one({"type": "zip_auto"}, {"_id": 0})
+    
+    return {
+        "atlas": atlas_config,
+        "gcs": gcs_config,
+        "schedule": {**(schedule_config or {}), "running": auto_backup_running},
+        "zip": zip_config
+    }
+
+
+# ==================== NOTIFICATION API ====================
+
+@router.post("/notifications/configure")
+async def configure_notifications(config: NotificationConfig):
+    """Configure backup email notifications"""
+    await backup_config.update_one(
+        {"type": "notification"},
+        {"$set": {
+            "type": "notification",
+            "enabled": config.enabled,
+            "recipient_email": config.recipient_email,
+            "send_daily_summary": config.send_daily_summary,
+            "send_on_failure": config.send_on_failure,
+            "summary_hour": config.summary_hour,
+            "configured_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    
+    return {
+        "success": True,
+        "message": "Notifications configurées",
+        "recipient": config.recipient_email
+    }
+
+
+@router.get("/notifications/status")
+async def get_notification_status():
+    """Get notification configuration status"""
+    config = await backup_config.find_one({"type": "notification"}, {"_id": 0})
+    
+    return {
+        "configured": config is not None,
+        "resend_available": RESEND_AVAILABLE and bool(RESEND_API_KEY),
+        "config": config
+    }
+
+
+@router.post("/notifications/test")
+async def test_notification():
+    """Send a test notification email"""
+    config = await backup_config.find_one({"type": "notification"})
+    
+    if not config:
+        raise HTTPException(status_code=400, detail="Notifications non configurées")
+    
+    if not RESEND_AVAILABLE or not RESEND_API_KEY:
+        raise HTTPException(status_code=400, detail="Resend non configuré. Ajoutez RESEND_API_KEY dans .env")
+    
+    # Send test email
+    html = """
+    <div style="font-family: Arial, sans-serif; background-color: #1a1a1a; color: #fff; padding: 30px; border-radius: 12px;">
+        <h1 style="color: #f5a623;">🦌 Test de Notification HUNTIQ</h1>
+        <p>Félicitations ! Votre configuration de notification fonctionne correctement.</p>
+        <p style="color: #888;">Vous recevrez un résumé quotidien de vos backups à l'heure configurée.</p>
+        <hr style="border-color: #333;">
+        <p style="font-size: 12px; color: #666;">HUNTIQ / Chasse Bionic™</p>
+    </div>
+    """
+    
+    success = await send_backup_email(
+        subject="🦌 HUNTIQ - Test de notification",
+        html_content=html,
+        recipient=config["recipient_email"]
+    )
+    
+    if success:
+        return {"success": True, "message": f"Email de test envoyé à {config['recipient_email']}"}
+    else:
+        raise HTTPException(status_code=500, detail="Échec de l'envoi de l'email")
+
+
+@router.post("/notifications/send-summary")
+async def trigger_daily_summary():
+    """Manually trigger daily summary email"""
+    config = await backup_config.find_one({"type": "notification"})
+    
+    if not config:
+        raise HTTPException(status_code=400, detail="Notifications non configurées")
+    
+    await send_daily_summary()
+    
+    return {"success": True, "message": "Résumé envoyé"}
+
+
 # ==================== MONGODB ATLAS ====================
 
 @router.post("/atlas/configure")
