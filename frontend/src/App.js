@@ -99,17 +99,15 @@ import {
   Globe,
   Construction,
   Power,
-  Mail,
-  Handshake
+  Handshake,
   XCircle,
-  Mail,
-  Power,
   Moon,
   Sun,
   Bot,
   Radar,
   Share2,
-  Gift
+  Gift,
+  Mail
 } from "lucide-react";
 import {
   Sheet,
