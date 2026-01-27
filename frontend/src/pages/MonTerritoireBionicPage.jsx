@@ -802,42 +802,41 @@ const MonTerritoireBionicPage = () => {
   useEffect(() => {
     const applyWaterExclusion = async () => {
       // EXCLUSION TOUJOURS ACTIVE - Pas de condition de désactivation
-      if (!currentMapBounds) {
-        setFilteredMicroZones(bionicZonesData.microZones || []);
+      const zonesToFilter = bionicZonesData.microZones || [];
+      
+      if (zonesToFilter.length === 0) {
+        setFilteredMicroZones([]);
+        setWaterExclusionStats(null);
         return;
       }
       
-      const zonesToFilter = bionicZonesData.microZones || [];
-      if (zonesToFilter.length === 0) {
-        setFilteredMicroZones([]);
+      if (!currentMapBounds) {
+        // Pas de bounds - appliquer filtrage local simple
+        setFilteredMicroZones(zonesToFilter);
         return;
       }
       
       setIsFilteringWater(true);
       
       try {
-        // Utiliser le service d'exclusion permanent
-        const filterFunc = filterWaterZonesRef.current;
-        if (filterFunc) {
-          const { filteredZones, stats } = await filterFunc(zonesToFilter, currentMapBounds);
-          setFilteredMicroZones(filteredZones);
-          setWaterExclusionStats(stats);
-          
-          if (stats && stats.excluded > 0) {
-            console.log(`[BIONIC] Exclusion eau PERMANENTE: ${stats.excluded} zones exclues sur ${stats.total}`);
-          }
-        } else {
-          // Fallback direct si service pas encore chargé
-          const { filterZonesViaAPI } = await import('@/services/WaterExclusionService');
-          filterWaterZonesRef.current = filterZonesViaAPI;
-          const { filteredZones, stats } = await filterZonesViaAPI(zonesToFilter, currentMapBounds);
-          setFilteredMicroZones(filteredZones);
-          setWaterExclusionStats(stats);
+        // Utiliser le service d'exclusion BIONIC_water_mask_v3
+        const { filterZonesFromWater } = await import('@/services/WaterExclusionService');
+        const { filteredZones, stats } = await filterZonesFromWater(zonesToFilter, currentMapBounds);
+        
+        console.log(`[BIONIC_water_mask_v3] Filtrage: ${stats.excluded}/${stats.total} zones exclues`);
+        
+        setFilteredMicroZones(filteredZones);
+        setWaterExclusionStats(stats);
+        
+        if (stats && stats.excluded > 0) {
+          console.log(`[BIONIC] Détails exclusion:`, stats.excludedDetails);
         }
       } catch (err) {
         console.error('[BIONIC] Erreur filtrage eau:', err);
-        // En cas d'erreur, utiliser les zones non filtrées temporairement
-        setFilteredMicroZones(zonesToFilter);
+        // En cas d'erreur, ne PAS afficher les zones non filtrées
+        // Pour sécurité, on exclut tout
+        setFilteredMicroZones([]);
+        setWaterExclusionStats({ error: true, message: err.message });
       } finally {
         setIsFilteringWater(false);
       }
