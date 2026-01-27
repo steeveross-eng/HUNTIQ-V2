@@ -367,36 +367,196 @@ export async function filterZonesFromWater(zones, bounds) {
     waterFeaturesCount: waterFeatures.length,
     bufferMeters: CONFIG.WATER_BUFFER_METERS,
     ruleset: 'BIONIC_water_mask_v3',
-    excludedDetails: excludedDetails.slice(0, 10) // Limiter pour performance
-    tolerance: CONFIG.SHORE_TOLERANCE_METERS
+    excludedDetails: excludedDetails.slice(0, 10)
   };
   
   if (excludedCount > 0) {
-    console.log(`[WaterExclusion] ${excludedCount}/${zones.length} zones excluded (in water)`);
+    console.log(`[BIONIC_water_mask_v3] ${excludedCount}/${zones.length} zones exclues`);
   }
   
   return { filteredZones, stats };
 }
 
 /**
- * Vérifie si une zone circulaire touche une surface d'eau
+ * Vérifie si une zone touche l'eau avec buffer de 5m
+ * @returns {Object|null} - { intersects, inBuffer, name, type, distance }
  */
-function checkZoneTouchesWater(centerLat, centerLng, radiusMeters, waterFeatures) {
-  // Vérifier plusieurs points sur le périmètre de la zone
-  const checkPoints = 8;
+function checkZoneTouchesWaterWithBuffer(centerLat, centerLng, radiusMeters, waterFeatures, bufferMeters = 5) {
+  const checkPoints = 16; // Plus de points pour précision
   const radiusDeg = radiusMeters / 111320;
+  const bufferDeg = bufferMeters / 111320;
   
-  for (let i = 0; i < checkPoints; i++) {
-    const angle = (i / checkPoints) * 2 * Math.PI;
-    const checkLat = centerLat + radiusDeg * Math.cos(angle);
-    const checkLng = centerLng + (radiusDeg / Math.cos(centerLat * Math.PI / 180)) * Math.sin(angle);
+  let closestDistance = Infinity;
+  let closestFeature = null;
+  let intersectsWater = false;
+  
+  // Vérifier le centre et le périmètre
+  for (let i = 0; i <= checkPoints; i++) {
+    let checkLat, checkLng;
     
-    const { inWater, feature } = isPointInWater(checkLat, checkLng, waterFeatures);
-    if (inWater) {
-      return { touches: true, name: feature?.name || 'eau' };
+    if (i === 0) {
+      // Centre
+      checkLat = centerLat;
+      checkLng = centerLng;
+    } else {
+      // Périmètre
+      const angle = ((i - 1) / checkPoints) * 2 * Math.PI;
+      checkLat = centerLat + radiusDeg * Math.cos(angle);
+      checkLng = centerLng + (radiusDeg / Math.cos(centerLat * Math.PI / 180)) * Math.sin(angle);
+    }
+    
+    // Vérifier si ce point est dans l'eau
+    const { inWater, feature, distance } = isPointInWaterWithDistance(checkLat, checkLng, waterFeatures);
+    
+    if (inWater && i > 0) {
+      intersectsWater = true;
+      if (distance !== undefined && distance < closestDistance) {
+        closestDistance = distance;
+        closestFeature = feature;
+      }
+    }
+    
+    // Vérifier aussi les points dans le buffer (périmètre + 5m)
+    if (i > 0) {
+      const bufferLat = centerLat + (radiusDeg + bufferDeg) * Math.cos(((i - 1) / checkPoints) * 2 * Math.PI);
+      const bufferLng = centerLng + ((radiusDeg + bufferDeg) / Math.cos(centerLat * Math.PI / 180)) * Math.sin(((i - 1) / checkPoints) * 2 * Math.PI);
+      
+      const bufferCheck = isPointInWater(bufferLat, bufferLng, waterFeatures);
+      if (bufferCheck.inWater) {
+        return {
+          intersects: true,
+          inBuffer: true,
+          name: bufferCheck.feature?.name || 'eau',
+          type: bufferCheck.feature?.type,
+          distance: 0
+        };
+      }
     }
   }
   
+  if (intersectsWater) {
+    return {
+      intersects: true,
+      inBuffer: false,
+      name: closestFeature?.name || 'eau',
+      type: closestFeature?.type,
+      distance: closestDistance
+    };
+  }
+  
+  return null;
+}
+
+/**
+ * Estime le ratio de chevauchement d'une zone avec l'eau
+ * @returns {number} - Ratio entre 0 et 1
+ */
+function estimateOverlapRatio(centerLat, centerLng, radiusMeters, waterFeatures) {
+  const gridSize = 8; // Grille 8x8 pour estimation
+  const radiusDeg = radiusMeters / 111320;
+  let pointsInWater = 0;
+  let totalPoints = 0;
+  
+  for (let i = -gridSize; i <= gridSize; i++) {
+    for (let j = -gridSize; j <= gridSize; j++) {
+      const offsetLat = (i / gridSize) * radiusDeg;
+      const offsetLng = (j / gridSize) * (radiusDeg / Math.cos(centerLat * Math.PI / 180));
+      
+      // Vérifier si le point est dans le cercle
+      const distFromCenter = Math.sqrt(offsetLat * offsetLat + offsetLng * offsetLng);
+      if (distFromCenter > radiusDeg) continue;
+      
+      totalPoints++;
+      
+      const checkLat = centerLat + offsetLat;
+      const checkLng = centerLng + offsetLng;
+      
+      const { inWater } = isPointInWater(checkLat, checkLng, waterFeatures);
+      if (inWater) pointsInWater++;
+    }
+  }
+  
+  return totalPoints > 0 ? pointsInWater / totalPoints : 0;
+}
+
+/**
+ * Vérifie si un point est dans l'eau et retourne la distance
+ */
+function isPointInWaterWithDistance(lat, lng, waterFeatures) {
+  for (const feature of waterFeatures) {
+    const result = pointInPolygonWithDistance(lat, lng, feature.polygon);
+    if (result.inside) {
+      return { inWater: true, feature, distance: result.distance };
+    }
+  }
+  return { inWater: false, feature: null, distance: Infinity };
+}
+
+/**
+ * Point-in-polygon avec calcul de distance au bord
+ */
+function pointInPolygonWithDistance(lat, lng, polygon) {
+  if (!polygon || polygon.length < 3) return { inside: false, distance: Infinity };
+  
+  let inside = false;
+  let minDistance = Infinity;
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [yi, xi] = polygon[i];
+    const [yj, xj] = polygon[j];
+    
+    if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+    
+    // Calculer distance au segment
+    const dist = distanceToSegment(lat, lng, xi, yi, xj, yj);
+    if (dist < minDistance) minDistance = dist;
+  }
+  
+  return { inside, distance: minDistance * 111320 }; // Convertir en mètres
+}
+
+/**
+ * Distance d'un point à un segment
+ */
+function distanceToSegment(px, py, x1, y1, x2, y2) {
+  const A = px - x1;
+  const B = py - y1;
+  const C = x2 - x1;
+  const D = y2 - y1;
+  
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+  
+  if (lenSq !== 0) param = dot / lenSq;
+  
+  let xx, yy;
+  if (param < 0) {
+    xx = x1;
+    yy = y1;
+  } else if (param > 1) {
+    xx = x2;
+    yy = y2;
+  } else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+  
+  const dx = px - xx;
+  const dy = py - yy;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * Vérifie si une zone circulaire touche une surface d'eau (legacy)
+ */
+function checkZoneTouchesWater(centerLat, centerLng, radiusMeters, waterFeatures) {
+  const result = checkZoneTouchesWaterWithBuffer(centerLat, centerLng, radiusMeters, waterFeatures, 0);
+  if (result?.intersects) {
+    return { touches: true, name: result.name };
+  }
   return null;
 }
 
