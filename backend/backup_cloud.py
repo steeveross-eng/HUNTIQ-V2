@@ -89,6 +89,58 @@ class NotificationConfig(BaseModel):
     send_daily_summary: bool = True
     send_on_failure: bool = True
     summary_hour: int = 8  # Hour of day to send summary (0-23)
+    resend_api_key: Optional[str] = None  # API key entered via UI
+
+
+class ResendApiKeyConfig(BaseModel):
+    api_key: str
+
+
+# ==================== RESEND API KEY MANAGEMENT ====================
+
+async def get_resend_api_key():
+    """Get Resend API key from DB or environment"""
+    # First check DB
+    config = await backup_config.find_one({"type": "resend_api"})
+    if config and config.get("api_key"):
+        return config["api_key"]
+    # Fallback to environment
+    return RESEND_API_KEY
+
+
+@router.post("/resend/configure")
+async def configure_resend_api(config: ResendApiKeyConfig):
+    """Configure Resend API key via UI"""
+    if not config.api_key or not config.api_key.startswith("re_"):
+        raise HTTPException(status_code=400, detail="Clé API invalide. Elle doit commencer par 're_'")
+    
+    # Save to database
+    await backup_config.update_one(
+        {"type": "resend_api"},
+        {"$set": {
+            "type": "resend_api",
+            "api_key": config.api_key,
+            "configured_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    
+    return {
+        "success": True,
+        "message": "Clé API Resend configurée avec succès"
+    }
+
+
+@router.get("/resend/status")
+async def get_resend_status():
+    """Check if Resend API is configured"""
+    api_key = await get_resend_api_key()
+    is_configured = bool(api_key) and api_key.startswith("re_")
+    
+    return {
+        "configured": is_configured,
+        "source": "database" if (await backup_config.find_one({"type": "resend_api"})) else "environment"
+    }
 
 
 # ==================== EMAIL NOTIFICATIONS ====================
