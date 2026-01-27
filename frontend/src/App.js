@@ -1114,7 +1114,7 @@ function App() {
     } else {
       setLoading(false);
     }
-  }, [fetchProducts, fetchCart, siteStatus.maintenance_mode]);
+  }, [fetchProducts, fetchCart, siteStatus?.maintenance_mode]);
 
   const handleAddToCart = async (product) => {
     try {
