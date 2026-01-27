@@ -1125,21 +1125,44 @@ const CloudBackupManager = () => {
                 </div>
               )}
 
-              {/* Resend API Status */}
-              <div className={`rounded-lg p-3 ${notifStatus?.resend_available ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
-                <div className="flex items-center gap-2">
-                  {notifStatus?.resend_available ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <span className="text-sm text-green-400">Resend API configurée</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-4 w-4 text-red-400" />
-                      <span className="text-sm text-red-400">Resend API non configurée - Ajoutez RESEND_API_KEY dans .env</span>
-                    </>
-                  )}
-                </div>
+              {/* Resend API Key Configuration */}
+              <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-lg p-4 border border-pink-500/30">
+                <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-pink-400" />
+                  Clé API Resend
+                </h4>
+                
+                {resendStatus?.configured ? (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm">Clé API configurée ({resendStatus.source})</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-400">
+                      Collez votre clé API Resend ci-dessous (elle commence par <code className="bg-gray-800 px-1 rounded">re_</code>)
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        placeholder="re_xxxxxxxxxxxxxxxxxxxxx"
+                        value={resendApiKey}
+                        onChange={(e) => setResendApiKey(e.target.value)}
+                        className="flex-1 font-mono"
+                      />
+                      <Button 
+                        onClick={saveResendApiKey}
+                        disabled={savingApiKey || !resendApiKey}
+                        className="bg-pink-600 hover:bg-pink-700"
+                      >
+                        {savingApiKey ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sauvegarder"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Obtenez votre clé sur <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">resend.com/api-keys</a>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Configuration Form */}
