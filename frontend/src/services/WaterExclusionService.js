@@ -518,9 +518,9 @@ function pointInPolygonWithDistance(lat, lng, polygon) {
 }
 
 /**
- * Distance d'un point à un segment
+ * Distance d'un point à un segment (version coordonnées séparées)
  */
-function distanceToSegment(px, py, x1, y1, x2, y2) {
+function distancePointToSegment(px, py, x1, y1, x2, y2) {
   const A = px - x1;
   const B = py - y1;
   const C = x2 - x1;
