@@ -1770,14 +1770,13 @@ const MonTerritoireBionicPage = () => {
               {/* GPS LIVE - Affichage flottant suivant le curseur */}
               {cursorPosition && cursorData && (
                 <div 
-                  className="fixed pointer-events-none z-[10000] transition-transform duration-75"
+                  className="fixed pointer-events-none z-[10000]"
                   style={{
-                    left: `${cursorPosition.pixel?.x + 270}px`, // Offset pour le panneau de gauche
-                    top: `${cursorPosition.pixel?.y + 200}px`,  // Offset pour le header
-                    transform: 'translate(15px, 15px)'
+                    left: `${(cursorPosition.pixel?.x || 0) + 230}px`,
+                    top: `${(cursorPosition.pixel?.y || 0) + 160}px`,
                   }}
                 >
-                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50">
+                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50 ml-4 mt-4">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                       <span className="text-[#f5a623] text-xs font-bold">GPS LIVE</span>
@@ -1786,7 +1785,7 @@ const MonTerritoireBionicPage = () => {
                       {cursorData.lat.toFixed(5)}°N
                     </div>
                     <div className="text-white font-mono text-sm">
-                      {cursorData.lng.toFixed(5)}°O
+                      {Math.abs(cursorData.lng).toFixed(5)}°O
                     </div>
                     {cursorData.distanceFromUser && (
                       <div className="text-blue-400 text-xs mt-1 border-t border-gray-700 pt-1">
