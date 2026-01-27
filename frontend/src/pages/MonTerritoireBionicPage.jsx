@@ -1400,7 +1400,7 @@ const MonTerritoireBionicPage = () => {
                       <ChevronDown className="h-4 w-4 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-900 border-gray-700 w-64">
+                  <DropdownMenuContent className="bg-gray-900 border-gray-700 w-64 z-[9999]">
                     {/* Enregistrement GPS instantané */}
                     <DropdownMenuItem 
                       onClick={handleQuickWaypointFromGPS}
