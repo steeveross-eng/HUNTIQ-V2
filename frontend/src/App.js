@@ -1100,10 +1100,6 @@ function App() {
   }, [sessionId]);
 
   useEffect(() => {
-    checkSiteStatus();
-  }, [checkSiteStatus]);
-
-  useEffect(() => {
     const initData = async () => {
       setLoading(true);
       await fetchProducts();
@@ -1113,7 +1109,7 @@ function App() {
     
     // Only load data if not in maintenance mode OR if admin is authenticated
     const isAdminAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
-    if (!siteStatus.maintenance_mode || isAdminAuthenticated) {
+    if (!siteStatus?.maintenance_mode || isAdminAuthenticated) {
       initData();
     } else {
       setLoading(false);
