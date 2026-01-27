@@ -1767,6 +1767,38 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
+              {/* GPS LIVE - Affichage flottant suivant le curseur */}
+              {cursorPosition && cursorData && (
+                <div 
+                  className="fixed pointer-events-none z-[10000] transition-transform duration-75"
+                  style={{
+                    left: `${cursorPosition.pixel?.x + 270}px`, // Offset pour le panneau de gauche
+                    top: `${cursorPosition.pixel?.y + 200}px`,  // Offset pour le header
+                    transform: 'translate(15px, 15px)'
+                  }}
+                >
+                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-[#f5a623]/50 shadow-lg shadow-black/50">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[#f5a623] text-xs font-bold">GPS LIVE</span>
+                    </div>
+                    <div className="text-white font-mono text-sm mt-1">
+                      {cursorData.lat.toFixed(5)}°N
+                    </div>
+                    <div className="text-white font-mono text-sm">
+                      {cursorData.lng.toFixed(5)}°O
+                    </div>
+                    {cursorData.distanceFromUser && (
+                      <div className="text-blue-400 text-xs mt-1 border-t border-gray-700 pt-1">
+                        📍 {cursorData.distanceFromUser < 1 
+                          ? `${(cursorData.distanceFromUser * 1000).toFixed(0)} m` 
+                          : `${cursorData.distanceFromUser.toFixed(2)} km`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
               {/* Contrôles carte */}
               <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
                 <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => setMapZoom(z => Math.min(18, z + 1))}>+</Button>
