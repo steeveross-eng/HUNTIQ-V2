@@ -519,54 +519,6 @@ export async function filterZonesFromWater(zones, bounds) {
     
     // Zone sur terre - CONSERVER
     filteredZones.push(zone);
-        water_name: feature?.name
-      });
-      continue;
-    }
-    
-    // RÈGLE 2 & 3: EXCL_INTERSECTS_WATER & EXCL_WITHIN_5M_WATER
-    const touchesWater = checkZoneTouchesWaterWithBuffer(lat, lng, radius, waterFeatures, CONFIG.WATER_BUFFER_METERS);
-    
-    if (touchesWater?.inBuffer) {
-      // Zone dans le buffer de 5m - EXCLURE
-      excludedCount++;
-      excludedDetails.push({
-        zone_id: zone.id,
-        reason: 'EXCL_WITHIN_5M_WATER',
-        water_type: touchesWater.type,
-        water_name: touchesWater.name,
-        distance_to_water: touchesWater.distance
-      });
-      continue;
-    }
-    
-    if (touchesWater?.intersects) {
-      // Zone touche l'eau mais centre sur terre
-      // Vérifier le chevauchement (RÈGLE 4)
-      const overlapRatio = estimateOverlapRatio(lat, lng, radius, waterFeatures);
-      
-      if (overlapRatio > CONFIG.OVERLAP_EXCLUSION_THRESHOLD) {
-        // Chevauchement > 1% - EXCLURE
-        excludedCount++;
-        excludedDetails.push({
-          zone_id: zone.id,
-          reason: 'EXCL_OVERLAP_GT_1_PERCENT',
-          overlap_percent: (overlapRatio * 100).toFixed(1)
-        });
-        continue;
-      }
-      
-      // Zone touchant l'eau mais acceptable - MARQUER comme clippée
-      clippedCount++;
-      filteredZones.push({
-        ...zone,
-        _clippedFromWater: true,
-        _waterFeatureName: touchesWater.name
-      });
-    } else {
-      // Zone entièrement sur terre - CONSERVER
-      filteredZones.push(zone);
-    }
   }
   
   const stats = {
