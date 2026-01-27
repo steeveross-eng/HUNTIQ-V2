@@ -1816,52 +1816,29 @@ const MonTerritoireBionicPage = () => {
                   }}
                 >
                   {/* Conteneur avec flèche pointant vers le point précis */}
-                  <div className="relative">
-                    {/* Pointe de flèche SVG vers le point GPS précis */}
-                    <svg 
-                      className="absolute" 
-                      width="50" 
-                      height="50"
-                      style={{ 
-                        left: '-12px', 
-                        top: '-12px',
-                        overflow: 'visible' 
+                  <div className="relative flex items-start">
+                    {/* Pointe de flèche triangulaire */}
+                    <div 
+                      className="flex-shrink-0"
+                      style={{
+                        width: 0,
+                        height: 0,
+                        borderTop: '10px solid transparent',
+                        borderBottom: '10px solid transparent',
+                        borderRight: '16px solid #f5a623',
+                        marginTop: '8px',
+                        filter: 'drop-shadow(2px 0 4px rgba(0,0,0,0.5))'
                       }}
-                    >
-                      {/* Cercle externe animé (pulse) */}
-                      <circle cx="0" cy="0" r="8" fill="none" stroke="#f5a623" strokeWidth="2" opacity="0.4">
-                        <animate attributeName="r" values="8;14;8" dur="1.5s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0.4;0;0.4" dur="1.5s" repeatCount="indefinite"/>
-                      </circle>
-                      
-                      {/* Flèche/ligne vers la bulle */}
-                      <path 
-                        d="M 0 0 L 18 18" 
-                        stroke="#f5a623" 
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))"
-                      />
-                      
-                      {/* Triangle pointe de flèche au point GPS */}
-                      <polygon 
-                        points="0,-6 5,4 -5,4" 
-                        fill="#f5a623"
-                        transform="rotate(45)"
-                        filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))"
-                      />
-                      
-                      {/* Point central blanc (le point GPS exact) */}
-                      <circle cx="0" cy="0" r="3" fill="#ffffff" filter="drop-shadow(0 0 3px rgba(245,166,35,0.8))"/>
-                    </svg>
+                    />
                     
                     {/* Corps de la bulle d'info */}
-                    <div 
-                      className="ml-5 mt-5 bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623]/60 shadow-xl shadow-black/60 rounded-lg"
-                      style={{
-                        borderTopLeftRadius: '2px'
-                      }}
-                    >
+                    <div className="bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623] shadow-xl shadow-black/60 rounded-r-lg rounded-b-lg">
+                      {/* Point GPS précis indicator */}
+                      <div className="absolute -left-4 top-3 flex items-center">
+                        <div className="w-2 h-2 bg-[#f5a623] rounded-full animate-ping" />
+                        <div className="absolute w-1.5 h-1.5 bg-white rounded-full left-0.5 top-0.5" />
+                      </div>
+                      
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         <span className="text-[#f5a623] text-xs font-bold tracking-wider">GPS LIVE</span>
