@@ -645,14 +645,14 @@ async def get_backup_stats():
                     "modified_at": datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
                 })
     
+    schedule_data = schedule_config if schedule_config else {}
+    schedule_data["running"] = auto_backup_running
+    
     return {
         "success": True,
         "atlas": atlas_config,
         "gcs": gcs_config,
-        "schedule": {
-            **schedule_config if schedule_config else {},
-            "running": auto_backup_running
-        },
+        "schedule": schedule_data,
         "zip": {
             "last_update": zip_config.get("last_update") if zip_config else None,
             "size_bytes": zip_config.get("size_bytes") if zip_config else None,
