@@ -103,63 +103,111 @@ const hydroCache = {
 };
 
 /**
- * Masque d'eau statique pour le fleuve Saint-Laurent
- * Polygone étendu couvrant le fleuve de Québec à l'île d'Orléans
- * Ce masque est TOUJOURS appliqué comme premier filtre
+ * Masques d'eau statiques pour le fleuve Saint-Laurent
+ * Couvre TOUT le fleuve visible sur la carte de Québec incluant l'île d'Orléans
+ * Ces masques sont TOUJOURS appliqués comme premier filtre
  */
-const SAINT_LAURENT_MASK = {
-  name: 'Fleuve Saint-Laurent',
-  type: 'river',
-  // Polygone étendu couvrant tout le fleuve visible sur la carte de Québec
-  polygon: [
-    // Rive nord (de l'ouest vers l'est)
-    [46.870, -71.35], [46.875, -71.30], [46.880, -71.25], [46.882, -71.20],
-    [46.878, -71.15], [46.870, -71.10], [46.865, -71.05], [46.860, -71.00],
-    [46.855, -70.95], [46.850, -70.90], [46.845, -70.85],
-    // Pointe est (vers île d'Orléans)
-    [46.835, -70.80], [46.820, -70.78],
-    // Rive sud de l'île d'Orléans
-    [46.810, -70.80], [46.800, -70.85], [46.795, -70.90],
-    // Rive sud (Lévis, de l'est vers l'ouest)
-    [46.790, -70.95], [46.785, -71.00], [46.780, -71.05], [46.775, -71.10],
-    [46.772, -71.15], [46.775, -71.20], [46.780, -71.25], [46.785, -71.30],
-    [46.795, -71.33], [46.810, -71.35], [46.830, -71.36],
-    // Fermer le polygone
-    [46.850, -71.36], [46.870, -71.35]
-  ],
-  // Bounding box étendue
-  bounds: {
-    north: 46.882,
-    south: 46.772,
-    east: -70.78,
-    west: -71.36
+const SAINT_LAURENT_MASKS = [
+  // ZONE 1: Fleuve principal entre Québec et Lévis (ouest de l'île d'Orléans)
+  {
+    name: 'Fleuve Saint-Laurent - Québec/Lévis',
+    type: 'river',
+    polygon: [
+      [46.870, -71.36], [46.875, -71.30], [46.878, -71.25], [46.880, -71.20],
+      [46.875, -71.15], [46.865, -71.10], [46.855, -71.05], [46.850, -71.00],
+      [46.845, -70.98], // Pointe vers île d'Orléans
+      [46.830, -70.98], [46.820, -71.00], [46.810, -71.05],
+      [46.795, -71.10], [46.785, -71.15], [46.780, -71.20],
+      [46.782, -71.25], [46.790, -71.30], [46.805, -71.34],
+      [46.825, -71.36], [46.850, -71.36], [46.870, -71.36]
+    ],
+    bounds: { north: 46.880, south: 46.780, east: -70.98, west: -71.36 }
+  },
+  // ZONE 2: Chenal sud de l'île d'Orléans (entre île et Lévis)
+  {
+    name: 'Fleuve Saint-Laurent - Chenal Sud',
+    type: 'river',
+    polygon: [
+      [46.845, -70.98], [46.850, -70.92], [46.855, -70.85], [46.858, -70.78],
+      [46.855, -70.72], [46.850, -70.68], [46.840, -70.65],
+      [46.820, -70.65], [46.805, -70.68], [46.795, -70.72],
+      [46.785, -70.78], [46.778, -70.85], [46.775, -70.92],
+      [46.780, -70.98], [46.795, -71.02], [46.815, -71.00],
+      [46.830, -70.98], [46.845, -70.98]
+    ],
+    bounds: { north: 46.858, south: 46.775, east: -70.65, west: -71.02 }
+  },
+  // ZONE 3: Chenal nord de l'île d'Orléans (entre île et Beauport)
+  {
+    name: 'Fleuve Saint-Laurent - Chenal Nord',
+    type: 'river',
+    polygon: [
+      [46.895, -71.00], [46.900, -70.95], [46.905, -70.88], [46.908, -70.80],
+      [46.905, -70.72], [46.898, -70.65], [46.890, -70.60],
+      [46.875, -70.58], [46.865, -70.60], [46.858, -70.65],
+      [46.855, -70.72], [46.858, -70.80], [46.862, -70.88],
+      [46.868, -70.95], [46.875, -71.00], [46.885, -71.02],
+      [46.895, -71.00]
+    ],
+    bounds: { north: 46.908, south: 46.855, east: -70.58, west: -71.02 }
+  },
+  // ZONE 4: Pointe ouest de l'île d'Orléans (Sainte-Pétronille)
+  {
+    name: 'Fleuve - Pointe Sainte-Pétronille',
+    type: 'river',
+    polygon: [
+      [46.865, -71.02], [46.868, -70.98], [46.865, -70.95],
+      [46.858, -70.92], [46.850, -70.90], [46.842, -70.92],
+      [46.838, -70.95], [46.840, -70.98], [46.845, -71.00],
+      [46.855, -71.02], [46.865, -71.02]
+    ],
+    bounds: { north: 46.868, south: 46.838, east: -70.90, west: -71.02 }
+  },
+  // ZONE 5: Extension est du fleuve (après île d'Orléans)
+  {
+    name: 'Fleuve Saint-Laurent - Est',
+    type: 'river',
+    polygon: [
+      [46.890, -70.60], [46.895, -70.50], [46.892, -70.40], [46.885, -70.32],
+      [46.870, -70.30], [46.850, -70.32], [46.835, -70.38],
+      [46.825, -70.45], [46.820, -70.55], [46.825, -70.62],
+      [46.840, -70.65], [46.860, -70.62], [46.875, -70.60],
+      [46.890, -70.60]
+    ],
+    bounds: { north: 46.895, south: 46.820, east: -70.30, west: -70.65 }
   }
-};
+];
 
 /**
- * Vérifie si un point est dans le masque du fleuve Saint-Laurent
+ * Vérifie si un point est dans l'un des masques du fleuve Saint-Laurent
  */
 function isPointInSaintLaurent(lat, lng) {
-  // Vérification rapide des bounds
-  if (lat < SAINT_LAURENT_MASK.bounds.south || lat > SAINT_LAURENT_MASK.bounds.north ||
-      lng < SAINT_LAURENT_MASK.bounds.west || lng > SAINT_LAURENT_MASK.bounds.east) {
-    return false;
-  }
-  
-  // Test point-in-polygon
-  const polygon = SAINT_LAURENT_MASK.polygon;
-  let inside = false;
-  
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [yi, xi] = polygon[i];
-    const [yj, xj] = polygon[j];
+  for (const mask of SAINT_LAURENT_MASKS) {
+    // Vérification rapide des bounds
+    if (lat < mask.bounds.south || lat > mask.bounds.north ||
+        lng < mask.bounds.west || lng > mask.bounds.east) {
+      continue;
+    }
     
-    if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
-      inside = !inside;
+    // Test point-in-polygon
+    const polygon = mask.polygon;
+    let inside = false;
+    
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [yi, xi] = polygon[i];
+      const [yj, xj] = polygon[j];
+      
+      if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    
+    if (inside) {
+      return { inWater: true, mask };
     }
   }
   
-  return inside;
+  return { inWater: false, mask: null };
 }
 
 /**
