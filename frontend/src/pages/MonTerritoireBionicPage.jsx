@@ -475,6 +475,27 @@ const MapClickHandler = ({ onMapClick }) => {
   return null;
 };
 
+// Composant pour suivre la position du curseur sur la carte
+const CursorTracker = ({ onCursorMove, onCursorLeave }) => {
+  useMapEvents({
+    mousemove: (e) => {
+      if (onCursorMove) {
+        onCursorMove({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+          pixel: { x: e.containerPoint.x, y: e.containerPoint.y }
+        });
+      }
+    },
+    mouseout: () => {
+      if (onCursorLeave) {
+        onCursorLeave();
+      }
+    }
+  });
+  return null;
+};
+
 const MonTerritoireBionicPage = () => {
   const navigate = useNavigate();
   
