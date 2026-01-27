@@ -2014,45 +2014,49 @@ const MonTerritoireBionicPage = () => {
                     </div>
                   )}
                   
-                  {/* EXCLUSION PERMANENTE DES ZONES AQUATIQUES */}
+                  {/* EXCLUSION PERMANENTE DES ZONES AQUATIQUES - BIONIC_water_mask_v3 */}
                   <div className="bg-cyan-900/40 rounded-lg p-3 border border-cyan-500/40">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Waves className="h-4 w-4 text-cyan-400" />
-                        <span className="text-xs font-medium text-cyan-400">Exclusion Eau</span>
+                        <span className="text-xs font-medium text-cyan-400">Masque Hydrique</span>
                       </div>
                       <Badge className="bg-cyan-500/20 text-cyan-300 text-[9px] px-1.5">
-                        PERMANENT
+                        v3 ACTIF
                       </Badge>
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-gray-400">Tolérance rivage</span>
+                        <span className="text-gray-400">Buffer sécurité</span>
                         <span className="text-cyan-300">5m</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-gray-400">Seuil chevauchement</span>
+                        <span className="text-cyan-300">&gt;1%</span>
                       </div>
                       {activeWaypoints?.length > 0 && isFilteringWater ? (
                         <div className="flex items-center gap-2 text-[10px] text-cyan-300">
                           <RefreshCw className="h-3 w-3 animate-spin" />
-                          Analyse hydrographique...
+                          Analyse multi-sources...
                         </div>
                       ) : activeWaypoints?.length > 0 && waterExclusionStats ? (
                         <>
                           <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-gray-400">Zones filtrées</span>
+                            <span className="text-gray-400">Zones exclues</span>
                             <span className={waterExclusionStats.excluded > 0 ? "text-orange-400" : "text-green-400"}>
                               {waterExclusionStats.excluded} / {waterExclusionStats.total}
                             </span>
                           </div>
-                          {waterExclusionStats.sources_used && (
+                          {waterExclusionStats.ruleset && (
                             <div className="text-[9px] text-gray-500 mt-1">
-                              Sources: {waterExclusionStats.sources_used.join(', ')}
+                              Ruleset: {waterExclusionStats.ruleset}
                             </div>
                           )}
                         </>
                       ) : (
                         <div className="text-[10px] text-green-400 flex items-center gap-1">
                           <CheckCircle className="h-3 w-3" />
-                          Actif sur toutes les couches
+                          Protection active
                         </div>
                       )}
                     </div>
