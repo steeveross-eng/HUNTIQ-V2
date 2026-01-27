@@ -768,8 +768,8 @@ const MonTerritoireBionicPage = () => {
   // Callback pour le changement de zoom
   const handleZoomChange = useCallback((newZoom) => {
     setCurrentZoom(newZoom);
-    // Synchroniser mapZoom avec le zoom réel de la carte
-    setMapZoom(newZoom);
+    // Ne PAS synchroniser mapZoom ici pour éviter les conflits
+    // mapZoom est contrôlé par les boutons +/- uniquement
   }, []);
   
   // Callback pour le déplacement de la carte
