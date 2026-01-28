@@ -1,27 +1,37 @@
 /**
- * WaterExclusionService.js - BIONIC_water_mask_v5
+ * WaterExclusionService.js - BIONIC Zone Relocation v6.0
  * 
- * Service PERMANENT de RELOCALISATION des zones aquatiques.
- * PROTOCOLE: Si une zone est dans l'eau → RELOCALISER à 5m du bord vers la terre.
- * Garantie: AUCUNE zone ne doit rester dans l'eau.
+ * Service UNIFIÉ de RELOCALISATION des zones d'attraction BIONIC™
  * 
- * OPTIMISATIONS v5.1:
- * - Cache des résultats de filtrage
- * - Calculs mémorisés pour les polygones
+ * RÈGLES ACTIVES:
+ * 1. RELOCATE_FROM_WATER_5M: Zones sur eau → Relocaliser à 5m vers la terre
+ * 2. RELOCATE_FROM_URBAN_200M: Zones urbaines → Relocaliser à 200m vers zone score max
+ * 
+ * Garantie: AUCUNE zone ne doit rester dans l'eau ou en zone urbaine dense
  */
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
 const CONFIG = Object.freeze({
+  // Règle EAU
   WATER_BUFFER_METERS: 5,
+  WATER_SEARCH_RADIUS_M: 1000,
+  WATER_SEARCH_DIRECTIONS: 72,
+  WATER_SEARCH_STEP_M: 5,
+  WATER_RELOCATION_DISTANCE_M: 5,
+  
+  // Règle URBAIN
+  URBAN_SEARCH_RADIUS_M: 200,
+  URBAN_MIN_DISTANCE_M: 200,
+  URBAN_SEARCH_DIRECTIONS: 36,
+  
+  // Cache
   CACHE_DURATION_MS: 300000,
+  ZONE_CACHE_DURATION_MS: 60000,
   FETCH_RADIUS_METERS: 15000,
-  ENABLED: true,
-  RELOCATION_DISTANCE_M: 5,
-  SEARCH_RADIUS_M: 1000,
-  SEARCH_DIRECTIONS: 72,
-  SEARCH_STEP_M: 5,
-  ZONE_CACHE_DURATION_MS: 60000 // Cache des zones filtrées: 1 minute
+  
+  // Général
+  ENABLED: true
 });
 
 // Cache pour les données hydrographiques
