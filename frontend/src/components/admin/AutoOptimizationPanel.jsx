@@ -4,6 +4,8 @@
  * Panneau d'administration pour le module d'auto-optimisation BIONIC™
  * 
  * Fonctionnalités:
+ * - Toggle ON/OFF du module
+ * - Configuration des notifications email
  * - Affichage des propositions d'optimisation en attente
  * - Bouton "Accepter les changements" pour approbation
  * - Historique des versions avec restauration
@@ -14,12 +16,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Zap, CheckCircle, XCircle, Clock, History, RefreshCw, 
   Shield, AlertTriangle, ChevronDown, ChevronUp, Play,
-  RotateCcw, Archive, Eye, Settings, Brain, Sparkles
+  RotateCcw, Archive, Eye, Settings, Brain, Sparkles,
+  Power, Mail, Bell, Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
   getOptimizationProposals,
@@ -34,8 +40,10 @@ import {
   PROPOSAL_STATUS
 } from '@/services/AutoOptimizationService';
 
+const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
+
 // Composant pour afficher une proposition
-const ProposalCard = ({ proposal, onApprove, onReject, onPreview }) => {
+const ProposalCard = ({ proposal, onApprove, onReject, onPreview, disabled }) => {
   const [expanded, setExpanded] = useState(false);
   const summary = generateProposalSummary(proposal);
   const changeType = summary.type;
