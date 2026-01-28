@@ -557,12 +557,21 @@ export async function filterZonesFromWater(zones, bounds) {
 }
 
 /**
- * FONCTION PRINCIPALE V6 - Filtre et RELOCALISE les zones (EAU + URBAIN)
- * Applique les deux règles dans l'ordre:
- * 1. RELOCATE_FROM_WATER_5M
- * 2. RELOCATE_FROM_URBAN_200M
+ * FONCTION PRINCIPALE V7 - Module BIONIC™ Complet (EAU + URBAIN 2000M + QA)
+ * 
+ * Applique les règles dans l'ordre:
+ * 1. RELOCATE_FROM_WATER_5M - Relocalise les zones sur l'eau
+ * 2. RELOCATE_FROM_URBAN_2000M - Relocalise hors buffer urbain 2000m vers score max
+ * 3. QA_URBAN_REPORT - Validation stricte de toutes les zones
+ * 
+ * @param {Array} zones - Zones à traiter
+ * @param {Object} bounds - Limites de la carte
+ * @param {Object} options - Options (enableQA, etc.)
+ * @returns {Object} { filteredZones, stats, qaReport }
  */
-export async function filterAndRelocateZones(zones, bounds) {
+export async function filterAndRelocateZones(zones, bounds, options = {}) {
+  const { enableQA = true } = options;
+  
   if (!zones || zones.length === 0) {
     return { 
       filteredZones: [], 
@@ -572,82 +581,140 @@ export async function filterAndRelocateZones(zones, bounds) {
         fromWater: 0, 
         fromUrban: 0, 
         excluded: 0, 
-        ruleset: 'BIONIC_relocation_v6' 
-      }
+        ruleset: 'BIONIC_FULL_MODULE_v7',
+        bufferUrban: 2000
+      },
+      qaReport: null
     };
   }
   
   // Vérifier le cache
-  const cacheKey = `v6_${zones.length}_${bounds?.north?.toFixed(3) || 0}`;
+  const cacheKey = `v7_${zones.length}_${bounds?.north?.toFixed(3) || 0}`;
   const cachedResult = zoneFilterCache.get(zones, bounds);
-  if (cachedResult && cachedResult.stats?.ruleset === 'BIONIC_relocation_v6') {
+  if (cachedResult && cachedResult.stats?.ruleset === 'BIONIC_FULL_MODULE_v7') {
     return cachedResult;
   }
   
-  // ÉTAPE 1: Appliquer la règle EAU
+  // Import dynamique du module urbain
+  const { processUrbanModule, isPointInWater } = await import('./UrbanExclusionService');
+  
+  // ============================================
+  // ÉTAPE 1: Appliquer la règle EAU (WATER_5M)
+  // ============================================
   const waterResult = await filterZonesFromWater(zones, bounds);
   const afterWater = waterResult.filteredZones;
-  const fromWater = waterResult.stats.relocated;
+  const fromWater = waterResult.stats.relocated || 0;
+  const excludedWater = waterResult.stats.excluded || 0;
   
-  // ÉTAPE 2: Appliquer la règle URBAINE sur les zones restantes
-  const finalZones = [];
-  let fromUrban = 0;
-  let excludedUrban = 0;
-  let unchanged = 0;
+  console.log(`[BIONIC_v7] Étape 1/3 - EAU: ${fromWater} relocalisées, ${excludedWater} exclues`);
   
-  for (const zone of afterWater) {
-    const center = zone.center || [zone.lat, zone.lng];
-    const [lat, lng] = center;
+  // ============================================
+  // ÉTAPE 2: Appliquer le MODULE URBAIN (2000M + SCORE MAX)
+  // ============================================
+  
+  // Créer une fonction de vérification eau pour le module urbain
+  const waterCheckFn = async (lat, lng) => {
+    // Vérifier si le point est dans l'eau
+    const inWater = await checkPointInWater(lat, lng);
+    return { inWater };
+  };
+  
+  const urbanResult = await processUrbanModule(afterWater, {
+    waterCheckFn,
+    enableQA
+  });
+  
+  const afterUrban = urbanResult.processedZones;
+  const fromUrban = urbanResult.stats.relocated || 0;
+  const excludedUrban = urbanResult.stats.excluded || 0;
+  const unchanged = urbanResult.stats.unchanged || 0;
+  
+  console.log(`[BIONIC_v7] Étape 2/3 - URBAIN: ${fromUrban} relocalisées, ${excludedUrban} exclues, ${unchanged} conformes`);
+  
+  // ============================================
+  // ÉTAPE 3: Rapport QA
+  // ============================================
+  const qaReport = urbanResult.qaReport;
+  
+  if (enableQA && qaReport) {
+    console.log(`[BIONIC_v7] Étape 3/3 - QA: ${qaReport.passedCount}/${qaReport.totalZones} zones validées`);
     
-    // Vérifier si dans zone urbaine (sauf si déjà relocalisé depuis l'eau)
-    if (!zone._relocated || zone._relocationReason !== 'water') {
-      const urbanCheck = isPointInUrbanZone(lat, lng);
-      
-      if (urbanCheck.inUrban) {
-        // Appliquer RELOCATE_FROM_URBAN_200M
-        const newPosition = relocateFromUrban(lat, lng, zone.score || 50, afterWater);
-        
-        if (newPosition) {
-          fromUrban++;
-          finalZones.push({
-            ...zone,
-            center: [newPosition.lat, newPosition.lng],
-            lat: newPosition.lat,
-            lng: newPosition.lng,
-            _relocated: true,
-            _relocationRule: 'RELOCATE_FROM_URBAN_200M',
-            _originalCenter: zone._originalCenter || [lat, lng],
-            _relocationDistance: newPosition.distance,
-            _relocationDirection: newPosition.direction,
-            _urbanZone: urbanCheck.zoneName,
-            _newScore: newPosition.score
-          });
-          continue;
-        } else {
-          // Impossible de relocaliser - exclure
-          excludedUrban++;
-          continue;
-        }
-      }
+    if (qaReport.failedCount > 0) {
+      console.warn(`[BIONIC_v7] ⚠️ ${qaReport.failedCount} zones ont échoué aux contrôles QA`);
     }
-    
-    // Zone OK - conserver
-    unchanged++;
-    finalZones.push(zone);
   }
   
+  // ============================================
+  // STATS FINALES
+  // ============================================
   const stats = {
     total: zones.length,
-    kept: finalZones.length,
+    kept: afterUrban.length,
     fromWater,
     fromUrban,
     unchanged,
-    excluded: waterResult.stats.excluded + excludedUrban,
-    ruleset: 'BIONIC_relocation_v6',
-    rules_applied: ['RELOCATE_FROM_WATER_5M', 'RELOCATE_FROM_URBAN_200M']
+    excludedWater,
+    excludedUrban,
+    excluded: excludedWater + excludedUrban,
+    ruleset: 'BIONIC_FULL_MODULE_v7',
+    bufferUrban: 2000,
+    bufferWater: 5,
+    rules_applied: [
+      'RELOCATE_FROM_WATER_5M',
+      'RELOCATE_FROM_URBAN_2000M',
+      'QA_URBAN_2000M'
+    ],
+    qaStatus: qaReport ? (qaReport.allPassed ? 'PASSED' : 'FAILED') : 'DISABLED',
+    qaPassedCount: qaReport?.passedCount || 0,
+    qaFailedCount: qaReport?.failedCount || 0
   };
   
-  const result = { filteredZones: finalZones, stats };
+  const result = { 
+    filteredZones: afterUrban, 
+    stats,
+    qaReport
+  };
+  
+  // Mettre en cache
+  zoneFilterCache.set(zones, bounds, result);
+  
+  console.log(`[BIONIC_FULL_MODULE_v7] ✓ Traitement terminé: ${stats.kept}/${stats.total} zones conservées (Eau: ${fromWater}, Urbain: ${fromUrban} relocalisées)`);
+  
+  return result;
+}
+
+/**
+ * Vérifie si un point est dans l'eau (pour le module urbain)
+ */
+async function checkPointInWater(lat, lng) {
+  // Utiliser les polygones d'eau locaux si disponibles
+  for (const polygon of Object.values(QUEBEC_WATER_POLYGONS || {})) {
+    if (isPointInPolygon(lat, lng, polygon)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Point dans polygone (helper)
+ */
+function isPointInPolygon(lat, lng, polygon) {
+  let inside = false;
+  const n = polygon.length;
+  
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const [yi, xi] = polygon[i];
+    const [yj, xj] = polygon[j];
+    
+    if (((yi > lat) !== (yj > lat)) &&
+        (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  
+  return inside;
+}
   
   // Mettre en cache
   zoneFilterCache.set(zones, bounds, result);
