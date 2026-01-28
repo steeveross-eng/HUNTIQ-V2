@@ -87,6 +87,7 @@ import BackupManager from "@/components/BackupManager";
 import CloudBackupManager from "@/components/CloudBackupManager";
 import PartnershipAdmin from "@/components/PartnershipAdmin";
 import AutoOptimizationPanel from "@/components/admin/AutoOptimizationPanel";
+import UrbanModuleAdminPanel from "@/components/admin/UrbanModuleAdminPanel";
 import { SaleModeBadge, AutoCategorizeButton } from "@/components/SharedComponents";
 import { useLanguage } from "@/contexts/LanguageContext";
 
