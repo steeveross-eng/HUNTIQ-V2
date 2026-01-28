@@ -324,6 +324,7 @@ async function fetchWaterFeatures(bounds) {
 /**
  * FONCTION PRINCIPALE - Filtre et RELOCALISE les zones dans l'eau
  * AUCUNE zone ne doit rester dans l'eau - elles sont toutes relocalisées vers la terre
+ * OPTIMISÉ: Utilise le cache pour éviter les recalculs
  */
 export async function filterZonesFromWater(zones, bounds) {
   if (!zones || zones.length === 0) {
@@ -333,7 +334,13 @@ export async function filterZonesFromWater(zones, bounds) {
     };
   }
   
-  // Précharger le cache (même si on utilise principalement les polygones statiques)
+  // Vérifier le cache d'abord
+  const cachedResult = zoneFilterCache.get(zones, bounds);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  
+  // Précharger le cache hydro (même si on utilise principalement les polygones statiques)
   await fetchWaterFeatures(bounds);
   
   const validZones = [];
