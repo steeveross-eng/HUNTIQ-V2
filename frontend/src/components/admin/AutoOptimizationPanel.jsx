@@ -285,20 +285,31 @@ const AutoOptimizationPanel = () => {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('proposals');
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [versionToRestore, setVersionToRestore] = useState(null);
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [config, setConfig] = useState({
+    enabled: true,
+    email_notifications: false,
+    notification_email: ''
+  });
 
-  // Charger les données
+  // Charger les données et la configuration
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [proposalsData, versionsData] = await Promise.all([
+      const [proposalsData, versionsData, configData] = await Promise.all([
         getOptimizationProposals(),
-        getVersionHistory()
+        getVersionHistory(),
+        fetch(`${API_BASE}/api/admin/optimization/config`).then(r => r.json()).catch(() => ({}))
       ]);
       setProposals(proposalsData);
       setVersions(versionsData);
+      if (configData.enabled !== undefined) {
+        setConfig(configData);
+      }
     } catch (error) {
       toast.error('Erreur lors du chargement des données');
     } finally {
@@ -310,12 +321,55 @@ const AutoOptimizationPanel = () => {
     loadData();
   }, [loadData]);
 
+  // Sauvegarder la configuration
+  const handleSaveConfig = async () => {
+    setSaving(true);
+    try {
+      await fetch(`${API_BASE}/api/admin/optimization/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      toast.success('Configuration sauvegardée');
+      if (!config.enabled) {
+        toast.info('Module désactivé - Les analyses automatiques sont suspendues');
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Toggle rapide du module
+  const handleQuickToggle = async () => {
+    const newEnabled = !config.enabled;
+    setConfig(prev => ({ ...prev, enabled: newEnabled }));
+    try {
+      await fetch(`${API_BASE}/api/admin/optimization/toggle?enabled=${newEnabled}`, {
+        method: 'POST'
+      });
+      toast.success(newEnabled ? 'Module activé' : 'Module désactivé');
+    } catch (error) {
+      toast.error('Erreur lors du changement');
+      setConfig(prev => ({ ...prev, enabled: !newEnabled }));
+    }
+  };
+
   // Lancer l'auto-analyse
   const handleRunAnalysis = async () => {
+    if (!config.enabled) {
+      toast.warning('Le module est désactivé');
+      return;
+    }
     setAnalyzing(true);
     try {
       const results = await runAutoAnalysis();
-      toast.success(`Analyse terminée: ${results.suggestions_count || 0} suggestions générées`);
+      if (results.module_enabled === false) {
+        toast.warning('Module désactivé - Analyse non exécutée');
+      } else {
+        toast.success(`Analyse terminée: ${results.suggestions_count || 0} suggestions générées`);
+      }
       await loadData();
     } catch (error) {
       toast.error('Erreur lors de l\'analyse');
