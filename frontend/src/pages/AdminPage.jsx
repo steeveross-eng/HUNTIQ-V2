@@ -381,6 +381,9 @@ const AdminPage = ({ onProductsUpdate }) => {
             <TabsTrigger value="optimization" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="optimization-tab">
               <Brain className="h-4 w-4 mr-2" />Auto-Optimisation
             </TabsTrigger>
+            <TabsTrigger value="urban" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="urban-module-tab">
+              <Building2 className="h-4 w-4 mr-2" />Module Urbain
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
