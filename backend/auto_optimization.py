@@ -126,10 +126,8 @@ async def approve_proposal(proposal_id: str, approval: ProposalApproval):
             }
         )
         
-        # Créer automatiquement un backup avant application
-        await create_version_backup(VersionBackup(
-            description=f"Backup automatique avant approbation: {proposal.get('title', 'Unknown')}"
-        ))
+        # Créer automatiquement un backup avant application (synchrone)
+        create_version_backup_sync(f"Backup automatique avant approbation: {proposal.get('title', 'Unknown')}")
         
         return {
             "message": "Proposition approuvée avec succès",
