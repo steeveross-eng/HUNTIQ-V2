@@ -78,7 +78,6 @@ const zoneFilterCache = {
   set(zones, bounds, result) {
     const key = this.getKey(zones, bounds);
     if (!key) return;
-    // Limiter la taille du cache
     if (this.data.size >= this.maxSize) {
       const firstKey = this.data.keys().next().value;
       this.data.delete(firstKey);
@@ -88,8 +87,112 @@ const zoneFilterCache = {
 };
 
 // ════════════════════════════════════════════════════════════════
+// DÉFINITION DES ZONES URBAINES DU QUÉBEC
+// RÈGLE: RELOCATE_FROM_URBAN_200M
+// ════════════════════════════════════════════════════════════════
+
+// Zone urbaine de Québec (Vieux-Québec, Sainte-Foy, Beauport)
+const QUEBEC_CITY_URBAN = [
+  [46.8800, -71.3200], [46.8850, -71.2800], [46.8700, -71.2400],
+  [46.8550, -71.2000], [46.8400, -71.1800], [46.8200, -71.1600],
+  [46.8000, -71.1800], [46.7900, -71.2200], [46.7850, -71.2600],
+  [46.7950, -71.3000], [46.8200, -71.3200], [46.8500, -71.3300],
+  [46.8800, -71.3200]
+];
+
+// Zone urbaine de Lévis
+const LEVIS_URBAN = [
+  [46.8200, -71.2200], [46.8100, -71.1800], [46.7950, -71.1500],
+  [46.7800, -71.1200], [46.7600, -71.1400], [46.7500, -71.1800],
+  [46.7600, -71.2200], [46.7800, -71.2400], [46.8000, -71.2400],
+  [46.8200, -71.2200]
+];
+
+// Zones urbaines combinées
+const URBAN_ZONES = [
+  { name: 'Québec', polygon: QUEBEC_CITY_URBAN },
+  { name: 'Lévis', polygon: LEVIS_URBAN }
+];
+
+/**
+ * Vérifie si un point est dans une zone urbaine
+ */
+function isPointInUrbanZone(lat, lng) {
+  for (const zone of URBAN_ZONES) {
+    if (pointInPolygon(lat, lng, zone.polygon)) {
+      return { inUrban: true, zoneName: zone.name };
+    }
+  }
+  return { inUrban: false };
+}
+
+/**
+ * Trouve le point non-urbain avec le meilleur score dans un rayon de 200m
+ */
+function relocateFromUrban(lat, lng, score, allZones) {
+  const degPerMeter = 1 / 111320;
+  const cosLat = Math.cos(lat * Math.PI / 180);
+  
+  let bestCandidate = null;
+  let bestScore = -Infinity;
+  
+  // Recherche dans 36 directions (tous les 10°)
+  for (let step = 0; step < CONFIG.URBAN_SEARCH_DIRECTIONS; step++) {
+    const angle = (step / CONFIG.URBAN_SEARCH_DIRECTIONS) * 2 * Math.PI;
+    
+    // Chercher à exactement 200m + un peu plus pour être sûr
+    for (let dist = CONFIG.URBAN_MIN_DISTANCE_M; dist <= CONFIG.URBAN_SEARCH_RADIUS_M + 50; dist += 20) {
+      const distDegLat = dist * degPerMeter;
+      const distDegLng = dist * degPerMeter / cosLat;
+      
+      const testLat = lat + distDegLat * Math.cos(angle);
+      const testLng = lng + distDegLng * Math.sin(angle);
+      
+      // Vérifier que le nouveau point n'est pas en zone urbaine
+      if (isPointInUrbanZone(testLat, testLng).inUrban) continue;
+      
+      // Vérifier que le nouveau point n'est pas dans l'eau
+      if (isPointInWater(testLat, testLng).inWater) continue;
+      
+      // Calculer le score potentiel (basé sur les zones environnantes)
+      let candidateScore = score || 50;
+      if (allZones && allZones.length > 0) {
+        let totalWeight = 0;
+        let weightedScore = 0;
+        for (const zone of allZones) {
+          if (zone._relocated) continue;
+          const zCenter = zone.center || [zone.lat, zone.lng];
+          const zDist = distanceInMeters(testLat, testLng, zCenter[0], zCenter[1]);
+          if (zDist < 500 && zDist > 0) {
+            const weight = 1 / (1 + zDist / 100);
+            weightedScore += (zone.score || 50) * weight;
+            totalWeight += weight;
+          }
+        }
+        if (totalWeight > 0) {
+          candidateScore = weightedScore / totalWeight;
+        }
+      }
+      
+      if (candidateScore > bestScore) {
+        bestScore = candidateScore;
+        bestCandidate = {
+          lat: testLat,
+          lng: testLng,
+          distance: dist,
+          direction: angle * 180 / Math.PI,
+          score: candidateScore
+        };
+      }
+    }
+  }
+  
+  return bestCandidate;
+}
+
+// ════════════════════════════════════════════════════════════════
 // DÉFINITION COMPLÈTE DE L'ÎLE D'ORLÉANS ET TERRES FERMES
-// Polygones précis pour toute l'île
+// RÈGLE: RELOCATE_FROM_WATER_5M
 // ════════════════════════════════════════════════════════════════
 
 // Polygone complet de l'île d'Orléans (contour extérieur)
