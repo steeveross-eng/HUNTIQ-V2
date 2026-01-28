@@ -486,14 +486,13 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 }
 
 /**
- * BIONIC_water_mask_v3 - FONCTION PRINCIPALE
- * Filtre les zones pour exclure celles dans/près de l'eau
+ * BIONIC_water_mask_v4 - FONCTION PRINCIPALE
+ * Filtre les zones ET RELOCALISE celles dans l'eau à 5m du bord
  * 
- * Règles d'exclusion (appliquées dans l'ordre):
- * 1. EXCL_CENTROID_IN_WATER - Centre dans l'eau
- * 2. EXCL_INTERSECTS_WATER - Intersection avec eau
- * 3. EXCL_WITHIN_5M_WATER - Dans buffer 5m
- * 4. EXCL_OVERLAP_GT_1_PERCENT - Chevauchement > 1%
+ * PROTOCOLE DE RELOCALISATION (au lieu d'exclusion):
+ * 1. Vérifier si le centre est dans l'eau
+ * 2. Si oui → RELOCALISER à 5m du bord le plus proche
+ * 3. Si impossible de relocaliser → EXCLURE
  * 
  * Cette fonction est PERMANENTE et ne peut PAS être désactivée.
  * 
@@ -505,56 +504,128 @@ export async function filterZonesFromWater(zones, bounds) {
   if (!zones || zones.length === 0) {
     return { 
       filteredZones: [], 
-      stats: { total: 0, kept: 0, excluded: 0, clipped: 0, ruleset: 'BIONIC_water_mask_v3' }
+      stats: { total: 0, kept: 0, excluded: 0, relocated: 0, ruleset: 'BIONIC_water_mask_v4' }
     };
   }
   
-  // Récupérer les surfaces d'eau multi-sources
+  // Récupérer les surfaces d'eau multi-sources (pour fallback)
   const waterFeatures = await fetchWaterFeatures(bounds);
   
-  if (waterFeatures.length === 0) {
-    // Aucune donnée d'eau disponible
-    return {
-      filteredZones: zones,
-      stats: { 
-        total: zones.length, 
-        kept: zones.length, 
-        excluded: 0, 
-        clipped: 0, 
-        noData: true,
-        ruleset: 'BIONIC_water_mask_v3'
-      }
-    };
-  }
-  
   const filteredZones = [];
+  const relocatedZones = [];
   const excludedDetails = [];
   let excludedCount = 0;
-  let clippedCount = 0;
-  let adjustedCount = 0;
+  let relocatedCount = 0;
   
   for (const zone of zones) {
     const center = zone.center || [zone.lat, zone.lng];
     const [lat, lng] = center;
     const radius = zone.radiusMeters || 100;
     
-    // RÈGLE 1: EXCL_CENTROID_IN_WATER - Centre dans l'eau (masques statiques + API)
-    const centerCheck = isPointInWater(lat, lng, waterFeatures);
-    if (centerCheck.inWater) {
-      excludedCount++;
-      excludedDetails.push({
-        zone_id: zone.id,
-        reason: 'EXCL_CENTROID_IN_WATER',
-        water_type: centerCheck.feature?.type,
-        water_name: centerCheck.feature?.name
-      });
+    // VÉRIFICATION ULTRA-STRICTE: Le centre est-il dans l'eau?
+    const stLaurentCheck = isPointInSaintLaurent(lat, lng);
+    const apiWaterCheck = isPointInWater(lat, lng, waterFeatures);
+    
+    // Si SOIT le masque statique SOIT l'API indique de l'eau → traiter
+    if (stLaurentCheck.inWater || apiWaterCheck.inWater) {
+      // PROTOCOLE DE RELOCALISATION
+      const nearestLand = findNearestLandPoint(lat, lng);
+      
+      if (nearestLand && nearestLand.distance < 500) {
+        // Relocaliser la zone à 5m du bord
+        relocatedCount++;
+        relocatedZones.push({
+          ...zone,
+          center: [nearestLand.lat, nearestLand.lng],
+          lat: nearestLand.lat,
+          lng: nearestLand.lng,
+          _relocated: true,
+          _originalCenter: [lat, lng],
+          _relocationDistance: nearestLand.distance,
+          _relocationReason: stLaurentCheck.inWater ? 'FLEUVE_SAINT_LAURENT' : 'API_WATER_DETECTION'
+        });
+        
+        console.log(`[BIONIC_water_mask_v4] Zone ${zone.id} relocalisée de ${nearestLand.distance.toFixed(0)}m`);
+      } else {
+        // Impossible de relocaliser (trop loin de la terre) → EXCLURE
+        excludedCount++;
+        excludedDetails.push({
+          zone_id: zone.id,
+          reason: 'RELOCATION_IMPOSSIBLE',
+          water_type: stLaurentCheck.mask?.type || apiWaterCheck.feature?.type,
+          original_center: [lat, lng]
+        });
+      }
       continue;
     }
     
-    // RÈGLE 2: EXCL_PERIMETER_IN_WATER - Vérifier 8 points sur le périmètre
+    // VÉRIFICATION DU PÉRIMÈTRE (8 points)
     let perimeterInWater = false;
-    let perimeterWaterFeature = null;
     const radiusDeg = radius / 111320;
+    
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * 2 * Math.PI;
+      const checkLat = lat + radiusDeg * Math.cos(angle);
+      const checkLng = lng + (radiusDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle);
+      
+      const perimStLaurent = isPointInSaintLaurent(checkLat, checkLng);
+      const perimApiCheck = isPointInWater(checkLat, checkLng, waterFeatures);
+      
+      if (perimStLaurent.inWater || perimApiCheck.inWater) {
+        perimeterInWater = true;
+        break;
+      }
+    }
+    
+    if (perimeterInWater) {
+      // Le périmètre touche l'eau - relocaliser vers le centre de l'île
+      const nearestLand = findNearestLandPoint(lat, lng);
+      
+      if (nearestLand) {
+        relocatedCount++;
+        relocatedZones.push({
+          ...zone,
+          center: [nearestLand.lat, nearestLand.lng],
+          lat: nearestLand.lat,
+          lng: nearestLand.lng,
+          _relocated: true,
+          _originalCenter: [lat, lng],
+          _relocationDistance: nearestLand.distance,
+          _relocationReason: 'PERIMETER_IN_WATER'
+        });
+      } else {
+        excludedCount++;
+        excludedDetails.push({
+          zone_id: zone.id,
+          reason: 'PERIMETER_RELOCATION_IMPOSSIBLE'
+        });
+      }
+      continue;
+    }
+    
+    // Zone OK - sur terre
+    filteredZones.push(zone);
+  }
+  
+  // Fusionner les zones OK et les zones relocalisées
+  const allValidZones = [...filteredZones, ...relocatedZones];
+  
+  const stats = {
+    total: zones.length,
+    kept: filteredZones.length,
+    relocated: relocatedCount,
+    excluded: excludedCount,
+    waterFeaturesCount: waterFeatures.length,
+    ruleset: 'BIONIC_water_mask_v4',
+    excludedDetails: excludedDetails.slice(0, 10)
+  };
+  
+  if (relocatedCount > 0 || excludedCount > 0) {
+    console.log(`[BIONIC_water_mask_v4] ${relocatedCount} zones relocalisées, ${excludedCount} exclues sur ${zones.length}`);
+  }
+  
+  return { filteredZones: allValidZones, stats };
+}
     
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * 2 * Math.PI;
