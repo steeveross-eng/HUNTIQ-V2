@@ -431,11 +431,16 @@ export async function filterZonesFromWater(zones, bounds) {
     ruleset: 'BIONIC_water_mask_v5'
   };
   
+  const result = { filteredZones: validZones, stats };
+  
+  // Mettre en cache le résultat
+  zoneFilterCache.set(zones, bounds, result);
+  
   if (relocatedCount > 0 || excludedCount > 0) {
     console.log(`[BIONIC_water_mask_v5] ✓ ${relocatedCount} relocalisées, ${excludedCount} exclues, ${onLandCount} sur terre / ${zones.length} total`);
   }
   
-  return { filteredZones: validZones, stats };
+  return result;
 }
 
 // Exports pour compatibilité
