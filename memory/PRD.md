@@ -141,22 +141,24 @@
 
 ## Prioritized Backlog
 
-### P0 - Critical (Next)
-- [ ] Configurer MongoDB Atlas avec credentials utilisateur
-- [ ] Configurer Google Cloud Storage avec credentials utilisateur
-- [ ] Activer backup automatique
+### P0 - Critical (Completed) ✅
+- [x] Relocalisation des zones BIONIC hors de l'eau (BIONIC_water_mask_v5)
+- [x] GPS LIVE avec flèche pointant vers le bas
 
 ### P1 - High Priority
+- [ ] Test complet du système de backup avec credentials utilisateur
+- [ ] Import/Export GPX/KML pour les waypoints
 - [ ] Intégration paiement Stripe pour e-commerce
 - [ ] Notifications push pour alertes chasse
-- [ ] Chat en temps réel pour groupes de chasse
 
 ### P2 - Medium Priority
+- [ ] Refactoring de MonTerritoireBionicPage.jsx (fichier trop volumineux)
+- [ ] Correction des warnings ESLint (apostrophes non-échappées)
+- [ ] Chat en temps réel pour groupes de chasse
 - [ ] Gamification avec badges chasseur
-- [ ] Application mobile (React Native)
-- [ ] Intégration météo en temps réel
 
 ### P3 - Low Priority
+- [ ] Application mobile (React Native)
 - [ ] Export PDF des analyses
 - [ ] Intégration calendrier Google
 - [ ] Statistiques avancées chasseur
