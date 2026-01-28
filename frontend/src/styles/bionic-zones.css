@@ -1,0 +1,505 @@
+/**
+ * bionic-zones.css
+ * 
+ * Styles CSS pour les zones BIONIC™
+ * Compatible avec Leaflet et tous les moteurs cartographiques
+ */
+
+/* ============================================
+   STYLES DE BASE POUR LES ZONES
+   ============================================ */
+
+.bionic-zone {
+  transition: stroke-width 0.3s ease, stroke-opacity 0.3s ease;
+}
+
+.bionic-zone-halo {
+  transition: stroke-width 0.3s ease, stroke-opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Tooltip personnalisé */
+.bionic-zone-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.bionic-zone-tooltip .leaflet-tooltip-content {
+  background: transparent;
+}
+
+/* ============================================
+   COULEURS PAR TYPE DE ZONE - OFFICIELLES
+   ============================================ */
+
+/* Habitats optimaux - #2ECC71 */
+.bionic-zone-habitats_optimaux,
+.bionic-zone-habitats {
+  stroke: #2ECC71;
+}
+
+.bionic-zone-halo-habitats_optimaux,
+.bionic-zone-halo-habitats {
+  stroke: #2ECC71;
+}
+
+.bionic-panel-item-habitats_optimaux,
+.bionic-panel-item-habitats {
+  --zone-color: #2ECC71;
+}
+
+.bionic-panel-item-habitats_optimaux .zone-icon,
+.bionic-panel-item-habitats .zone-icon {
+  color: #2ECC71;
+}
+
+.bionic-panel-item-habitats_optimaux .zone-badge,
+.bionic-panel-item-habitats .zone-badge {
+  background-color: rgba(46, 204, 113, 0.12);
+  border-color: rgba(46, 204, 113, 0.5);
+  color: #2ECC71;
+}
+
+.bionic-panel-item-habitats_optimaux .zone-label,
+.bionic-panel-item-habitats .zone-label {
+  color: #2ECC71;
+}
+
+.bionic-panel-item-habitats_optimaux:hover,
+.bionic-panel-item-habitats:hover {
+  background-color: rgba(46, 204, 113, 0.08);
+}
+
+/* Rut potentiel - #C0392B */
+.bionic-zone-rut_potentiel,
+.bionic-zone-rut {
+  stroke: #C0392B;
+}
+
+.bionic-zone-halo-rut_potentiel,
+.bionic-zone-halo-rut {
+  stroke: #C0392B;
+}
+
+.bionic-panel-item-rut_potentiel,
+.bionic-panel-item-rut {
+  --zone-color: #C0392B;
+}
+
+.bionic-panel-item-rut_potentiel .zone-icon,
+.bionic-panel-item-rut .zone-icon {
+  color: #C0392B;
+}
+
+.bionic-panel-item-rut_potentiel .zone-badge,
+.bionic-panel-item-rut .zone-badge {
+  background-color: rgba(192, 57, 43, 0.12);
+  border-color: rgba(192, 57, 43, 0.5);
+  color: #C0392B;
+}
+
+.bionic-panel-item-rut_potentiel .zone-label,
+.bionic-panel-item-rut .zone-label {
+  color: #C0392B;
+}
+
+.bionic-panel-item-rut_potentiel:hover,
+.bionic-panel-item-rut:hover {
+  background-color: rgba(192, 57, 43, 0.08);
+}
+
+/* Salines potentielles - #3498DB */
+.bionic-zone-salines_potentielles,
+.bionic-zone-salines {
+  stroke: #3498DB;
+}
+
+.bionic-zone-halo-salines_potentielles,
+.bionic-zone-halo-salines {
+  stroke: #3498DB;
+}
+
+.bionic-panel-item-salines_potentielles,
+.bionic-panel-item-salines {
+  --zone-color: #3498DB;
+}
+
+.bionic-panel-item-salines_potentielles .zone-icon,
+.bionic-panel-item-salines .zone-icon {
+  color: #3498DB;
+}
+
+.bionic-panel-item-salines_potentielles .zone-badge,
+.bionic-panel-item-salines .zone-badge {
+  background-color: rgba(52, 152, 219, 0.12);
+  border-color: rgba(52, 152, 219, 0.5);
+  color: #3498DB;
+}
+
+.bionic-panel-item-salines_potentielles .zone-label,
+.bionic-panel-item-salines .zone-label {
+  color: #3498DB;
+}
+
+.bionic-panel-item-salines_potentielles:hover,
+.bionic-panel-item-salines:hover {
+  background-color: rgba(52, 152, 219, 0.08);
+}
+
+/* Affûts potentiels - #E67E22 */
+.bionic-zone-affuts_potentiels,
+.bionic-zone-affuts {
+  stroke: #E67E22;
+}
+
+.bionic-zone-halo-affuts_potentiels,
+.bionic-zone-halo-affuts {
+  stroke: #E67E22;
+}
+
+.bionic-panel-item-affuts_potentiels,
+.bionic-panel-item-affuts {
+  --zone-color: #E67E22;
+}
+
+.bionic-panel-item-affuts_potentiels .zone-icon,
+.bionic-panel-item-affuts .zone-icon {
+  color: #E67E22;
+}
+
+.bionic-panel-item-affuts_potentiels .zone-badge,
+.bionic-panel-item-affuts .zone-badge {
+  background-color: rgba(230, 126, 34, 0.12);
+  border-color: rgba(230, 126, 34, 0.5);
+  color: #E67E22;
+}
+
+.bionic-panel-item-affuts_potentiels .zone-label,
+.bionic-panel-item-affuts .zone-label {
+  color: #E67E22;
+}
+
+.bionic-panel-item-affuts_potentiels:hover,
+.bionic-panel-item-affuts:hover {
+  background-color: rgba(230, 126, 34, 0.08);
+}
+
+/* Trajets de chasse - #8E44AD */
+.bionic-zone-trajets_chasse,
+.bionic-zone-corridors {
+  stroke: #8E44AD;
+}
+
+.bionic-zone-halo-trajets_chasse,
+.bionic-zone-halo-corridors {
+  stroke: #8E44AD;
+}
+
+.bionic-panel-item-trajets_chasse,
+.bionic-panel-item-corridors {
+  --zone-color: #8E44AD;
+}
+
+.bionic-panel-item-trajets_chasse .zone-icon,
+.bionic-panel-item-corridors .zone-icon {
+  color: #8E44AD;
+}
+
+.bionic-panel-item-trajets_chasse .zone-badge,
+.bionic-panel-item-corridors .zone-badge {
+  background-color: rgba(142, 68, 173, 0.12);
+  border-color: rgba(142, 68, 173, 0.5);
+  color: #8E44AD;
+}
+
+.bionic-panel-item-trajets_chasse .zone-label,
+.bionic-panel-item-corridors .zone-label {
+  color: #8E44AD;
+}
+
+.bionic-panel-item-trajets_chasse:hover,
+.bionic-panel-item-corridors:hover {
+  background-color: rgba(142, 68, 173, 0.08);
+}
+
+/* Peuplements forestiers - #6E2C00 */
+.bionic-zone-peuplements_forestiers,
+.bionic-zone-repos {
+  stroke: #6E2C00;
+}
+
+.bionic-zone-halo-peuplements_forestiers,
+.bionic-zone-halo-repos {
+  stroke: #6E2C00;
+}
+
+.bionic-panel-item-peuplements_forestiers,
+.bionic-panel-item-repos {
+  --zone-color: #6E2C00;
+}
+
+.bionic-panel-item-peuplements_forestiers .zone-icon,
+.bionic-panel-item-repos .zone-icon {
+  color: #6E2C00;
+}
+
+.bionic-panel-item-peuplements_forestiers .zone-badge,
+.bionic-panel-item-repos .zone-badge {
+  background-color: rgba(110, 44, 0, 0.12);
+  border-color: rgba(110, 44, 0, 0.5);
+  color: #6E2C00;
+}
+
+.bionic-panel-item-peuplements_forestiers .zone-label,
+.bionic-panel-item-repos .zone-label {
+  color: #6E2C00;
+}
+
+.bionic-panel-item-peuplements_forestiers:hover,
+.bionic-panel-item-repos:hover {
+  background-color: rgba(110, 44, 0, 0.08);
+}
+
+/* Ensoleillement - #F1C40F */
+.bionic-zone-ensoleillement {
+  stroke: #F1C40F;
+}
+
+.bionic-zone-halo-ensoleillement {
+  stroke: #F1C40F;
+}
+
+.bionic-panel-item-ensoleillement {
+  --zone-color: #F1C40F;
+}
+
+.bionic-panel-item-ensoleillement .zone-icon {
+  color: #F1C40F;
+}
+
+.bionic-panel-item-ensoleillement .zone-badge {
+  background-color: rgba(241, 196, 15, 0.12);
+  border-color: rgba(241, 196, 15, 0.5);
+  color: #F1C40F;
+}
+
+.bionic-panel-item-ensoleillement .zone-label {
+  color: #F1C40F;
+}
+
+.bionic-panel-item-ensoleillement:hover {
+  background-color: rgba(241, 196, 15, 0.08);
+}
+
+/* Orientation - #A04000 */
+.bionic-zone-orientation {
+  stroke: #A04000;
+}
+
+.bionic-zone-halo-orientation {
+  stroke: #A04000;
+}
+
+.bionic-panel-item-orientation {
+  --zone-color: #A04000;
+}
+
+.bionic-panel-item-orientation .zone-icon {
+  color: #A04000;
+}
+
+.bionic-panel-item-orientation .zone-badge {
+  background-color: rgba(160, 64, 0, 0.12);
+  border-color: rgba(160, 64, 0, 0.5);
+  color: #A04000;
+}
+
+.bionic-panel-item-orientation .zone-label {
+  color: #A04000;
+}
+
+.bionic-panel-item-orientation:hover {
+  background-color: rgba(160, 64, 0, 0.08);
+}
+
+/* Hydrographie avancée - #5DADE2 */
+.bionic-zone-hydrographie_avancee,
+.bionic-zone-fraicheur {
+  stroke: #5DADE2;
+}
+
+.bionic-zone-halo-hydrographie_avancee,
+.bionic-zone-halo-fraicheur {
+  stroke: #5DADE2;
+}
+
+.bionic-panel-item-hydrographie_avancee,
+.bionic-panel-item-fraicheur {
+  --zone-color: #5DADE2;
+}
+
+.bionic-panel-item-hydrographie_avancee .zone-icon,
+.bionic-panel-item-fraicheur .zone-icon {
+  color: #5DADE2;
+}
+
+.bionic-panel-item-hydrographie_avancee .zone-badge,
+.bionic-panel-item-fraicheur .zone-badge {
+  background-color: rgba(93, 173, 226, 0.12);
+  border-color: rgba(93, 173, 226, 0.5);
+  color: #5DADE2;
+}
+
+.bionic-panel-item-hydrographie_avancee .zone-label,
+.bionic-panel-item-fraicheur .zone-label {
+  color: #5DADE2;
+}
+
+.bionic-panel-item-hydrographie_avancee:hover,
+.bionic-panel-item-fraicheur:hover {
+  background-color: rgba(93, 173, 226, 0.08);
+}
+
+/* Zones d'alimentation - #A3E635 */
+.bionic-zone-zones_alimentation,
+.bionic-zone-alimentation {
+  stroke: #A3E635;
+}
+
+.bionic-zone-halo-zones_alimentation,
+.bionic-zone-halo-alimentation {
+  stroke: #A3E635;
+}
+
+.bionic-panel-item-zones_alimentation,
+.bionic-panel-item-alimentation {
+  --zone-color: #A3E635;
+}
+
+.bionic-panel-item-zones_alimentation .zone-icon,
+.bionic-panel-item-alimentation .zone-icon {
+  color: #A3E635;
+}
+
+.bionic-panel-item-zones_alimentation .zone-badge,
+.bionic-panel-item-alimentation .zone-badge {
+  background-color: rgba(163, 230, 53, 0.12);
+  border-color: rgba(163, 230, 53, 0.5);
+  color: #A3E635;
+}
+
+.bionic-panel-item-zones_alimentation .zone-label,
+.bionic-panel-item-alimentation .zone-label {
+  color: #A3E635;
+}
+
+.bionic-panel-item-zones_alimentation:hover,
+.bionic-panel-item-alimentation:hover {
+  background-color: rgba(163, 230, 53, 0.08);
+}
+
+/* Zone tampon/transition - #999999 */
+.bionic-zone-transition {
+  stroke: #999999;
+}
+
+.bionic-zone-halo-transition {
+  stroke: #999999;
+}
+
+.bionic-panel-item-transition {
+  --zone-color: #999999;
+}
+
+.bionic-panel-item-transition .zone-icon {
+  color: #999999;
+}
+
+.bionic-panel-item-transition .zone-badge {
+  background-color: rgba(153, 153, 153, 0.12);
+  border-color: rgba(153, 153, 153, 0.5);
+  color: #999999;
+}
+
+.bionic-panel-item-transition .zone-label {
+  color: #999999;
+}
+
+.bionic-panel-item-transition:hover {
+  background-color: rgba(153, 153, 153, 0.08);
+}
+
+/* ============================================
+   LÉGENDE BIONIC - PANNEAU LATÉRAL
+   ============================================ */
+
+.bionic-zone-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bionic-zone-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bionic-zone-legend-item.active {
+  ring: 1px solid currentColor;
+}
+
+.bionic-zone-legend-item.inactive {
+  opacity: 0.6;
+}
+
+.bionic-zone-legend-item:hover {
+  opacity: 1;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes bionic-pulse {
+  0%, 100% {
+    stroke-opacity: 0.8;
+    stroke-width: var(--base-width, 4);
+  }
+  50% {
+    stroke-opacity: 1;
+    stroke-width: calc(var(--base-width, 4) * 1.2);
+  }
+}
+
+.bionic-zone-animated {
+  animation: bionic-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   RESPONSIVE - ADAPTATION MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .bionic-zone-tooltip .leaflet-tooltip-content {
+    min-width: 180px !important;
+    font-size: 0.85rem;
+  }
+  
+  .bionic-zone-legend-item {
+    padding: 0.375rem;
+  }
+  
+  .bionic-zone-legend-item .zone-icon {
+    font-size: 1rem;
+  }
+  
+  .bionic-zone-legend-item .zone-label {
+    font-size: 0.75rem;
+  }
+}
