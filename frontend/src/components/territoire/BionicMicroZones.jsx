@@ -21,56 +21,76 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Circle, CircleMarker, Polyline, Tooltip, useMap, Polygon } from 'react-leaflet';
 import { Badge } from '@/components/ui/badge';
 
-// Configuration des modules thématiques - Style "Dany Lavoie"
-// Couleurs vives et saturées pour contraste optimal sur carte topo
+// Import des styles BIONIC officiels
+import { 
+  BIONIC_ZONE_COLORS, 
+  HALO_CONFIG, 
+  getLeafletCircleStyle, 
+  getLeafletHaloStyle 
+} from '@/styles/BionicZoneStyles';
+
+// Configuration des modules thématiques - COULEURS OFFICIELLES BIONIC™
+// Mapping vers les nouvelles couleurs définies
 export const BIONIC_MODULES = {
   habitats: { 
-    color: '#00CC00', // Vert vif (style Dany Lavoie)
+    color: BIONIC_ZONE_COLORS.habitats_optimaux.color, // #2ECC71 - Vert
     label: 'Habitat optimal', 
     icon: '🌲',
     interpretation: { high: 'Zone de refuge idéale', medium: 'Habitat favorable', low: 'Habitat secondaire' }
   },
   rut: { 
-    color: '#FF0066', // Rose/magenta vif
+    color: BIONIC_ZONE_COLORS.rut_potentiel.color, // #C0392B - Rouge
     label: 'Zone de rut', 
     icon: '💕',
     interpretation: { high: 'Activité intense', medium: 'Zone de reproduction', low: 'Passage occasionnel' }
   },
   affuts: { 
-    color: '#9900FF', // Violet vif
+    color: BIONIC_ZONE_COLORS.affuts_potentiels.color, // #E67E22 - Orange
     label: 'Affût potentiel', 
     icon: '🎯',
     interpretation: { high: 'Position stratégique', medium: 'Bon potentiel', low: 'Point d\'observation' }
   },
   corridors: { 
-    color: '#FF9900', // Orange vif (style Dany Lavoie)
+    color: BIONIC_ZONE_COLORS.trajets_chasse.color, // #8E44AD - Violet
     label: 'Corridor faunique', 
     icon: '🦌',
     interpretation: { high: 'Passage principal', medium: 'Route fréquente', low: 'Itinéraire secondaire' }
   },
   alimentation: { 
-    color: '#66CC00', // Vert lime
+    color: BIONIC_ZONE_COLORS.zones_alimentation.color, // #A3E635 - Vert lime
     label: 'Zone alimentation', 
     icon: '🌿',
     interpretation: { high: 'Gagnage optimal', medium: 'Zone de nourrissage', low: 'Ressource limitée' }
   },
   repos: { 
-    color: '#996633', // Brun/terre
+    color: BIONIC_ZONE_COLORS.peuplements_forestiers.color, // #6E2C00 - Brun
     label: 'Zone de repos', 
     icon: '💤',
     interpretation: { high: 'Remise principale', medium: 'Zone de couche', low: 'Repos temporaire' }
   },
   fraicheur: { 
-    color: '#00CCFF', // Cyan vif
+    color: BIONIC_ZONE_COLORS.hydrographie_avancee.color, // #5DADE2 - Bleu clair
     label: 'Zone de fraîcheur', 
     icon: '💧',
     interpretation: { high: 'Point d\'eau vital', medium: 'Zone humide', low: 'Fraîcheur relative' }
   },
   salines: { 
-    color: '#FFFF00', // Jaune vif (style Dany Lavoie)
+    color: BIONIC_ZONE_COLORS.salines_potentielles.color, // #3498DB - Bleu
     label: 'Saline potentielle', 
     icon: '🧂',
     interpretation: { high: 'Saline active', medium: 'Zone minérale', low: 'Présence possible' }
+  },
+  ensoleillement: {
+    color: BIONIC_ZONE_COLORS.ensoleillement.color, // #F1C40F - Jaune
+    label: 'Ensoleillement',
+    icon: '☀️',
+    interpretation: { high: 'Exposition optimale', medium: 'Ensoleillement partiel', low: 'Zone ombragée' }
+  },
+  orientation: {
+    color: BIONIC_ZONE_COLORS.orientation.color, // #A04000 - Terre cuite
+    label: 'Orientation',
+    icon: '🧭',
+    interpretation: { high: 'Orientation idéale', medium: 'Orientation favorable', low: 'Orientation neutre' }
   },
   transition: { 
     color: '#999999', // Gris moyen
