@@ -72,6 +72,22 @@
 
 ## What's Been Implemented
 
+### Phase 52f (January 28, 2026) - Collapse/Expand Arrow for Auto-Optimization ✅
+
+**Flèche collapse/expand ajoutée au module Auto-Optimisation**
+
+Nouvelles fonctionnalités:
+- ✅ **Flèche collapse/expand** dans le header du module (ChevronDown/ChevronUp)
+- ✅ **Header cliquable** pour replier/déplier tout le contenu du module
+- ✅ **Animation fluide** avec transition entre les états
+- ✅ **Icône avec effet hover** (gris -> blanc au survol)
+- ✅ **Boutons header non affectés** par le clic (toggle ON/OFF, Paramètres)
+
+**Comportement:**
+- État déplié par défaut (contenu visible)
+- Clic sur header → replie tout le contenu (tabs, boutons, propositions)
+- Flèche change de direction selon l'état
+
 ### Phase 52e (January 28, 2026) - Email Notifications & Toggle Control ✅
 
 **Notifications par email et contrôle ON/OFF ajoutés**
