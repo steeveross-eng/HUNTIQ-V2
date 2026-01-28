@@ -862,20 +862,32 @@ const MonTerritoireBionicPage = () => {
       setIsFilteringWater(true);
       
       try {
-        // Utiliser le service de relocalisation BIONIC v6 (EAU + URBAIN)
+        // Utiliser le MODULE BIONIC™ COMPLET v7 (EAU 5m + URBAIN 2000m + QA)
         const { filterAndRelocateZones } = await import('@/services/WaterExclusionService');
-        const { filteredZones, stats } = await filterAndRelocateZones(zonesToFilter, currentMapBounds);
+        const { filteredZones, stats, qaReport } = await filterAndRelocateZones(
+          zonesToFilter, 
+          currentMapBounds,
+          { enableQA: true }
+        );
         
-        console.log(`[BIONIC_relocation_v6] Eau: ${stats.fromWater || 0}, Urbain: ${stats.fromUrban || 0}, Exclues: ${stats.excluded || 0}/${stats.total}`);
+        console.log(`[BIONIC_v7] Résultat: ${stats.kept}/${stats.total} zones (Eau: ${stats.fromWater || 0}, Urbain: ${stats.fromUrban || 0})`);
         
         setFilteredMicroZones(filteredZones);
         setWaterExclusionStats(stats);
         
+        // Log QA si disponible
+        if (qaReport) {
+          console.log(`[BIONIC_v7] QA: ${qaReport.passedCount}/${qaReport.totalZones} validées`);
+          if (qaReport.failedCount > 0) {
+            console.warn(`[BIONIC_v7] ⚠️ ${qaReport.failedCount} zones non conformes`);
+          }
+        }
+        
         if (stats && (stats.fromWater > 0 || stats.fromUrban > 0)) {
-          console.log(`[BIONIC] Règles appliquées:`, stats.rules_applied);
+          console.log(`[BIONIC_v7] Règles appliquées:`, stats.rules_applied);
         }
       } catch (err) {
-        console.error('[BIONIC] Erreur filtrage/relocalisation:', err);
+        console.error('[BIONIC_v7] Erreur filtrage/relocalisation:', err);
         // En cas d'erreur, ne PAS afficher les zones non filtrées
         // Pour sécurité, on exclut tout
         setFilteredMicroZones([]);
