@@ -252,52 +252,19 @@ const getStrokeWeight = (percentage, isHovered, zoom = 12) => {
   
   return Math.max(minWeight, Math.min(maxWeight, weight));
 };
-    baseWeight = 5.5;      // Survol : rétroaction visuelle claire
-  } else if (percentage >= 90) {
-    baseWeight = 5.0;      // Zone très haute priorité
-  } else if (percentage >= 75) {
-    baseWeight = 4.5;
-  } else if (percentage >= 60) {
-    baseWeight = 4.0;
-  } else if (percentage >= 45) {
-    baseWeight = 3.5;
-  } else {
-    baseWeight = 3.0;
-  }
-  
-  // Application du facteur de zoom
-  const weight = baseWeight * zoomFactor;
-  
-  // Limites adaptatives au zoom pour garantir la lisibilité
-  // Fort zoom : permet des bordures plus épaisses pour la précision
-  // Faible zoom : force des bordures très fines pour éviter saturation
-  const minWeight = zoom >= 16 ? 1.2 : zoom >= 14 ? 0.6 : zoom >= 12 ? 0.3 : 0.1;
-  const maxWeight = zoom >= 16 ? 4.0 : zoom >= 14 ? 2.5 : zoom >= 12 ? 1.5 : 0.5;
-  
-  return Math.max(minWeight, Math.min(maxWeight, weight));
-};
 
 /**
- * Épaisseur des cercles concentriques adaptative au zoom - STYLE VECTORIEL
+ * Épaisseur des cercles concentriques adaptative au zoom - STYLE BIONIC™
  * Suit la même logique que les contours principaux avec atténuation progressive
  */
 const getConcentricStrokeWeight = (zoom = 12, index = 0) => {
+  // Utilisation de la configuration HALO_CONFIG
+  const haloParams = HALO_CONFIG.getHaloParams(zoom);
+  
   // Atténuation progressive pour chaque cercle concentrique
   const attenuation = 1 - (index * 0.25);
   
-  let baseWeight;
-  if (zoom >= 16) {
-    baseWeight = 1.8 * attenuation;
-  } else if (zoom >= 14) {
-    baseWeight = 1.0 * attenuation;
-  } else if (zoom >= 12) {
-    baseWeight = 0.5 * attenuation;
-  } else if (zoom >= 10) {
-    baseWeight = 0.25 * attenuation;
-  } else {
-    baseWeight = 0.1 * attenuation;
-  }
-  return Math.max(0.08, baseWeight);
+  return Math.max(0.5, haloParams.weight * 0.5 * attenuation);
 };
 
 /**
