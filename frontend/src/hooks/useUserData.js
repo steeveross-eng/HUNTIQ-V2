@@ -6,10 +6,20 @@
  * - Fallback localStorage pour mode hors ligne
  * - Synchronisation automatique au login
  * - Cache local pour performances
+ * - LIMITE: Maximum 2 waypoints actifs pour optimiser les performances
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
+
+const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
+
+// Configuration des limites pour optimisation mémoire
+const WAYPOINT_CONFIG = {
+  MAX_ACTIVE_WAYPOINTS: 2,
+  WARNING_MESSAGE: "Pour optimiser les performances et éviter les ralentissements, un maximum de 2 waypoints peuvent être actifs simultanément.",
+  LIMIT_REACHED_MESSAGE: "Limite atteinte : Désactivez un waypoint existant avant d'en activer un nouveau."
+};
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
