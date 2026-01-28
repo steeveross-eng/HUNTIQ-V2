@@ -715,16 +715,6 @@ function isPointInPolygon(lat, lng, polygon) {
   
   return inside;
 }
-  
-  // Mettre en cache
-  zoneFilterCache.set(zones, bounds, result);
-  
-  if (fromWater > 0 || fromUrban > 0) {
-    console.log(`[BIONIC_relocation_v6] ✓ Eau: ${fromWater}, Urbain: ${fromUrban}, Inchangées: ${unchanged}, Exclues: ${stats.excluded} / ${zones.length} total`);
-  }
-  
-  return result;
-}
 
 // Exports pour compatibilité
 export async function filterZonesViaAPI(zones, bounds) {
@@ -735,15 +725,10 @@ export async function preloadWaterData(bounds) {
   await fetchWaterFeatures(bounds);
 }
 
-// Export des fonctions utilitaires
-export { isPointInUrbanZone, relocateFromUrban };
-
 export default {
   filterZonesFromWater,
   filterAndRelocateZones,
   filterZonesViaAPI,
   preloadWaterData,
-  isPointInUrbanZone,
-  relocateFromUrban,
   CONFIG
 };
