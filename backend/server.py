@@ -4442,6 +4442,14 @@ try:
 except ImportError as e:
     print(f"WMS Proxy API not available: {e}")
 
+# Include Auto-Optimization Module BIONIC™
+try:
+    from auto_optimization import router as optimization_router
+    app.include_router(optimization_router)
+    print("Auto-Optimization BIONIC™ module loaded")
+except ImportError as e:
+    print(f"Auto-Optimization module not available: {e}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
