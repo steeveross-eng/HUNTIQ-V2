@@ -297,12 +297,21 @@ const getConcentricStrokeWeight = (zoom = 12, index = 0) => {
 };
 
 /**
- * Opacité du remplissage - STYLE "DANY LAVOIE"
- * Semi-transparent pour voir le terrain sous-jacent
- * Légèrement plus opaque pour les zones à fort pourcentage
+ * Opacité du remplissage - STYLE BIONIC™ OFFICIEL
+ * INTÉRIEUR TOTALEMENT TRANSPARENT - Seul le halo coloré est visible
+ * @param {number} percentage - Pourcentage de la zone
+ * @param {boolean} isHovered - Zone survolée
+ * @param {boolean} transparentFill - Si true, intérieur totalement transparent (par défaut)
+ * @returns {number} Opacité du remplissage (0 à 1)
  */
-const getFillOpacity = (percentage, isHovered) => {
-  if (isHovered) return 0.45; // Survol : mise en évidence
+const getFillOpacity = (percentage, isHovered, transparentFill = true) => {
+  // STYLE OFFICIEL : Intérieur transparent, seul le halo est visible
+  if (transparentFill) {
+    if (isHovered) return 0.15; // Légère coloration au survol pour feedback visuel
+    return 0; // Totalement transparent par défaut
+  }
+  // Mode legacy (ancien style avec remplissage)
+  if (isHovered) return 0.45;
   if (percentage >= 90) return 0.38;
   if (percentage >= 75) return 0.32;
   if (percentage >= 60) return 0.26;
