@@ -290,6 +290,7 @@ const AutoOptimizationPanel = () => {
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [versionToRestore, setVersionToRestore] = useState(null);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [config, setConfig] = useState({
     enabled: true,
     email_notifications: false,
