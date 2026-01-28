@@ -547,9 +547,20 @@ async def restore_version(version_id: str):
 @router.post("/analyze")
 async def run_auto_analysis():
     """Exécute une auto-analyse du système et génère des suggestions"""
+    # Vérifier si le module est activé
+    config = get_module_config()
+    if not config.get("enabled", True):
+        return {
+            "message": "Module d'auto-optimisation désactivé",
+            "suggestions_count": 0,
+            "suggestions": [],
+            "module_enabled": False
+        }
+    
     try:
         db = get_db()
         suggestions = []
+        new_proposals = []
         
         # Analyse 1: Vérifier les waypoints sans coordonnées valides
         try:
@@ -623,11 +634,25 @@ async def run_auto_analysis():
                 suggestion["created_at"] = datetime.now(timezone.utc).isoformat()
                 suggestion["updated_at"] = datetime.now(timezone.utc).isoformat()
                 db.optimization_proposals.insert_one(suggestion)
+                new_proposals.append(suggestion)
+        
+        # Envoyer notification email pour les nouvelles propositions
+        if new_proposals and config.get("email_notifications"):
+            try:
+                email_html = generate_proposal_email(new_proposals)
+                await send_optimization_email(
+                    f"🧠 BIONIC™: {len(new_proposals)} nouvelle(s) proposition(s) d'optimisation",
+                    email_html
+                )
+            except Exception as email_error:
+                print(f"[AutoOptimization] Email notification failed: {email_error}")
         
         return {
             "message": "Analyse terminée",
             "suggestions_count": len(suggestions),
-            "suggestions": suggestions
+            "new_proposals_count": len(new_proposals),
+            "suggestions": suggestions,
+            "module_enabled": True
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
