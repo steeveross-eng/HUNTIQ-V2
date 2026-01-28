@@ -66,7 +66,8 @@ import {
   ShoppingCart,
   Link as LinkIcon,
   Palette,
-  Handshake
+  Handshake,
+  Brain
 } from "lucide-react";
 import { toast } from "sonner";
 
