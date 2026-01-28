@@ -72,6 +72,20 @@
 
 ## What's Been Implemented
 
+### Phase 52b (January 28, 2026) - Waypoint Limit & Memory Optimization ✅
+
+**Limite de 2 waypoints actifs pour optimisation mémoire**
+- Maximum 2 waypoints peuvent être actifs simultanément
+- Message d'avertissement toast quand limite atteinte
+- Conseil de performance affiché lors de la première activation
+- Badge visuel "X/2" dans l'interface waypoints
+- Avertissement permanent visible dans le panneau waypoints
+- Switches désactivés visuellement quand limite atteinte
+
+**Files Modified:**
+- `/app/frontend/src/hooks/useUserData.js` (logique de limite)
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` (UI avertissement)
+
 ### Phase 52 (January 28, 2026) - Water Exclusion & GPS LIVE ✅
 
 **CRITICAL FIX: BIONIC Water Mask v5 - Zone Relocation**
