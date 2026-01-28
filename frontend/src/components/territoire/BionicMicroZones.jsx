@@ -207,47 +207,51 @@ const getAngleFromCenter = (center, point) => {
 };
 
 // ============================================
-// STYLE "DANY LAVOIE" - SEGMENTATION AVANCÉE
-// Lignes vectorielles ultra-fines et adaptatives
-// Épaisseur recalculée dynamiquement selon le zoom
+// STYLE BIONIC™ OFFICIEL - HALO DYNAMIQUE
+// Cercles avec intérieur transparent et halo coloré
+// Épaisseur du halo variant selon le niveau de zoom
 // ============================================
 
 /**
- * Épaisseur du contour adaptative au zoom - ALGORITHME VECTORIEL "DANY LAVOIE"
+ * Épaisseur du halo (contour) adaptative au zoom - STYLE BIONIC™ OFFICIEL
  * 
  * COMPORTEMENT DYNAMIQUE :
- * - Fort zoom (≥16) : Épaisseur AUGMENTÉE pour précision visuelle maximale
- * - Zoom moyen (12-15) : Épaisseur ÉQUILIBRÉE pour lecture confortable
- * - Faible zoom (≤11) : Réduction DRASTIQUE pour carte propre et non saturée
+ * - Fort zoom (≥16) : Halo ÉPAIS pour précision visuelle maximale
+ * - Zoom moyen (12-15) : Halo ÉQUILIBRÉ pour lecture confortable
+ * - Faible zoom (≤11) : Halo FIN pour carte propre et non saturée
  * 
- * La formule utilise une courbe exponentielle pour une transition fluide
+ * Le halo est le seul élément visible (intérieur transparent)
  */
 const getStrokeWeight = (percentage, isHovered, zoom = 12) => {
-  // Facteur d'épaisseur VECTORIEL selon le zoom (courbe exponentielle)
-  // Plus le zoom est élevé, plus l'épaisseur augmente pour la précision
-  // Plus le zoom est bas, plus l'épaisseur est réduite drastiquement
+  // Utilisation de la configuration HALO_CONFIG importée
+  const haloParams = HALO_CONFIG.getHaloParams(zoom);
   
-  let zoomFactor;
-  if (zoom >= 18) {
-    zoomFactor = 0.70;     // Ultra zoomé : précision maximale
-  } else if (zoom >= 16) {
-    zoomFactor = 0.55;     // Très zoomé : haute précision
-  } else if (zoom >= 14) {
-    zoomFactor = 0.38;     // Zoomé : lecture détaillée
-  } else if (zoom >= 12) {
-    zoomFactor = 0.22;     // Moyen : équilibré
-  } else if (zoom >= 10) {
-    zoomFactor = 0.12;     // Éloigné : fin
-  } else if (zoom >= 8) {
-    zoomFactor = 0.06;     // Très éloigné : ultra-fin
+  // Facteur selon le pourcentage (zones importantes = halo plus visible)
+  let percentageFactor;
+  if (percentage >= 90) {
+    percentageFactor = 1.3;
+  } else if (percentage >= 75) {
+    percentageFactor = 1.2;
+  } else if (percentage >= 60) {
+    percentageFactor = 1.1;
+  } else if (percentage >= 45) {
+    percentageFactor = 1.0;
   } else {
-    zoomFactor = 0.03;     // Vue globale : quasi invisible (réduction drastique)
+    percentageFactor = 0.9;
   }
   
-  // Calcul de base selon le pourcentage et l'état hover
-  // Les zones à fort pourcentage ont des contours légèrement plus marqués
-  let baseWeight;
-  if (isHovered) {
+  // Facteur de survol
+  const hoverFactor = isHovered ? 1.5 : 1.0;
+  
+  // Calcul final de l'épaisseur du halo
+  const weight = haloParams.weight * percentageFactor * hoverFactor;
+  
+  // Limites pour garantir la lisibilité
+  const minWeight = zoom >= 16 ? 3 : zoom >= 14 ? 2 : zoom >= 12 ? 1.5 : 0.5;
+  const maxWeight = zoom >= 16 ? 16 : zoom >= 14 ? 12 : zoom >= 12 ? 8 : 4;
+  
+  return Math.max(minWeight, Math.min(maxWeight, weight));
+};
     baseWeight = 5.5;      // Survol : rétroaction visuelle claire
   } else if (percentage >= 90) {
     baseWeight = 5.0;      // Zone très haute priorité
