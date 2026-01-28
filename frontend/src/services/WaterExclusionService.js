@@ -626,58 +626,6 @@ export async function filterZonesFromWater(zones, bounds) {
   
   return { filteredZones: allValidZones, stats };
 }
-    
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * 2 * Math.PI;
-      const checkLat = lat + radiusDeg * Math.cos(angle);
-      const checkLng = lng + (radiusDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle);
-      
-      const perimCheck = isPointInWater(checkLat, checkLng, waterFeatures);
-      if (perimCheck.inWater) {
-        perimeterInWater = true;
-        perimeterWaterFeature = perimCheck.feature;
-        break;
-      }
-    }
-    
-    if (perimeterInWater) {
-      excludedCount++;
-      excludedDetails.push({
-        zone_id: zone.id,
-        reason: 'EXCL_PERIMETER_IN_WATER',
-        water_type: perimeterWaterFeature?.type,
-        water_name: perimeterWaterFeature?.name
-      });
-      continue;
-    }
-    
-    // RÈGLE 3: EXCL_INTERSECTS_WATER - Vérification supplémentaire avec buffer
-    const touchesWater = checkZoneTouchesWaterWithBuffer(lat, lng, radius, waterFeatures, CONFIG.WATER_BUFFER_METERS);
-    
-    if (touchesWater?.inBuffer) {
-      // Zone dans le buffer de 5m - EXCLURE
-      excludedCount++;
-      excludedDetails.push({
-        zone_id: zone.id,
-        reason: 'EXCL_WITHIN_5M_WATER',
-        water_type: touchesWater.type,
-        water_name: touchesWater.name
-      });
-      continue;
-    }
-    
-    // Zone sur terre - CONSERVER
-    filteredZones.push(zone);
-  }
-  
-  const stats = {
-    total: zones.length,
-    kept: filteredZones.length,
-    excluded: excludedCount,
-    clipped: clippedCount,
-    adjusted: adjustedCount,
-    waterFeaturesCount: waterFeatures.length,
-    bufferMeters: CONFIG.WATER_BUFFER_METERS,
     ruleset: 'BIONIC_water_mask_v3',
     excludedDetails: excludedDetails.slice(0, 10)
   };
