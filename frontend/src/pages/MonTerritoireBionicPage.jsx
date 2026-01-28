@@ -2173,8 +2173,21 @@ const MonTerritoireBionicPage = () => {
                   <h2 className="text-white font-semibold flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-[#f5a623]" />
                     Waypoints actifs
-                    <Badge className="bg-[#f5a623] text-black">{activeWaypoints.length}</Badge>
+                    <Badge className={`${activeWaypoints.length >= 2 ? 'bg-orange-500' : 'bg-[#f5a623]'} text-black`}>
+                      {activeWaypoints.length}/2
+                    </Badge>
                   </h2>
+                </div>
+                
+                {/* Avertissement limite de waypoints */}
+                <div className="bg-amber-900/20 rounded-lg p-2 border border-amber-500/30 mb-3">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-amber-300">
+                      <span className="font-medium">Limite: 2 waypoints actifs max</span>
+                      <p className="text-amber-400/70 mt-0.5">Pour optimiser les performances et éviter les ralentissements.</p>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* Position actuelle de l'utilisateur */}
@@ -2210,11 +2223,12 @@ const MonTerritoireBionicPage = () => {
                     const typeInfo = PLACE_TYPES.find(t => t.id === wp.type);
                     const distanceFromUser = userPosition ? 
                       Math.sqrt(Math.pow((wp.lat - userPosition.lat) * 111, 2) + Math.pow((wp.lng - userPosition.lng) * 111 * Math.cos(userPosition.lat * Math.PI / 180), 2)) : null;
+                    const canActivate = wp.active || activeWaypoints.length < 2;
                     
                     return (
                       <div 
                         key={wp.id} 
-                        className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} transition-all hover:bg-gray-800 cursor-pointer`}
+                        className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} ${!canActivate ? 'opacity-60' : ''} transition-all hover:bg-gray-800 cursor-pointer`}
                         onClick={() => { setMapCenter([wp.lat, wp.lng]); setMapZoom(15); }}
                       >
                         <div className="flex items-start justify-between">
