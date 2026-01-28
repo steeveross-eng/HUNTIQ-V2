@@ -4,6 +4,10 @@
  * Service PERMANENT de RELOCALISATION des zones aquatiques.
  * PROTOCOLE: Si une zone est dans l'eau → RELOCALISER à 5m du bord vers la terre.
  * Garantie: AUCUNE zone ne doit rester dans l'eau.
+ * 
+ * OPTIMISATIONS v5.1:
+ * - Cache des résultats de filtrage
+ * - Calculs mémorisés pour les polygones
  */
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
@@ -16,7 +20,8 @@ const CONFIG = Object.freeze({
   RELOCATION_DISTANCE_M: 5,
   SEARCH_RADIUS_M: 1000,
   SEARCH_DIRECTIONS: 72,
-  SEARCH_STEP_M: 5
+  SEARCH_STEP_M: 5,
+  ZONE_CACHE_DURATION_MS: 60000 // Cache des zones filtrées: 1 minute
 });
 
 // Cache pour les données hydrographiques
@@ -38,6 +43,37 @@ const hydroCache = {
   set(bounds, features) {
     const key = this.getKey(bounds);
     this.data.set(key, { features, timestamp: Date.now() });
+  }
+};
+
+// Cache pour les résultats de filtrage (évite les recalculs)
+const zoneFilterCache = {
+  data: new Map(),
+  maxSize: 10,
+  getKey(zones, bounds) {
+    if (!zones || !bounds) return null;
+    const zoneHash = zones.length + '_' + (zones[0]?.center?.[0] || 0).toFixed(4);
+    const boundsHash = (bounds.north || 0).toFixed(3) + '_' + (bounds.south || 0).toFixed(3);
+    return `${zoneHash}_${boundsHash}`;
+  },
+  get(zones, bounds) {
+    const key = this.getKey(zones, bounds);
+    if (!key) return null;
+    const cached = this.data.get(key);
+    if (cached && Date.now() - cached.timestamp < CONFIG.ZONE_CACHE_DURATION_MS) {
+      return cached.result;
+    }
+    return null;
+  },
+  set(zones, bounds, result) {
+    const key = this.getKey(zones, bounds);
+    if (!key) return;
+    // Limiter la taille du cache
+    if (this.data.size >= this.maxSize) {
+      const firstKey = this.data.keys().next().value;
+      this.data.delete(firstKey);
+    }
+    this.data.set(key, { result, timestamp: Date.now() });
   }
 };
 
