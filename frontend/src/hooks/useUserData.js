@@ -21,8 +21,6 @@ const WAYPOINT_CONFIG = {
   LIMIT_REACHED_MESSAGE: "Limite atteinte : Désactivez un waypoint existant avant d'en activer un nouveau."
 };
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
-
 // Helper pour les requêtes API
 const apiRequest = async (endpoint, options = {}) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
