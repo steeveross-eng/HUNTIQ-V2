@@ -8,10 +8,12 @@ Fonctionnalités:
 - Création et restauration de versions/backups
 - Auto-analyse du système
 - Processus d'approbation administrateur
+- Notifications par email
+- Toggle ON/OFF du module
 """
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime, timezone
 from bson import ObjectId
@@ -24,6 +26,13 @@ router = APIRouter(prefix="/api/admin/optimization", tags=["Auto-Optimization"])
 # Configuration
 VERSIONS_DIR = "/app/backups/versions"
 MAX_VERSIONS = 50
+
+# Email notifications
+try:
+    import resend
+    RESEND_AVAILABLE = True
+except ImportError:
+    RESEND_AVAILABLE = False
 
 # Modèles Pydantic
 class OptimizationProposal(BaseModel):
