@@ -51,8 +51,11 @@ class VersionBackup(BaseModel):
 
 # Helper pour obtenir la collection MongoDB
 def get_db():
-    from server import db
-    return db
+    import os
+    from pymongo import MongoClient
+    client = MongoClient(os.environ.get('MONGO_URL'))
+    db_name = os.environ.get('DB_NAME', 'test_database')
+    return client[db_name]
 
 # ================================
 # PROPOSITIONS D'OPTIMISATION
