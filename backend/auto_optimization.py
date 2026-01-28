@@ -58,6 +58,12 @@ class VersionBackup(BaseModel):
     description: str = ""
     modules: List[str] = ["bionic", "territory", "waypoints", "zones", "config"]
 
+class ModuleConfig(BaseModel):
+    enabled: bool = True
+    email_notifications: bool = False
+    notification_email: Optional[str] = None
+    auto_analyze_interval_hours: int = 24
+
 # Helper pour obtenir la collection MongoDB
 def get_db():
     import os
@@ -65,6 +71,214 @@ def get_db():
     client = MongoClient(os.environ.get('MONGO_URL'))
     db_name = os.environ.get('DB_NAME', 'test_database')
     return client[db_name]
+
+# ================================
+# CONFIGURATION DU MODULE
+# ================================
+
+def get_module_config():
+    """Récupère la configuration du module"""
+    try:
+        db = get_db()
+        config = db.optimization_config.find_one({"type": "module_settings"})
+        if config:
+            return {
+                "enabled": config.get("enabled", True),
+                "email_notifications": config.get("email_notifications", False),
+                "notification_email": config.get("notification_email"),
+                "auto_analyze_interval_hours": config.get("auto_analyze_interval_hours", 24)
+            }
+    except Exception:
+        pass
+    return {
+        "enabled": True,
+        "email_notifications": False,
+        "notification_email": None,
+        "auto_analyze_interval_hours": 24
+    }
+
+@router.get("/config")
+async def get_config():
+    """Récupère la configuration actuelle du module"""
+    return get_module_config()
+
+@router.post("/config")
+async def update_config(config: ModuleConfig):
+    """Met à jour la configuration du module"""
+    try:
+        db = get_db()
+        db.optimization_config.update_one(
+            {"type": "module_settings"},
+            {"$set": {
+                "type": "module_settings",
+                "enabled": config.enabled,
+                "email_notifications": config.email_notifications,
+                "notification_email": config.notification_email,
+                "auto_analyze_interval_hours": config.auto_analyze_interval_hours,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }},
+            upsert=True
+        )
+        return {"message": "Configuration mise à jour", "config": config.dict()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/toggle")
+async def toggle_module(enabled: bool = True):
+    """Active ou désactive le module d'auto-optimisation"""
+    try:
+        db = get_db()
+        db.optimization_config.update_one(
+            {"type": "module_settings"},
+            {"$set": {
+                "type": "module_settings",
+                "enabled": enabled,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }},
+            upsert=True
+        )
+        status = "activé" if enabled else "désactivé"
+        return {"message": f"Module d'auto-optimisation {status}", "enabled": enabled}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ================================
+# NOTIFICATIONS EMAIL
+# ================================
+
+async def send_optimization_email(subject: str, html_content: str):
+    """Envoie une notification email pour les événements d'optimisation"""
+    config = get_module_config()
+    
+    if not config.get("email_notifications") or not config.get("notification_email"):
+        print("[AutoOptimization] Email notifications disabled or no email configured")
+        return False
+    
+    if not RESEND_AVAILABLE:
+        print("[AutoOptimization] Resend not available - email skipped")
+        return False
+    
+    try:
+        # Récupérer la clé API Resend depuis la config ou l'environnement
+        db = get_db()
+        resend_config = db.backup_config.find_one({"type": "resend_api"})
+        api_key = resend_config.get("api_key") if resend_config else os.environ.get("RESEND_API_KEY")
+        
+        if not api_key:
+            print("[AutoOptimization] No Resend API key configured")
+            return False
+        
+        resend.api_key = api_key
+        
+        params = {
+            "from": "BIONIC™ Auto-Optimization <noreply@scentscience.com>",
+            "to": [config["notification_email"]],
+            "subject": subject,
+            "html": html_content
+        }
+        
+        result = resend.Emails.send(params)
+        print(f"[AutoOptimization] Email sent: {result}")
+        return True
+    except Exception as e:
+        print(f"[AutoOptimization] Email error: {e}")
+        return False
+
+def generate_proposal_email(proposals: List[dict]) -> str:
+    """Génère le contenu HTML pour les nouvelles propositions"""
+    proposals_html = ""
+    for p in proposals:
+        type_icons = {
+            "performance": "⚡",
+            "security": "🔒",
+            "optimization": "🚀",
+            "fix": "🔧",
+            "feature": "✨",
+            "config": "⚙️"
+        }
+        icon = type_icons.get(p.get("type", "optimization"), "📋")
+        
+        proposals_html += f"""
+        <div style="background: #f8f9fa; border-left: 4px solid #f5a623; padding: 15px; margin: 10px 0; border-radius: 4px;">
+            <h3 style="margin: 0 0 10px 0; color: #1a1a2e;">{icon} {p.get('title', 'Sans titre')}</h3>
+            <p style="margin: 0; color: #666;">{p.get('description', '')}</p>
+            <div style="margin-top: 10px;">
+                <span style="background: #f5a623; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 5px;">
+                    {p.get('type', 'optimization').upper()}
+                </span>
+                <span style="background: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 12px; font-size: 11px;">
+                    Impact: {p.get('impact', 'medium')}
+                </span>
+            </div>
+        </div>
+        """
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #f5a623; margin: 0;">🧠 BIONIC™ Auto-Optimisation</h1>
+            <p style="color: #888; margin: 10px 0 0 0;">Nouvelles propositions d'optimisation</p>
+        </div>
+        <div style="padding: 30px; background: #fff;">
+            <p>Bonjour,</p>
+            <p>Le module d'auto-optimisation BIONIC™ a généré <strong>{len(proposals)} nouvelle(s) proposition(s)</strong> nécessitant votre approbation :</p>
+            
+            {proposals_html}
+            
+            <div style="margin-top: 30px; padding: 20px; background: #f5a623; border-radius: 8px; text-align: center;">
+                <a href="https://bionic-territory.preview.emergentagent.com/admin" 
+                   style="color: #000; text-decoration: none; font-weight: bold; font-size: 16px;">
+                    ➜ Accéder au panneau d'administration
+                </a>
+            </div>
+        </div>
+        <div style="background: #1a1a2e; color: #888; padding: 20px; text-align: center; font-size: 12px;">
+            <p>Module d'Auto-Optimisation BIONIC™</p>
+            <p>Ce message a été envoyé automatiquement.</p>
+        </div>
+    </body>
+    </html>
+    """
+
+def generate_backup_email(version_id: str, description: str, modules: List[str]) -> str:
+    """Génère le contenu HTML pour la notification de backup"""
+    modules_html = "".join([f"<li style='color: #28a745;'>✓ {m}</li>" for m in modules])
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #f5a623; margin: 0;">📦 Backup BIONIC™ Créé</h1>
+        </div>
+        <div style="padding: 30px; background: #fff;">
+            <p>Un nouveau backup a été créé avec succès.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>Version :</strong> {version_id}</p>
+                <p style="margin: 10px 0 0 0;"><strong>Description :</strong> {description}</p>
+                <p style="margin: 10px 0 0 0;"><strong>Date :</strong> {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M UTC')}</p>
+            </div>
+            
+            <p><strong>Modules sauvegardés :</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+                {modules_html}
+            </ul>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                Ce backup peut être restauré à tout moment depuis l'onglet "Historique Versions" du panneau d'administration.
+            </p>
+        </div>
+        <div style="background: #1a1a2e; color: #888; padding: 20px; text-align: center; font-size: 12px;">
+            <p>Module d'Auto-Optimisation BIONIC™</p>
+        </div>
+    </body>
+    </html>
+    """
 
 # ================================
 # PROPOSITIONS D'OPTIMISATION
