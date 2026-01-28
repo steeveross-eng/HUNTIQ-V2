@@ -484,128 +484,133 @@ const AutoOptimizationPanel = () => {
         </div>
       </div>
 
-      {/* Panneau de configuration (conditionnel) */}
-      {showConfigPanel && (
-        <ModuleConfigPanel
-          config={config}
-          onConfigChange={setConfig}
-          onSave={handleSaveConfig}
-          saving={saving}
-        />
-      )}
+      {/* Contenu collapsible */}
+      {!isCollapsed && (
+        <>
+          {/* Panneau de configuration (conditionnel) */}
+          {showConfigPanel && (
+            <ModuleConfigPanel
+              config={config}
+              onConfigChange={setConfig}
+              onSave={handleSaveConfig}
+              saving={saving}
+            />
+          )}
 
-      {/* Bannière si module désactivé */}
-      {!config.enabled && (
-        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
-          <Power className="h-6 w-6 text-red-400" />
-          <div>
-            <p className="text-red-400 font-medium">Module désactivé</p>
-            <p className="text-red-400/70 text-sm">Les analyses automatiques et les actions sont suspendues. Activez le module pour reprendre.</p>
+          {/* Bannière si module désactivé */}
+          {!config.enabled && (
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+              <Power className="h-6 w-6 text-red-400" />
+              <div>
+                <p className="text-red-400 font-medium">Module désactivé</p>
+                <p className="text-red-400/70 text-sm">Les analyses automatiques et les actions sont suspendues. Activez le module pour reprendre.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Boutons d&apos;action */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCreateBackup}
+              className="border-gray-600 text-gray-300"
+              disabled={!config.enabled}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Créer Backup
+            </Button>
+            <Button
+              onClick={handleRunAnalysis}
+              disabled={analyzing || !config.enabled}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {analyzing ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4 mr-2" />
+              )}
+              {analyzing ? 'Analyse...' : 'Lancer Auto-Analyse'}
+            </Button>
           </div>
-        </div>
-      )}
 
-      {/* Boutons d'action */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          onClick={handleCreateBackup}
-          className="border-gray-600 text-gray-300"
-          disabled={!config.enabled}
-        >
-          <Archive className="h-4 w-4 mr-2" />
-          Créer Backup
-        </Button>
-        <Button
-          onClick={handleRunAnalysis}
-          disabled={analyzing || !config.enabled}
-          className="bg-purple-600 hover:bg-purple-700"
-        >
-          {analyzing ? (
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Play className="h-4 w-4 mr-2" />
-          )}
-          {analyzing ? 'Analyse...' : 'Lancer Auto-Analyse'}
-        </Button>
-      </div>
+          {/* Tabs */}
+          <div className="flex gap-2 border-b border-gray-700 pb-2">
+            <Button
+              variant={activeTab === 'proposals' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('proposals')}
+              className={activeTab === 'proposals' ? 'bg-[#f5a623] text-black' : 'text-gray-400'}
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Propositions
+              {pendingCount > 0 && (
+                <Badge className="ml-2 bg-red-500 text-white">{pendingCount}</Badge>
+              )}
+            </Button>
+            <Button
+              variant={activeTab === 'versions' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('versions')}
+              className={activeTab === 'versions' ? 'bg-[#f5a623] text-black' : 'text-gray-400'}
+            >
+              <History className="h-4 w-4 mr-2" />
+              Historique Versions
+              <Badge className="ml-2 bg-gray-600 text-white">{versions.length}</Badge>
+            </Button>
+          </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-700 pb-2">
-        <Button
-          variant={activeTab === 'proposals' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('proposals')}
-          className={activeTab === 'proposals' ? 'bg-[#f5a623] text-black' : 'text-gray-400'}
-        >
-          <Zap className="h-4 w-4 mr-2" />
-          Propositions
-          {pendingCount > 0 && (
-            <Badge className="ml-2 bg-red-500 text-white">{pendingCount}</Badge>
-          )}
-        </Button>
-        <Button
-          variant={activeTab === 'versions' ? 'default' : 'ghost'}
-          onClick={() => setActiveTab('versions')}
-          className={activeTab === 'versions' ? 'bg-[#f5a623] text-black' : 'text-gray-400'}
-        >
-          <History className="h-4 w-4 mr-2" />
-          Historique Versions
-          <Badge className="ml-2 bg-gray-600 text-white">{versions.length}</Badge>
-        </Button>
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="h-8 w-8 text-[#f5a623] animate-spin" />
-        </div>
-      ) : activeTab === 'proposals' ? (
-        <div className="space-y-4">
-          {proposals.length === 0 ? (
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardContent className="py-12 text-center">
-                <Sparkles className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">Aucune proposition d'optimisation</p>
-                <p className="text-gray-500 text-sm mt-1">Lancez une auto-analyse pour générer des suggestions</p>
-              </CardContent>
-            </Card>
+          {/* Content */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="h-8 w-8 text-[#f5a623] animate-spin" />
+            </div>
+          ) : activeTab === 'proposals' ? (
+            <div className="space-y-4">
+              {proposals.length === 0 ? (
+                <Card className="bg-gray-800/50 border-gray-700">
+                  <CardContent className="py-12 text-center">
+                    <Sparkles className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">Aucune proposition d&apos;optimisation</p>
+                    <p className="text-gray-500 text-sm mt-1">Lancez une auto-analyse pour générer des suggestions</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                proposals.map(proposal => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    disabled={!config.enabled}
+                  />
+                ))
+              )}
+            </div>
           ) : (
-            proposals.map(proposal => (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                disabled={!config.enabled}
-              />
-            ))
+            <div className="space-y-3">
+              {versions.length === 0 ? (
+                <Card className="bg-gray-800/50 border-gray-700">
+                  <CardContent className="py-12 text-center">
+                    <Archive className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">Aucune version sauvegardée</p>
+                    <p className="text-gray-500 text-sm mt-1">Les backups seront créés automatiquement lors des modifications</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                versions.map((version, index) => (
+                  <VersionHistoryItem
+                    key={version.id}
+                    version={version}
+                    isLatest={index === 0}
+                    onRestore={(v) => {
+                      setVersionToRestore(version);
+                      setShowRestoreDialog(true);
+                    }}
+                    disabled={!config.enabled}
+                  />
+                ))
+              )}
+            </div>
           )}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {versions.length === 0 ? (
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardContent className="py-12 text-center">
-                <Archive className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">Aucune version sauvegardée</p>
-                <p className="text-gray-500 text-sm mt-1">Les backups seront créés automatiquement lors des modifications</p>
-              </CardContent>
-            </Card>
-          ) : (
-            versions.map((version, index) => (
-              <VersionHistoryItem
-                key={version.id}
-                version={version}
-                isLatest={index === 0}
-                onRestore={(v) => {
-                  setVersionToRestore(version);
-                  setShowRestoreDialog(true);
-                }}
-                disabled={!config.enabled}
-              />
-            ))
-          )}
-        </div>
+        </>
       )}
 
       {/* Dialog de confirmation de restauration */}
