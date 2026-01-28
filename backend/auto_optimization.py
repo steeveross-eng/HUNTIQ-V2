@@ -319,56 +319,45 @@ async def run_auto_analysis():
         suggestions = []
         
         # Analyse 1: Vérifier les waypoints sans coordonnées valides
-        invalid_waypoints = db.waypoints.count_documents({
-            "$or": [
-                {"lat": {"$exists": False}},
-                {"lng": {"$exists": False}},
-                {"lat": None},
-                {"lng": None}
-            ]
-        })
-        if invalid_waypoints > 0:
-            suggestions.append({
-                "title": f"Nettoyage de {invalid_waypoints} waypoints invalides",
-                "description": f"Détecté {invalid_waypoints} waypoints sans coordonnées valides. Ces entrées peuvent être nettoyées pour améliorer les performances.",
-                "type": "optimization",
-                "impact": "low",
-                "affected_modules": ["waypoints", "territory"],
-                "benefits": ["Réduction de la taille de la base de données", "Amélioration des performances de chargement"],
-                "risks": ["Perte de données potentiellement récupérables"]
+        try:
+            invalid_waypoints = db.waypoints.count_documents({
+                "$or": [
+                    {"lat": {"$exists": False}},
+                    {"lng": {"$exists": False}},
+                    {"lat": None},
+                    {"lng": None}
+                ]
             })
+            if invalid_waypoints > 0:
+                suggestions.append({
+                    "title": f"Nettoyage de {invalid_waypoints} waypoints invalides",
+                    "description": f"Détecté {invalid_waypoints} waypoints sans coordonnées valides.",
+                    "type": "optimization",
+                    "impact": "low",
+                    "affected_modules": ["waypoints", "territory"],
+                    "benefits": ["Réduction de la taille de la base de données"],
+                    "risks": ["Perte de données potentiellement récupérables"]
+                })
+        except Exception:
+            pass
         
         # Analyse 2: Vérifier le nombre de versions stockées
-        version_count = db.optimization_versions.count_documents({})
-        if version_count > MAX_VERSIONS * 0.8:
-            suggestions.append({
-                "title": "Nettoyage des anciennes versions",
-                "description": f"Le système conserve {version_count} versions. Un nettoyage des plus anciennes peut libérer de l'espace.",
-                "type": "optimization",
-                "impact": "low",
-                "affected_modules": ["config"],
-                "benefits": ["Libération d'espace de stockage"],
-                "risks": []
-            })
+        try:
+            version_count = db.optimization_versions.count_documents({})
+            if version_count > MAX_VERSIONS * 0.8:
+                suggestions.append({
+                    "title": "Nettoyage des anciennes versions",
+                    "description": f"Le système conserve {version_count} versions.",
+                    "type": "optimization",
+                    "impact": "low",
+                    "affected_modules": ["config"],
+                    "benefits": ["Libération d'espace de stockage"],
+                    "risks": []
+                })
+        except Exception:
+            pass
         
-        # Analyse 3: Vérifier les propositions en attente depuis longtemps
-        from datetime import timedelta
-        old_proposals = db.optimization_proposals.count_documents({
-            "status": "pending",
-            "created_at": {"$lt": (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()}
-        })
-        if old_proposals > 0:
-            suggestions.append({
-                "title": f"Revue de {old_proposals} propositions anciennes",
-                "description": f"{old_proposals} propositions sont en attente depuis plus de 7 jours. Une décision devrait être prise.",
-                "type": "config",
-                "impact": "low",
-                "affected_modules": ["config"],
-                "benefits": ["Meilleure gestion des changements"],
-                "risks": []
-            })
-        
-        # Analyse 4: Suggestion d'optimisation de la mémoire
+        # Analyse 3: Suggestion d'optimisation de la mémoire (toujours générée)
         suggestions.append({
             "title": "Optimisation automatique de la mémoire",
             "description": "Nettoyage des caches expirés et optimisation de l'utilisation mémoire des composants BIONIC.",
@@ -377,6 +366,17 @@ async def run_auto_analysis():
             "affected_modules": ["bionic", "territory", "zones"],
             "benefits": ["Réduction de la consommation mémoire", "Amélioration de la réactivité"],
             "risks": ["Temps de rechargement initial légèrement plus long"]
+        })
+        
+        # Analyse 4: Suggestion de backup régulier
+        suggestions.append({
+            "title": "Configuration des backups automatiques",
+            "description": "Activer les sauvegardes automatiques quotidiennes pour protéger vos données.",
+            "type": "security",
+            "impact": "high",
+            "affected_modules": ["config", "backup"],
+            "benefits": ["Protection contre la perte de données", "Restauration rapide en cas de problème"],
+            "risks": []
         })
         
         # Créer les propositions dans la base
