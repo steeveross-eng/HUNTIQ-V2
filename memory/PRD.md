@@ -30,6 +30,10 @@
 │   │   ├── MonTerritoireBionicPage.jsx  # Territory BIONIC page (2500+ lines)
 │   │   ├── ShopPage.jsx       # E-commerce shop
 │   │   └── ...
+│   ├── styles/                # NEW: Styles cartographiques BIONIC
+│   │   ├── BionicZoneStyles.js    # Système de styles multi-moteur
+│   │   ├── BionicStyleExporter.js # Export QGIS/ArcGIS/Mapbox
+│   │   └── bionic-zones.css       # CSS pour les zones
 │   ├── services/
 │   │   └── WaterExclusionService.js  # BIONIC water mask v5 - RELOCATION
 │   └── components/
