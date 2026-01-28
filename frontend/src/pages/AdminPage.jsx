@@ -1112,6 +1112,18 @@ const AdminPage = ({ onProductsUpdate }) => {
           <TabsContent value="optimization" className="space-y-6">
             <AutoOptimizationPanel />
           </TabsContent>
+
+          {/* Urban Module BIONIC™ Tab */}
+          <TabsContent value="urban" className="space-y-6">
+            <UrbanModuleAdminPanel 
+              onConfigChange={(config) => {
+                console.log('[Admin] Urban config changed:', config);
+                toast.success('Configuration urbaine mise à jour');
+              }}
+              currentStats={{}}
+              qaReport={null}
+            />
+          </TabsContent>
         </Tabs>
       </div>
     </main>
