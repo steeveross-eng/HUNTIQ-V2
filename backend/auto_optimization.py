@@ -163,6 +163,44 @@ async def reject_proposal(proposal_id: str, rejection: ProposalRejection):
 # GESTION DES VERSIONS
 # ================================
 
+def create_version_backup_sync(description: str = ""):
+    """Crée un backup versionné (version synchrone pour usage interne)"""
+    try:
+        db = get_db()
+        timestamp = datetime.now(timezone.utc)
+        version_id = f"BIONIC_v{timestamp.strftime('%Y%m%d_%H%M%S')}"
+        
+        version_data = {
+            "version_id": version_id,
+            "description": description or f"Backup automatique - {timestamp.strftime('%d/%m/%Y %H:%M')}",
+            "created_at": timestamp.isoformat(),
+            "modules": ["bionic", "territory", "waypoints", "zones", "config"],
+            "module_snapshots": {}
+        }
+        
+        # Capturer l'état
+        try:
+            version_data["module_snapshots"]["waypoints"] = list(db.waypoints.find({}, {"_id": 0}))
+        except:
+            version_data["module_snapshots"]["waypoints"] = []
+        
+        try:
+            version_data["module_snapshots"]["zones"] = list(db.zones.find({}, {"_id": 0}))
+        except:
+            version_data["module_snapshots"]["zones"] = []
+            
+        try:
+            config = db.app_config.find_one({}, {"_id": 0})
+            version_data["module_snapshots"]["config"] = config or {}
+        except:
+            version_data["module_snapshots"]["config"] = {}
+        
+        result = db.optimization_versions.insert_one(version_data)
+        return str(result.inserted_id), version_id
+    except Exception as e:
+        print(f"Error creating backup: {e}")
+        return None, None
+
 @router.get("/versions")
 async def get_versions():
     """Récupère l'historique des versions sauvegardées"""
