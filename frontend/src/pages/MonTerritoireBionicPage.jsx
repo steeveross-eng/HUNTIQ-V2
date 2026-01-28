@@ -2010,59 +2010,14 @@ const MonTerritoireBionicPage = () => {
                     </div>
                   )}
                   
-                  {/* EXCLUSION PERMANENTE DES ZONES AQUATIQUES - BIONIC_water_mask_v3 */}
-                  <div className="bg-cyan-900/40 rounded-lg p-3 border border-cyan-500/40">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Waves className="h-4 w-4 text-cyan-400" />
-                        <span className="text-xs font-medium text-cyan-400">Masque Hydrique</span>
-                      </div>
-                      <Badge className="bg-cyan-500/20 text-cyan-300 text-[9px] px-1.5">
-                        v3 ACTIF
-                      </Badge>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-gray-400">Buffer sécurité</span>
-                        <span className="text-cyan-300">5m</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-gray-400">Seuil chevauchement</span>
-                        <span className="text-cyan-300">&gt;1%</span>
-                      </div>
-                      {activeWaypoints?.length > 0 && isFilteringWater ? (
-                        <div className="flex items-center gap-2 text-[10px] text-cyan-300">
-                          <RefreshCw className="h-3 w-3 animate-spin" />
-                          Analyse multi-sources...
-                        </div>
-                      ) : activeWaypoints?.length > 0 && waterExclusionStats ? (
-                        <>
-                          {waterExclusionStats.relocated > 0 && (
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="text-gray-400">Relocalisées</span>
-                              <span className="text-blue-400">
-                                {waterExclusionStats.relocated}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-gray-400">Exclues</span>
-                            <span className={waterExclusionStats.excluded > 0 ? "text-orange-400" : "text-green-400"}>
-                              {waterExclusionStats.excluded} / {waterExclusionStats.total}
-                            </span>
-                          </div>
-                          <div className="text-[9px] text-gray-500 mt-1">
-                            {waterExclusionStats.ruleset || 'BIONIC_water_mask_v4'}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-[10px] text-green-400 flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          Protection active
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* EXCLUSION PERMANENTE DES ZONES AQUATIQUES - Composant modulaire */}
+                  <WaterMaskStats
+                    activeWaypoints={activeWaypoints}
+                    isFilteringWater={isFilteringWater}
+                    waterExclusionStats={waterExclusionStats}
+                    visibleZonesCount={filteredMicroZones?.length}
+                    zoneDisplayMode={zoneDisplayMode}
+                  />
                   
                   {/* Alertes conditions optimales */}
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
