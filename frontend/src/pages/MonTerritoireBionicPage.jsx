@@ -1849,39 +1849,20 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
-              {/* GPS LIVE - Affichage en forme de flèche suivant le curseur (seulement si activé) */}
+              {/* GPS LIVE - Affichage avec flèche pointant vers le bas (vers le point GPS) */}
               {gpsLiveEnabled && cursorPosition && cursorData && (
                 <div 
                   className="fixed pointer-events-none z-[10000]"
                   style={{
                     left: `${(cursorPosition.pixel?.x || 0) + 230}px`,
-                    top: `${(cursorPosition.pixel?.y || 0) + 160}px`,
+                    top: `${(cursorPosition.pixel?.y || 0) + 100}px`,
+                    transform: 'translateX(-50%)'
                   }}
                 >
-                  {/* Conteneur avec flèche pointant vers le point précis */}
-                  <div className="relative flex items-start">
-                    {/* Pointe de flèche triangulaire */}
-                    <div 
-                      className="flex-shrink-0"
-                      style={{
-                        width: 0,
-                        height: 0,
-                        borderTop: '10px solid transparent',
-                        borderBottom: '10px solid transparent',
-                        borderRight: '16px solid #f5a623',
-                        marginTop: '8px',
-                        filter: 'drop-shadow(2px 0 4px rgba(0,0,0,0.5))'
-                      }}
-                    />
-                    
+                  {/* Conteneur vertical avec bulle en haut et flèche pointant vers le bas */}
+                  <div className="relative flex flex-col items-center">
                     {/* Corps de la bulle d'info */}
-                    <div className="bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623] shadow-xl shadow-black/60 rounded-r-lg rounded-b-lg">
-                      {/* Point GPS précis indicator */}
-                      <div className="absolute -left-4 top-3 flex items-center">
-                        <div className="w-2 h-2 bg-[#f5a623] rounded-full animate-ping" />
-                        <div className="absolute w-1.5 h-1.5 bg-white rounded-full left-0.5 top-0.5" />
-                      </div>
-                      
+                    <div className="bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623] shadow-xl shadow-black/60 rounded-lg">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         <span className="text-[#f5a623] text-xs font-bold tracking-wider">GPS LIVE</span>
@@ -1905,6 +1886,30 @@ const MonTerritoireBionicPage = () => {
                             : `${cursorData.distanceFromUser.toFixed(2)} km`}
                         </div>
                       )}
+                    </div>
+                    
+                    {/* Tige de la flèche */}
+                    <div 
+                      className="w-0.5 bg-[#f5a623]"
+                      style={{ height: '20px' }}
+                    />
+                    
+                    {/* Pointe de flèche triangulaire pointant vers le BAS */}
+                    <div 
+                      style={{
+                        width: 0,
+                        height: 0,
+                        borderLeft: '8px solid transparent',
+                        borderRight: '8px solid transparent',
+                        borderTop: '14px solid #f5a623',
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                      }}
+                    />
+                    
+                    {/* Point GPS animé sous la flèche */}
+                    <div className="relative mt-1">
+                      <div className="w-3 h-3 bg-[#f5a623] rounded-full animate-ping absolute -left-0.5 -top-0.5 opacity-50" />
+                      <div className="w-2 h-2 bg-white rounded-full border-2 border-[#f5a623]" />
                     </div>
                   </div>
                 </div>
