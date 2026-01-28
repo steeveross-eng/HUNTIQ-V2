@@ -3,7 +3,7 @@
 ## Project Overview
 **Application**: HUNTIQ / Chasse Bionic™  
 **Type**: Full-stack hunting platform with AI-powered analysis, marketplace, territory mapping, and e-commerce  
-**Last Updated**: January 27, 2026
+**Last Updated**: January 28, 2026
 
 ---
 
@@ -27,10 +27,13 @@
 │   ├── App.js                 # Main React app
 │   ├── pages/
 │   │   ├── AdminPage.jsx      # Admin panel (1000+ lines)
+│   │   ├── MonTerritoireBionicPage.jsx  # Territory BIONIC page (2500+ lines)
 │   │   ├── ShopPage.jsx       # E-commerce shop
 │   │   └── ...
+│   ├── services/
+│   │   └── WaterExclusionService.js  # BIONIC water mask v5 - RELOCATION
 │   └── components/
-│       ├── CloudBackupManager.jsx  # NEW: Cloud backup UI
+│       ├── CloudBackupManager.jsx  # Cloud backup UI
 │       ├── TerritoryMap.jsx        # Interactive Quebec map
 │       └── ...
 └── memory/PRD.md
