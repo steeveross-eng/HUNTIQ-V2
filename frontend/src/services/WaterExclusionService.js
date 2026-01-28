@@ -1,9 +1,9 @@
 /**
- * WaterExclusionService.js - BIONIC_water_mask_v4
+ * WaterExclusionService.js - BIONIC_water_mask_v5
  * 
- * Service PERMANENT d'exclusion et RELOCALISATION des zones aquatiques.
- * PROTOCOLE: Si une zone est dans l'eau → relocaliser à 5m du bord.
- * Garantie 200%: AUCUNE zone ne peut être dans l'eau.
+ * Service PERMANENT de RELOCALISATION des zones aquatiques.
+ * PROTOCOLE: Si une zone est dans l'eau → RELOCALISER à 5m du bord vers la terre.
+ * Garantie: AUCUNE zone ne doit rester dans l'eau.
  */
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
@@ -14,7 +14,9 @@ const CONFIG = Object.freeze({
   FETCH_RADIUS_METERS: 15000,
   ENABLED: true,
   RELOCATION_DISTANCE_M: 5,
-  SEARCH_RADIUS_M: 500
+  SEARCH_RADIUS_M: 1000,
+  SEARCH_DIRECTIONS: 72,
+  SEARCH_STEP_M: 5
 });
 
 // Cache pour les données hydrographiques
@@ -40,27 +42,82 @@ const hydroCache = {
 };
 
 // ════════════════════════════════════════════════════════════════
-// DÉFINITION DES ZONES DE TERRE (ce qui N'EST PAS de l'eau)
+// DÉFINITION COMPLÈTE DE L'ÎLE D'ORLÉANS ET TERRES FERMES
+// Polygones précis pour toute l'île
 // ════════════════════════════════════════════════════════════════
 
-// Polygone réduit de l'île d'Orléans (seulement le centre)
-const ILE_ORLEANS_CENTER = [
-  [46.862, -71.00], [46.866, -70.94], [46.870, -70.86], [46.872, -70.78],
-  [46.870, -70.70], [46.866, -70.64], [46.860, -70.60], [46.852, -70.58],
-  [46.844, -70.58], [46.838, -70.62], [46.834, -70.68], [46.834, -70.76],
-  [46.836, -70.84], [46.840, -70.92], [46.846, -70.98], [46.854, -71.02],
-  [46.862, -71.00]
+// Polygone complet de l'île d'Orléans (contour extérieur)
+const ILE_ORLEANS_FULL = [
+  // Pointe ouest (Sainte-Pétronille)
+  [46.8510, -71.1290],
+  [46.8550, -71.1200],
+  [46.8600, -71.1050],
+  [46.8640, -71.0850],
+  // Côte nord-ouest
+  [46.8680, -71.0600],
+  [46.8720, -71.0300],
+  [46.8750, -71.0000],
+  [46.8770, -70.9700],
+  [46.8780, -70.9400],
+  [46.8790, -70.9100],
+  // Centre nord
+  [46.8800, -70.8800],
+  [46.8790, -70.8500],
+  [46.8780, -70.8200],
+  [46.8760, -70.7900],
+  [46.8740, -70.7600],
+  // Côte nord-est
+  [46.8710, -70.7300],
+  [46.8680, -70.7000],
+  [46.8640, -70.6700],
+  [46.8590, -70.6400],
+  // Pointe est (Saint-François)
+  [46.8540, -70.6200],
+  [46.8480, -70.6100],
+  [46.8420, -70.6000],
+  [46.8360, -70.5950],
+  [46.8300, -70.5920],
+  [46.8240, -70.5920],
+  // Côte sud-est
+  [46.8180, -70.5950],
+  [46.8120, -70.6100],
+  [46.8080, -70.6300],
+  [46.8050, -70.6500],
+  [46.8030, -70.6800],
+  // Côte sud
+  [46.8020, -70.7100],
+  [46.8020, -70.7400],
+  [46.8030, -70.7700],
+  [46.8040, -70.8000],
+  [46.8050, -70.8300],
+  // Côte sud-ouest
+  [46.8060, -70.8600],
+  [46.8080, -70.8900],
+  [46.8100, -70.9200],
+  [46.8130, -70.9500],
+  [46.8170, -70.9800],
+  [46.8210, -71.0100],
+  // Retour pointe ouest
+  [46.8270, -71.0400],
+  [46.8330, -71.0650],
+  [46.8400, -71.0850],
+  [46.8460, -71.1050],
+  [46.8510, -71.1290]
 ];
 
-// Triangle très réduit pour Sainte-Pétronille
-const STE_PETRONILLE = {
-  p1: { lat: 46.856, lng: -71.10 },
-  p2: { lat: 46.860, lng: -71.04 },
-  p3: { lat: 46.850, lng: -71.04 }
-};
+// Zone tampon supplémentaire pour Sainte-Pétronille (pointe ouest de l'île)
+const STE_PETRONILLE_EXTENDED = [
+  [46.8450, -71.1350],
+  [46.8550, -71.1350],
+  [46.8620, -71.1100],
+  [46.8600, -71.0900],
+  [46.8480, -71.0900],
+  [46.8400, -71.1100],
+  [46.8450, -71.1350]
+];
 
 /**
- * Test point-in-polygon
+ * Test point-in-polygon utilisant l'algorithme ray-casting
  */
 function pointInPolygon(lat, lng, polygon) {
   let inside = false;
@@ -75,48 +132,53 @@ function pointInPolygon(lat, lng, polygon) {
 }
 
 /**
- * Test point-in-triangle
+ * Calcule la distance approximative en mètres entre deux points
  */
-function pointInTriangle(px, py, ax, ay, bx, by, cx, cy) {
-  const v0x = cx - ax, v0y = cy - ay;
-  const v1x = bx - ax, v1y = by - ay;
-  const v2x = px - ax, v2y = py - ay;
-  const dot00 = v0x * v0x + v0y * v0y;
-  const dot01 = v0x * v1x + v0y * v1y;
-  const dot02 = v0x * v2x + v0y * v2y;
-  const dot11 = v1x * v1x + v1y * v1y;
-  const dot12 = v1x * v2x + v1y * v2y;
-  const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-  const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-  const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-  return (u >= 0) && (v >= 0) && (u + v < 1);
+function distanceInMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Rayon de la Terre en mètres
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
 /**
  * Vérifie si un point est sur TERRE FERME
- * Retourne true si le point est CERTAINEMENT sur terre
+ * Utilise plusieurs zones de détection
  */
 function isPointOnLand(lat, lng) {
-  // Rive nord (Québec/Beauport) - latitude haute
-  if (lat > 46.87 && lng > -71.28 && lng < -71.02) {
+  // 1. Zone hors du fleuve Saint-Laurent (latitude très haute ou très basse)
+  if (lat > 46.92) return true;  // Nord de Québec
+  if (lat < 46.78) return true;  // Sud du fleuve (Lévis et au-delà)
+  
+  // 2. Hors de la zone longitudinale du fleuve
+  if (lng > -70.55 || lng < -71.35) return true;
+  
+  // 3. Rive nord (Québec/Beauport) - zone élargie
+  if (lat > 46.86 && lng > -71.32 && lng < -70.98) {
     return true;
   }
   
-  // Rive sud (Lévis) - latitude basse
-  if (lat < 46.83 && lng > -71.28 && lng < -70.58) {
+  // 4. Rive nord côté est (Beauport vers Château-Richer)
+  if (lat > 46.87 && lng >= -70.98 && lng < -70.75) {
     return true;
   }
   
-  // Centre de l'île d'Orléans
-  if (pointInPolygon(lat, lng, ILE_ORLEANS_CENTER)) {
+  // 5. Rive sud (Lévis) - zone élargie
+  if (lat < 46.84 && lng > -71.32 && lng < -70.55) {
     return true;
   }
   
-  // Triangle de Sainte-Pétronille
-  if (pointInTriangle(lat, lng, 
-      STE_PETRONILLE.p1.lat, STE_PETRONILLE.p1.lng,
-      STE_PETRONILLE.p2.lat, STE_PETRONILLE.p2.lng,
-      STE_PETRONILLE.p3.lat, STE_PETRONILLE.p3.lng)) {
+  // 6. Île d'Orléans (polygone complet)
+  if (pointInPolygon(lat, lng, ILE_ORLEANS_FULL)) {
+    return true;
+  }
+  
+  // 7. Extension Sainte-Pétronille
+  if (pointInPolygon(lat, lng, STE_PETRONILLE_EXTENDED)) {
     return true;
   }
   
@@ -124,63 +186,73 @@ function isPointOnLand(lat, lng) {
 }
 
 /**
- * DÉTECTION ULTRA-STRICTE - Un point est dans l'EAU si:
- * - Il est dans la zone du fleuve Saint-Laurent
- * - ET il n'est PAS sur une terre connue
+ * Vérifie si un point est dans l'EAU du fleuve Saint-Laurent
  */
 function isPointInWater(lat, lng) {
-  // Hors zone du fleuve
-  if (lat < 46.76 || lat > 46.94 || lng < -71.40 || lng > -70.45) {
+  // Hors zone de détection du fleuve
+  if (lat < 46.76 || lat > 46.94 || lng < -71.40 || lng > -70.50) {
     return { inWater: false };
   }
   
-  // Vérifier si c'est sur terre
+  // Si le point est sur terre, ce n'est pas de l'eau
   if (isPointOnLand(lat, lng)) {
     return { inWater: false };
   }
   
-  // Tout le reste dans la zone est de l'EAU
+  // Tout le reste dans cette zone = EAU
   return { inWater: true, name: 'Fleuve Saint-Laurent' };
 }
 
 /**
- * Trouve le point de terre le plus proche
+ * Trouve le point de terre le plus proche et retourne une position
+ * relocalisée à 5m à l'intérieur des terres
  */
 function findNearestLandPoint(lat, lng) {
   const degPerMeter = 1 / 111320;
-  let closestLand = null;
+  const cosLat = Math.cos(lat * Math.PI / 180);
+  
+  let bestLand = null;
   let minDist = Infinity;
   
-  // Chercher dans 36 directions
-  for (let step = 0; step < 36; step++) {
-    const angle = (step / 36) * 2 * Math.PI;
+  // Recherche dans 72 directions (tous les 5 degrés)
+  for (let step = 0; step < CONFIG.SEARCH_DIRECTIONS; step++) {
+    const angle = (step / CONFIG.SEARCH_DIRECTIONS) * 2 * Math.PI;
     
-    for (let dist = 10; dist <= CONFIG.SEARCH_RADIUS_M; dist += 10) {
-      const distDeg = dist * degPerMeter;
-      const testLat = lat + distDeg * Math.cos(angle);
-      const testLng = lng + (distDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle);
+    // Chercher la terre la plus proche dans cette direction
+    for (let dist = CONFIG.SEARCH_STEP_M; dist <= CONFIG.SEARCH_RADIUS_M; dist += CONFIG.SEARCH_STEP_M) {
+      const distDegLat = dist * degPerMeter;
+      const distDegLng = dist * degPerMeter / cosLat;
+      
+      const testLat = lat + distDegLat * Math.cos(angle);
+      const testLng = lng + distDegLng * Math.sin(angle);
       
       if (isPointOnLand(testLat, testLng)) {
+        // Trouvé de la terre! Vérifier si c'est la plus proche
         if (dist < minDist) {
           minDist = dist;
-          // Reculer de 5m pour être à 5m du bord
-          const safeDistDeg = (dist + CONFIG.RELOCATION_DISTANCE_M) * degPerMeter;
-          closestLand = {
-            lat: lat + safeDistDeg * Math.cos(angle),
-            lng: lng + (safeDistDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle),
-            distance: dist
+          
+          // Calculer le point relocalisé: 5m plus loin dans la même direction (à l'intérieur des terres)
+          const safeDist = dist + CONFIG.RELOCATION_DISTANCE_M;
+          const safeDistDegLat = safeDist * degPerMeter;
+          const safeDistDegLng = safeDist * degPerMeter / cosLat;
+          
+          bestLand = {
+            lat: lat + safeDistDegLat * Math.cos(angle),
+            lng: lng + safeDistDegLng * Math.sin(angle),
+            distance: dist,
+            direction: angle * 180 / Math.PI
           };
         }
-        break;
+        break; // Passer à la direction suivante
       }
     }
   }
   
-  return closestLand;
+  return bestLand;
 }
 
 /**
- * Récupère les surfaces d'eau depuis l'API
+ * Récupère les surfaces d'eau depuis l'API (cache si disponible)
  */
 async function fetchWaterFeatures(bounds) {
   const cached = hydroCache.get(bounds);
@@ -207,7 +279,7 @@ async function fetchWaterFeatures(bounds) {
       return features;
     }
   } catch (error) {
-    console.error('[WaterExclusion] API error:', error);
+    // Silencieux - on utilise les polygones statiques
   }
   
   return [];
@@ -215,34 +287,38 @@ async function fetchWaterFeatures(bounds) {
 
 /**
  * FONCTION PRINCIPALE - Filtre et RELOCALISE les zones dans l'eau
+ * AUCUNE zone ne doit rester dans l'eau - elles sont toutes relocalisées vers la terre
  */
 export async function filterZonesFromWater(zones, bounds) {
   if (!zones || zones.length === 0) {
     return { 
       filteredZones: [], 
-      stats: { total: 0, kept: 0, relocated: 0, excluded: 0, ruleset: 'BIONIC_water_mask_v4' }
+      stats: { total: 0, kept: 0, relocated: 0, excluded: 0, ruleset: 'BIONIC_water_mask_v5' }
     };
   }
   
-  await fetchWaterFeatures(bounds); // Précharger le cache
+  // Précharger le cache (même si on utilise principalement les polygones statiques)
+  await fetchWaterFeatures(bounds);
   
   const validZones = [];
   let relocatedCount = 0;
   let excludedCount = 0;
+  let onLandCount = 0;
   
   for (const zone of zones) {
     const center = zone.center || [zone.lat, zone.lng];
     const [lat, lng] = center;
     const radius = zone.radiusMeters || 100;
     
-    // Vérifier le centre
+    // Vérifier si le centre est dans l'eau
     const centerCheck = isPointInWater(lat, lng);
     
     if (centerCheck.inWater) {
-      // RELOCALISER vers la terre la plus proche
+      // Centre dans l'eau - DOIT être relocalisé
       const nearestLand = findNearestLandPoint(lat, lng);
       
       if (nearestLand) {
+        // Relocalisation réussie
         relocatedCount++;
         validZones.push({
           ...zone,
@@ -250,22 +326,26 @@ export async function filterZonesFromWater(zones, bounds) {
           lat: nearestLand.lat,
           lng: nearestLand.lng,
           _relocated: true,
-          _originalCenter: [lat, lng]
+          _originalCenter: [lat, lng],
+          _relocationDistance: nearestLand.distance,
+          _relocationDirection: nearestLand.direction
         });
       } else {
+        // Impossible de relocaliser - exclure (cas rare)
         excludedCount++;
       }
       continue;
     }
     
-    // Vérifier le périmètre (8 points)
+    // Centre OK - vérifier aussi le périmètre (8 points)
     let perimeterInWater = false;
     const radiusDeg = radius / 111320;
+    const cosLat = Math.cos(lat * Math.PI / 180);
     
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * 2 * Math.PI;
       const checkLat = lat + radiusDeg * Math.cos(angle);
-      const checkLng = lng + (radiusDeg / Math.cos(lat * Math.PI / 180)) * Math.sin(angle);
+      const checkLng = lng + (radiusDeg / cosLat) * Math.sin(angle);
       
       if (isPointInWater(checkLat, checkLng).inWater) {
         perimeterInWater = true;
@@ -274,7 +354,7 @@ export async function filterZonesFromWater(zones, bounds) {
     }
     
     if (perimeterInWater) {
-      // Périmètre touche l'eau - relocaliser
+      // Le périmètre touche l'eau - relocaliser vers l'intérieur des terres
       const nearestLand = findNearestLandPoint(lat, lng);
       
       if (nearestLand) {
@@ -285,7 +365,9 @@ export async function filterZonesFromWater(zones, bounds) {
           lat: nearestLand.lat,
           lng: nearestLand.lng,
           _relocated: true,
-          _originalCenter: [lat, lng]
+          _originalCenter: [lat, lng],
+          _relocationReason: 'perimeterInWater',
+          _relocationDistance: nearestLand.distance
         });
       } else {
         excludedCount++;
@@ -293,26 +375,27 @@ export async function filterZonesFromWater(zones, bounds) {
       continue;
     }
     
-    // Zone OK sur terre
+    // Zone entièrement sur terre - garder telle quelle
+    onLandCount++;
     validZones.push(zone);
   }
   
   const stats = {
     total: zones.length,
-    kept: validZones.length - relocatedCount,
+    kept: onLandCount,
     relocated: relocatedCount,
     excluded: excludedCount,
-    ruleset: 'BIONIC_water_mask_v4'
+    ruleset: 'BIONIC_water_mask_v5'
   };
   
   if (relocatedCount > 0 || excludedCount > 0) {
-    console.log(`[BIONIC_water_mask_v4] ${relocatedCount} relocalisées, ${excludedCount} exclues / ${zones.length}`);
+    console.log(`[BIONIC_water_mask_v5] ✓ ${relocatedCount} relocalisées, ${excludedCount} exclues, ${onLandCount} sur terre / ${zones.length} total`);
   }
   
   return { filteredZones: validZones, stats };
 }
 
-// Export pour compatibilité
+// Exports pour compatibilité
 export async function filterZonesViaAPI(zones, bounds) {
   return filterZonesFromWater(zones, bounds);
 }
