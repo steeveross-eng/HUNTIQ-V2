@@ -72,6 +72,24 @@
 
 ## What's Been Implemented
 
+### Phase 52 (January 28, 2026) - Water Exclusion & GPS LIVE ✅
+
+**CRITICAL FIX: BIONIC Water Mask v5 - Zone Relocation**
+- Zones d'attraction dans l'eau sont maintenant **RELOCALISÉES** à 5m à l'intérieur des terres
+- Aucune zone n'est plus exclue - toutes sont relocalisées vers la terre la plus proche
+- Polygone complet de l'Île d'Orléans pour une détection précise
+- Algorithme de recherche en 72 directions pour trouver la terre la plus proche
+- Statistiques affichées: "Relocalisées: X" au lieu de "Exclues: X"
+
+**GPS LIVE Enhancement**
+- Design amélioré avec flèche triangulaire pointant vers le bas
+- Bulle d'info avec bordure orange
+- Animation du point GPS
+
+**Files Modified:**
+- `/app/frontend/src/services/WaterExclusionService.js` (REFACTORED - v5)
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` (GPS LIVE design)
+
 ### Phase 51+ (January 27, 2026) - Cloud Backup System ✅
 
 **NEW Features:**
