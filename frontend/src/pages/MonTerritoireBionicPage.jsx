@@ -2267,6 +2267,8 @@ const MonTerritoireBionicPage = () => {
                               onCheckedChange={() => toggleWaypointActive(wp.id)} 
                               className="data-[state=checked]:bg-[#f5a623]" 
                               onClick={(e) => e.stopPropagation()}
+                              disabled={!wp.active && activeWaypoints.length >= 2}
+                              title={!wp.active && activeWaypoints.length >= 2 ? "Limite de 2 waypoints actifs atteinte" : ""}
                             />
                             <Button 
                               variant="ghost" 
