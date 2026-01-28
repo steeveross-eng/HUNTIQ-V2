@@ -148,6 +148,7 @@ const ProposalCard = ({ proposal, onApprove, onReject, onPreview, disabled }) =>
               <Button
                 onClick={() => onApprove(proposal.id)}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                disabled={disabled}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Accepter les changements
@@ -156,6 +157,7 @@ const ProposalCard = ({ proposal, onApprove, onReject, onPreview, disabled }) =>
                 variant="outline"
                 onClick={() => onReject(proposal.id)}
                 className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                disabled={disabled}
               >
                 <XCircle className="h-4 w-4 mr-2" />
                 Rejeter
@@ -168,8 +170,86 @@ const ProposalCard = ({ proposal, onApprove, onReject, onPreview, disabled }) =>
   );
 };
 
+// Composant pour la configuration du module
+const ModuleConfigPanel = ({ config, onConfigChange, onSave, saving }) => {
+  return (
+    <Card className="bg-gray-800/50 border-gray-700 mb-6">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-white text-lg flex items-center gap-2">
+          <Settings className="h-5 w-5 text-gray-400" />
+          Configuration du module
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Toggle ON/OFF */}
+        <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Power className={`h-5 w-5 ${config.enabled ? 'text-green-400' : 'text-gray-500'}`} />
+            <div>
+              <Label className="text-white font-medium">Module activé</Label>
+              <p className="text-xs text-gray-400">Active ou désactive l'auto-optimisation</p>
+            </div>
+          </div>
+          <Switch
+            checked={config.enabled}
+            onCheckedChange={(checked) => onConfigChange({ ...config, enabled: checked })}
+            className="data-[state=checked]:bg-green-500"
+          />
+        </div>
+
+        {/* Notifications email */}
+        <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Bell className={`h-5 w-5 ${config.email_notifications ? 'text-blue-400' : 'text-gray-500'}`} />
+            <div>
+              <Label className="text-white font-medium">Notifications email</Label>
+              <p className="text-xs text-gray-400">Recevoir des alertes par email</p>
+            </div>
+          </div>
+          <Switch
+            checked={config.email_notifications}
+            onCheckedChange={(checked) => onConfigChange({ ...config, email_notifications: checked })}
+            className="data-[state=checked]:bg-blue-500"
+          />
+        </div>
+
+        {/* Email de notification */}
+        {config.email_notifications && (
+          <div className="p-3 bg-gray-900/50 rounded-lg space-y-2">
+            <Label className="text-white text-sm flex items-center gap-2">
+              <Mail className="h-4 w-4 text-gray-400" />
+              Adresse email pour les notifications
+            </Label>
+            <Input
+              type="email"
+              value={config.notification_email || ''}
+              onChange={(e) => onConfigChange({ ...config, notification_email: e.target.value })}
+              placeholder="admin@exemple.com"
+              className="bg-gray-800 border-gray-600 text-white"
+            />
+          </div>
+        )}
+
+        {/* Bouton sauvegarder */}
+        <Button
+          onClick={onSave}
+          disabled={saving}
+          className="w-full bg-[#f5a623] hover:bg-[#f5a623]/80 text-black"
+        >
+          {saving ? (
+            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4 mr-2" />
+          )}
+          Sauvegarder la configuration
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 // Composant pour l'historique des versions
-const VersionHistoryItem = ({ version, onRestore, isLatest }) => {
+const VersionHistoryItem = ({ version, onRestore, isLatest, disabled }) => {
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg ${isLatest ? 'bg-green-900/20 border border-green-500/30' : 'bg-gray-800/30 border border-gray-700'}`}>
       <div className="flex items-center gap-3">
@@ -189,6 +269,7 @@ const VersionHistoryItem = ({ version, onRestore, isLatest }) => {
           size="sm"
           onClick={() => onRestore(version.id)}
           className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+          disabled={disabled}
         >
           <RotateCcw className="h-4 w-4 mr-1" />
           Restaurer
