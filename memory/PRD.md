@@ -72,6 +72,23 @@
 
 ## What's Been Implemented
 
+### Phase 52e (January 28, 2026) - Email Notifications & Toggle Control ✅
+
+**Notifications par email et contrôle ON/OFF ajoutés**
+
+Nouvelles fonctionnalités:
+- ✅ **Toggle ON/OFF** du module visible dans le header (badge ACTIF/INACTIF)
+- ✅ **Panneau de configuration** accessible via bouton "Paramètres"
+- ✅ **Notifications email** configurables avec adresse email personnalisée
+- ✅ **Désactivation complète** du module possible (boutons grisés)
+- ✅ **Email automatique** lors de nouvelles propositions d'optimisation
+- ✅ **Email automatique** lors de création de backup
+
+**API Endpoints ajoutés:**
+- `GET /api/admin/optimization/config` - Récupérer la configuration
+- `POST /api/admin/optimization/config` - Sauvegarder la configuration
+- `POST /api/admin/optimization/toggle` - Toggle rapide ON/OFF
+
 ### Phase 52d (January 28, 2026) - Auto-Optimization Module BIONIC™ ✅
 
 **Module d'Auto-Optimisation avec approbation administrateur**
