@@ -432,22 +432,75 @@ const AutoOptimizationPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header avec Toggle ON/OFF */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/20 rounded-lg">
-            <Brain className="h-6 w-6 text-purple-400" />
+          <div className={`p-2 rounded-lg ${config.enabled ? 'bg-purple-500/20' : 'bg-gray-700'}`}>
+            <Brain className={`h-6 w-6 ${config.enabled ? 'text-purple-400' : 'text-gray-500'}`} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               Module d'Auto-Optimisation
-              <Sparkles className="h-5 w-5 text-yellow-400" />
+              <Sparkles className={`h-5 w-5 ${config.enabled ? 'text-yellow-400' : 'text-gray-500'}`} />
             </h2>
             <p className="text-gray-400 text-sm">Amélioration continue avec approbation administrateur</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Toggle ON/OFF principal */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${config.enabled ? 'bg-green-900/30 border border-green-500/30' : 'bg-red-900/30 border border-red-500/30'}`}>
+            <Power className={`h-4 w-4 ${config.enabled ? 'text-green-400' : 'text-red-400'}`} />
+            <span className={`text-sm font-medium ${config.enabled ? 'text-green-400' : 'text-red-400'}`}>
+              {config.enabled ? 'ACTIF' : 'INACTIF'}
+            </span>
+            <Switch
+              checked={config.enabled}
+              onCheckedChange={handleQuickToggle}
+              className="data-[state=checked]:bg-green-500"
+            />
+          </div>
+          
+          {/* Bouton paramètres */}
           <Button
+            variant="outline"
+            onClick={() => setShowConfigPanel(!showConfigPanel)}
+            className={`border-gray-600 ${showConfigPanel ? 'bg-gray-700' : ''}`}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Paramètres
+          </Button>
+        </div>
+      </div>
+
+      {/* Panneau de configuration (conditionnel) */}
+      {showConfigPanel && (
+        <ModuleConfigPanel
+          config={config}
+          onConfigChange={setConfig}
+          onSave={handleSaveConfig}
+          saving={saving}
+        />
+      )}
+
+      {/* Bannière si module désactivé */}
+      {!config.enabled && (
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+          <Power className="h-6 w-6 text-red-400" />
+          <div>
+            <p className="text-red-400 font-medium">Module désactivé</p>
+            <p className="text-red-400/70 text-sm">Les analyses automatiques et les actions sont suspendues. Activez le module pour reprendre.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Boutons d'action */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={handleCreateBackup}
+          className="border-gray-600 text-gray-300"
+          disabled={!config.enabled}
+        >
             variant="outline"
             onClick={handleCreateBackup}
             className="border-gray-600 text-gray-300"
