@@ -1,6 +1,8 @@
 /**
  * MonTerritoireBionicPage - Page dédiée Mon Territoire BIONIC™
  * Avec sous-onglets : Carte BIONIC, Waypoints actifs, Lieux enregistrés
+ * 
+ * REFACTORED: Utilise des composants modulaires pour une meilleure performance
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -27,11 +29,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+
+// Hooks BIONIC
 import useBionicLayers from '@/hooks/useBionicLayers';
 import useBionicWeather from '@/hooks/useBionicWeather';
 import useBionicScoring from '@/hooks/useBionicScoring';
 import { useUserData } from '@/hooks/useUserData';
 import { useNotifications, useHuntingGroups } from '@/hooks/useSharing';
+
+// Composants territoire (REFACTORED)
 import { ShareWaypointDialog, CreateGroupDialog, NotificationBell } from '@/components/territoire/ShareComponents';
 import { GroupDashboard } from '@/components/territoire/GroupDashboard';
 import BionicMicroZones, { generateMicroZones, generateMicroZonesForBounds, BIONIC_MODULES } from '@/components/territoire/BionicMicroZones';
@@ -44,6 +50,13 @@ import EcoforestryLayers, {
   ECOFORESTRY_LAYERS,
   EcoMapStatus 
 } from '@/components/territoire/EcoforestryLayers';
+
+// Nouveaux composants modulaires pour optimisation mémoire
+import GPSLiveDisplay from '@/components/territoire/GPSLiveDisplay';
+import WaterMaskStats from '@/components/territoire/WaterMaskStats';
+import ZoneControlPanel from '@/components/territoire/ZoneControlPanel';
+import MapToolbar from '@/components/territoire/MapToolbar';
+
 import { 
   BIONIC_LAYERS, 
   SCORE_CATEGORIES,
