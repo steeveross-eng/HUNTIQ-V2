@@ -377,6 +377,9 @@ const AdminPage = ({ onProductsUpdate }) => {
             <TabsTrigger value="identity" className="data-[state=active]:bg-[#f5a623] data-[state=active]:text-black">
               <Palette className="h-4 w-4 mr-2" />Identité
             </TabsTrigger>
+            <TabsTrigger value="optimization" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="optimization-tab">
+              <Brain className="h-4 w-4 mr-2" />Auto-Optimisation
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
