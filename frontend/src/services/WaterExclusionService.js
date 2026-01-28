@@ -556,17 +556,127 @@ export async function filterZonesFromWater(zones, bounds) {
   return result;
 }
 
+/**
+ * FONCTION PRINCIPALE V6 - Filtre et RELOCALISE les zones (EAU + URBAIN)
+ * Applique les deux règles dans l'ordre:
+ * 1. RELOCATE_FROM_WATER_5M
+ * 2. RELOCATE_FROM_URBAN_200M
+ */
+export async function filterAndRelocateZones(zones, bounds) {
+  if (!zones || zones.length === 0) {
+    return { 
+      filteredZones: [], 
+      stats: { 
+        total: 0, 
+        kept: 0, 
+        fromWater: 0, 
+        fromUrban: 0, 
+        excluded: 0, 
+        ruleset: 'BIONIC_relocation_v6' 
+      }
+    };
+  }
+  
+  // Vérifier le cache
+  const cacheKey = `v6_${zones.length}_${bounds?.north?.toFixed(3) || 0}`;
+  const cachedResult = zoneFilterCache.get(zones, bounds);
+  if (cachedResult && cachedResult.stats?.ruleset === 'BIONIC_relocation_v6') {
+    return cachedResult;
+  }
+  
+  // ÉTAPE 1: Appliquer la règle EAU
+  const waterResult = await filterZonesFromWater(zones, bounds);
+  const afterWater = waterResult.filteredZones;
+  const fromWater = waterResult.stats.relocated;
+  
+  // ÉTAPE 2: Appliquer la règle URBAINE sur les zones restantes
+  const finalZones = [];
+  let fromUrban = 0;
+  let excludedUrban = 0;
+  let unchanged = 0;
+  
+  for (const zone of afterWater) {
+    const center = zone.center || [zone.lat, zone.lng];
+    const [lat, lng] = center;
+    
+    // Vérifier si dans zone urbaine (sauf si déjà relocalisé depuis l'eau)
+    if (!zone._relocated || zone._relocationReason !== 'water') {
+      const urbanCheck = isPointInUrbanZone(lat, lng);
+      
+      if (urbanCheck.inUrban) {
+        // Appliquer RELOCATE_FROM_URBAN_200M
+        const newPosition = relocateFromUrban(lat, lng, zone.score || 50, afterWater);
+        
+        if (newPosition) {
+          fromUrban++;
+          finalZones.push({
+            ...zone,
+            center: [newPosition.lat, newPosition.lng],
+            lat: newPosition.lat,
+            lng: newPosition.lng,
+            _relocated: true,
+            _relocationRule: 'RELOCATE_FROM_URBAN_200M',
+            _originalCenter: zone._originalCenter || [lat, lng],
+            _relocationDistance: newPosition.distance,
+            _relocationDirection: newPosition.direction,
+            _urbanZone: urbanCheck.zoneName,
+            _newScore: newPosition.score
+          });
+          continue;
+        } else {
+          // Impossible de relocaliser - exclure
+          excludedUrban++;
+          continue;
+        }
+      }
+    }
+    
+    // Zone OK - conserver
+    unchanged++;
+    finalZones.push(zone);
+  }
+  
+  const stats = {
+    total: zones.length,
+    kept: finalZones.length,
+    fromWater,
+    fromUrban,
+    unchanged,
+    excluded: waterResult.stats.excluded + excludedUrban,
+    ruleset: 'BIONIC_relocation_v6',
+    rules_applied: ['RELOCATE_FROM_WATER_5M', 'RELOCATE_FROM_URBAN_200M']
+  };
+  
+  const result = { filteredZones: finalZones, stats };
+  
+  // Mettre en cache
+  zoneFilterCache.set(zones, bounds, result);
+  
+  if (fromWater > 0 || fromUrban > 0) {
+    console.log(`[BIONIC_relocation_v6] ✓ Eau: ${fromWater}, Urbain: ${fromUrban}, Inchangées: ${unchanged}, Exclues: ${stats.excluded} / ${zones.length} total`);
+  }
+  
+  return result;
+}
+
 // Exports pour compatibilité
 export async function filterZonesViaAPI(zones, bounds) {
-  return filterZonesFromWater(zones, bounds);
+  return filterAndRelocateZones(zones, bounds);
 }
 
 export async function preloadWaterData(bounds) {
   await fetchWaterFeatures(bounds);
 }
 
+// Export des fonctions utilitaires
+export { isPointInUrbanZone, relocateFromUrban };
+
 export default {
   filterZonesFromWater,
+  filterAndRelocateZones,
   filterZonesViaAPI,
-  preloadWaterData
+  preloadWaterData,
+  isPointInUrbanZone,
+  relocateFromUrban,
+  CONFIG
 };
