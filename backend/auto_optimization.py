@@ -481,6 +481,13 @@ async def create_version_backup(backup: VersionBackup):
             for old_version in oldest:
                 db.optimization_versions.delete_one({"_id": old_version["_id"]})
         
+        # Envoyer notification email
+        try:
+            email_html = generate_backup_email(version_id, version_data["description"], backup.modules)
+            await send_optimization_email(f"📦 Backup BIONIC™ créé: {version_id}", email_html)
+        except Exception as email_error:
+            print(f"[AutoOptimization] Email notification failed: {email_error}")
+        
         return {
             "id": str(result.inserted_id),
             "version_id": version_id,
