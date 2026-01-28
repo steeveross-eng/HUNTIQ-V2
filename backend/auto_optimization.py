@@ -275,17 +275,14 @@ async def restore_version(version_id: str):
         if not version:
             raise HTTPException(status_code=404, detail="Version non trouvée")
         
-        # Créer un backup de l'état actuel avant restauration
-        await create_version_backup(VersionBackup(
-            description=f"Backup pré-restauration vers {version.get('version_id', 'unknown')}"
-        ))
+        # Créer un backup de l'état actuel avant restauration (synchrone)
+        create_version_backup_sync(f"Backup pré-restauration vers {version.get('version_id', 'unknown')}")
         
         # Restaurer les snapshots des modules
         snapshots = version.get("module_snapshots", {})
         
         for module, data in snapshots.items():
             if module == "waypoints" and data:
-                # Supprimer les waypoints actuels et restaurer
                 db.waypoints.delete_many({})
                 if len(data) > 0:
                     db.waypoints.insert_many(data)
