@@ -1855,14 +1855,14 @@ const MonTerritoireBionicPage = () => {
                   className="fixed pointer-events-none z-[10000]"
                   style={{
                     left: `${(cursorPosition.pixel?.x || 0) + 230}px`,
-                    top: `${(cursorPosition.pixel?.y || 0) + 100}px`,
+                    top: `${(cursorPosition.pixel?.y || 0) + 60}px`,
                     transform: 'translateX(-50%)'
                   }}
                 >
                   {/* Conteneur vertical avec bulle en haut et flèche pointant vers le bas */}
                   <div className="relative flex flex-col items-center">
                     {/* Corps de la bulle d'info */}
-                    <div className="bg-black/95 backdrop-blur-sm px-3 py-2 border border-[#f5a623] shadow-xl shadow-black/60 rounded-lg">
+                    <div className="bg-black/95 backdrop-blur-sm px-3 py-2 border-2 border-[#f5a623] shadow-xl shadow-black/60 rounded-lg">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         <span className="text-[#f5a623] text-xs font-bold tracking-wider">GPS LIVE</span>
@@ -1888,28 +1888,28 @@ const MonTerritoireBionicPage = () => {
                       )}
                     </div>
                     
-                    {/* Tige de la flèche */}
-                    <div 
-                      className="w-0.5 bg-[#f5a623]"
-                      style={{ height: '20px' }}
-                    />
-                    
-                    {/* Pointe de flèche triangulaire pointant vers le BAS */}
-                    <div 
-                      style={{
-                        width: 0,
-                        height: 0,
-                        borderLeft: '8px solid transparent',
-                        borderRight: '8px solid transparent',
-                        borderTop: '14px solid #f5a623',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
-                      }}
-                    />
-                    
-                    {/* Point GPS animé sous la flèche */}
-                    <div className="relative mt-1">
-                      <div className="w-3 h-3 bg-[#f5a623] rounded-full animate-ping absolute -left-0.5 -top-0.5 opacity-50" />
-                      <div className="w-2 h-2 bg-white rounded-full border-2 border-[#f5a623]" />
+                    {/* Tige et flèche pointant vers le BAS */}
+                    <div className="flex flex-col items-center">
+                      {/* Tige */}
+                      <div className="w-1 h-6 bg-gradient-to-b from-[#f5a623] to-[#f5a623]/80" />
+                      
+                      {/* Pointe de flèche triangulaire */}
+                      <div 
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderLeft: '10px solid transparent',
+                          borderRight: '10px solid transparent',
+                          borderTop: '16px solid #f5a623',
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                        }}
+                      />
+                      
+                      {/* Point GPS animé */}
+                      <div className="relative mt-1">
+                        <div className="w-4 h-4 bg-[#f5a623] rounded-full animate-ping absolute -left-0.5 -top-0.5 opacity-40" />
+                        <div className="w-3 h-3 bg-white rounded-full border-2 border-[#f5a623] shadow-lg" />
+                      </div>
                     </div>
                   </div>
                 </div>
