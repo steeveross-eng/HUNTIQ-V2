@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import "@/App.css";
+import "@/styles/bionic-zones.css";
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
