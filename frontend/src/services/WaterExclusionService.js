@@ -626,16 +626,6 @@ export async function filterZonesFromWater(zones, bounds) {
   
   return { filteredZones: allValidZones, stats };
 }
-    ruleset: 'BIONIC_water_mask_v3',
-    excludedDetails: excludedDetails.slice(0, 10)
-  };
-  
-  if (excludedCount > 0) {
-    console.log(`[BIONIC_water_mask_v3] ${excludedCount}/${zones.length} zones exclues`);
-  }
-  
-  return { filteredZones, stats };
-}
 
 /**
  * Vérifie si une zone touche l'eau avec buffer de 5m
