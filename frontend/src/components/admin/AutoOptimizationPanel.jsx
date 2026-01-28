@@ -564,6 +564,7 @@ const AutoOptimizationPanel = () => {
                 proposal={proposal}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                disabled={!config.enabled}
               />
             ))
           )}
@@ -588,6 +589,7 @@ const AutoOptimizationPanel = () => {
                   setVersionToRestore(version);
                   setShowRestoreDialog(true);
                 }}
+                disabled={!config.enabled}
               />
             ))
           )}
