@@ -76,6 +76,61 @@
 
 ## What's Been Implemented
 
+### Phase 52i (January 28, 2026) - BIONIC_URBAN_MODULE Complet v7 ✅
+
+**Module urbain autonome BIONIC™ avec buffer 2000m, relocalisation intelligente et QA complet**
+
+Nouvelles fonctionnalités:
+- ✅ **Buffer 2000m** - Exclusion stricte dans un rayon de 2000m autour des zones urbaines
+- ✅ **Relocalisation 5000m** - Rayon de recherche étendu pour trouver le meilleur score
+- ✅ **7 couches urbaines** - U_VILLES, U_VILLAGES, U_RESIDENTIEL, U_COMMERCIAL, U_INDUSTRIEL, U_DENSE, U_MUNICIPAL
+- ✅ **URBAIN_FULL** - Union de toutes les couches urbaines
+- ✅ **URBAIN_FULL_BUFFER_2000M** - Buffer géométrique automatique
+- ✅ **QA_URBAN_REPORT** - Contrôle qualité avec 5 vérifications strictes
+- ✅ **Compatible hydrographie** - Évite WATER_FULL et WATER_BUF_5M si disponibles
+
+**Règles d'exclusion urbaines:**
+| ID | Type | Action |
+|----|------|--------|
+| EXCL_INTERSECTS_URBAIN | Intersecte URBAIN_FULL | Flag |
+| EXCL_INTERSECTS_URBAIN_BUFFER | Intersecte buffer 2000m | Flag |
+| EXCL_CENTROID_IN_URBAIN | Centroïde dans URBAIN_FULL | Flag |
+| EXCL_CENTROID_IN_URBAIN_BUFFER | Centroïde dans buffer | Flag |
+
+**Relocalisation RELOCATE_FROM_URBAN_2000M:**
+```
+search_radius: 5000m
+avoid_layers: [URBAIN_FULL, URBAIN_FULL_BUFFER_2000M, WATER_FULL, WATER_BUF_5M]
+strategy: highest_score
+constraints: distance >= 2000m de URBAIN_FULL
+```
+
+**Contrôle Qualité QA_URBAN_2000M:**
+| Check | Description |
+|-------|-------------|
+| QA_URBAN_INTERSECT | Vérifie non-intersection avec URBAIN_FULL |
+| QA_URBAN_INTERSECT_BUFFER | Vérifie non-intersection avec buffer |
+| QA_URBAN_CENTROID | Centroïde hors URBAIN_FULL |
+| QA_URBAN_CENTROID_BUFFER | Centroïde hors buffer |
+| QA_URBAN_DISTANCE | Distance >= 2000m de l'urbain |
+
+**Nouveaux fichiers:**
+- `/app/frontend/src/services/UrbanExclusionService.js` - Module urbain complet (600+ lignes)
+
+**Fichiers modifiés:**
+- `/app/frontend/src/services/WaterExclusionService.js` - Intégration module v7
+- `/app/frontend/src/components/territoire/WaterMaskStats.jsx` - Affichage QA et buffer 2000m
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Utilisation module v7
+
+**Villes et zones urbaines couvertes:**
+- Québec (centre, Limoilou, Montcalm, Sainte-Foy, Beauport, Charlesbourg, Cap-Rouge)
+- Lévis (centre)
+- Montréal (centre-ville)
+- Trois-Rivières
+- Sherbrooke
+- Gatineau
+- Saguenay
+
 ### Phase 52h (January 28, 2026) - Règle de Relocalisation Urbaine ✅
 
 **RELOCATE_FROM_URBAN_200M - Relocalisation automatique des zones en milieu urbain**
