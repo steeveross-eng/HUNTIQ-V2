@@ -76,6 +76,34 @@
 
 ## What's Been Implemented
 
+### Phase 52h (January 28, 2026) - Règle de Relocalisation Urbaine ✅
+
+**RELOCATE_FROM_URBAN_200M - Relocalisation automatique des zones en milieu urbain**
+
+Nouvelles fonctionnalités:
+- ✅ **Détection zones urbaines** - Polygones définis pour Québec, Lévis, Montréal
+- ✅ **Relocalisation 200m** - Vers la position avec le meilleur score d'attractivité
+- ✅ **Stratégie highest_score** - Évaluation des positions candidates par score pondéré
+- ✅ **Validation multiple** - Point non-urbain ET non-aquatique
+- ✅ **Service unifié v6** - `filterAndRelocateZones()` applique EAU puis URBAIN
+- ✅ **Statistiques détaillées** - `fromWater`, `fromUrban`, `unchanged`, `excluded`
+
+**Règles de relocalisation actives:**
+| Règle | Condition | Action |
+|-------|-----------|--------|
+| RELOCATE_FROM_WATER_5M | Zone sur eau | → 5m vers terre la plus proche |
+| RELOCATE_FROM_URBAN_200M | Zone en milieu urbain | → 200m vers meilleur score |
+
+**Fichiers modifiés:**
+- `/app/frontend/src/services/WaterExclusionService.js` - Ajout de `filterAndRelocateZones()`
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Utilisation de la nouvelle fonction
+- `/app/frontend/src/components/territoire/WaterMaskStats.jsx` - Affichage stats urbain
+
+**Zones urbaines définies:**
+- Québec (Vieux-Québec, Sainte-Foy, Beauport)
+- Lévis
+- Montréal (centre-ville et environs)
+
 ### Phase 52g (January 28, 2026) - Styles Cartographiques BIONIC™ Universels ✅
 
 **Système de styles cartographiques multi-moteur pour les zones BIONIC™**
