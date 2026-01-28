@@ -501,26 +501,21 @@ const AutoOptimizationPanel = () => {
           className="border-gray-600 text-gray-300"
           disabled={!config.enabled}
         >
-            variant="outline"
-            onClick={handleCreateBackup}
-            className="border-gray-600 text-gray-300"
-          >
-            <Archive className="h-4 w-4 mr-2" />
-            Créer Backup
-          </Button>
-          <Button
-            onClick={handleRunAnalysis}
-            disabled={analyzing}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            {analyzing ? (
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4 mr-2" />
-            )}
-            {analyzing ? 'Analyse...' : 'Lancer Auto-Analyse'}
-          </Button>
-        </div>
+          <Archive className="h-4 w-4 mr-2" />
+          Créer Backup
+        </Button>
+        <Button
+          onClick={handleRunAnalysis}
+          disabled={analyzing || !config.enabled}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
+          {analyzing ? (
+            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Play className="h-4 w-4 mr-2" />
+          )}
+          {analyzing ? 'Analyse...' : 'Lancer Auto-Analyse'}
+        </Button>
       </div>
 
       {/* Tabs */}
