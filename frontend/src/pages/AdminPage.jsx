@@ -1102,6 +1102,11 @@ const AdminPage = ({ onProductsUpdate }) => {
           <TabsContent value="identity" className="space-y-6">
             <BrandIdentityAdmin />
           </TabsContent>
+
+          {/* Auto-Optimization BIONIC™ Tab */}
+          <TabsContent value="optimization" className="space-y-6">
+            <AutoOptimizationPanel />
+          </TabsContent>
         </Tabs>
       </div>
     </main>
