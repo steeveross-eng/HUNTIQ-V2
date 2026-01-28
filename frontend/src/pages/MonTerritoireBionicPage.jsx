@@ -2076,17 +2076,23 @@ const MonTerritoireBionicPage = () => {
                         </div>
                       ) : activeWaypoints?.length > 0 && waterExclusionStats ? (
                         <>
+                          {waterExclusionStats.relocated > 0 && (
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-gray-400">Relocalisées</span>
+                              <span className="text-blue-400">
+                                {waterExclusionStats.relocated}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-gray-400">Zones exclues</span>
+                            <span className="text-gray-400">Exclues</span>
                             <span className={waterExclusionStats.excluded > 0 ? "text-orange-400" : "text-green-400"}>
                               {waterExclusionStats.excluded} / {waterExclusionStats.total}
                             </span>
                           </div>
-                          {waterExclusionStats.ruleset && (
-                            <div className="text-[9px] text-gray-500 mt-1">
-                              Ruleset: {waterExclusionStats.ruleset}
-                            </div>
-                          )}
+                          <div className="text-[9px] text-gray-500 mt-1">
+                            {waterExclusionStats.ruleset || 'BIONIC_water_mask_v4'}
+                          </div>
                         </>
                       ) : (
                         <div className="text-[10px] text-green-400 flex items-center gap-1">
