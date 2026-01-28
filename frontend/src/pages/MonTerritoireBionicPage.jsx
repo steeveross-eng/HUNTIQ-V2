@@ -862,20 +862,20 @@ const MonTerritoireBionicPage = () => {
       setIsFilteringWater(true);
       
       try {
-        // Utiliser le service d'exclusion BIONIC_water_mask_v3
-        const { filterZonesFromWater } = await import('@/services/WaterExclusionService');
-        const { filteredZones, stats } = await filterZonesFromWater(zonesToFilter, currentMapBounds);
+        // Utiliser le service de relocalisation BIONIC v6 (EAU + URBAIN)
+        const { filterAndRelocateZones } = await import('@/services/WaterExclusionService');
+        const { filteredZones, stats } = await filterAndRelocateZones(zonesToFilter, currentMapBounds);
         
-        console.log(`[BIONIC_water_mask_v3] Filtrage: ${stats.excluded}/${stats.total} zones exclues`);
+        console.log(`[BIONIC_relocation_v6] Eau: ${stats.fromWater || 0}, Urbain: ${stats.fromUrban || 0}, Exclues: ${stats.excluded || 0}/${stats.total}`);
         
         setFilteredMicroZones(filteredZones);
         setWaterExclusionStats(stats);
         
-        if (stats && stats.excluded > 0) {
-          console.log(`[BIONIC] Détails exclusion:`, stats.excludedDetails);
+        if (stats && (stats.fromWater > 0 || stats.fromUrban > 0)) {
+          console.log(`[BIONIC] Règles appliquées:`, stats.rules_applied);
         }
       } catch (err) {
-        console.error('[BIONIC] Erreur filtrage eau:', err);
+        console.error('[BIONIC] Erreur filtrage/relocalisation:', err);
         // En cas d'erreur, ne PAS afficher les zones non filtrées
         // Pour sécurité, on exclut tout
         setFilteredMicroZones([]);
