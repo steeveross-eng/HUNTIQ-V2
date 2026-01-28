@@ -67,7 +67,8 @@ import {
   Link as LinkIcon,
   Palette,
   Handshake,
-  Brain
+  Brain,
+  Building2
 } from "lucide-react";
 import { toast } from "sonner";
 
