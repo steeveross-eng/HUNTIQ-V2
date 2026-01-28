@@ -350,6 +350,34 @@ export const useUserData = (userId, options = {}) => {
     const waypoint = waypoints.find(wp => wp.id === waypointId);
     if (!waypoint) return;
     
+    const isActivating = !waypoint.active;
+    
+    // Si on active un waypoint, vérifier la limite
+    if (isActivating) {
+      const currentActiveCount = waypoints.filter(wp => wp.active).length;
+      
+      if (currentActiveCount >= WAYPOINT_CONFIG.MAX_ACTIVE_WAYPOINTS) {
+        // Limite atteinte - afficher un message d'avertissement
+        toast.warning('Limite de waypoints actifs atteinte', {
+          description: WAYPOINT_CONFIG.LIMIT_REACHED_MESSAGE,
+          duration: 5000,
+          action: {
+            label: 'Compris',
+            onClick: () => {}
+          }
+        });
+        return; // Ne pas activer
+      }
+      
+      // Afficher un conseil de performance si c'est le premier waypoint activé
+      if (currentActiveCount === 0) {
+        toast.info('💡 Conseil performance', {
+          description: WAYPOINT_CONFIG.WARNING_MESSAGE,
+          duration: 6000
+        });
+      }
+    }
+    
     await updateWaypoint(waypointId, { active: !waypoint.active });
   }, [waypoints, updateWaypoint]);
 
