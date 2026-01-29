@@ -536,18 +536,16 @@ const WindIndicator = ({ position, direction, force }) => {
 // ═══════════════════════════════════════════════════════════════
 
 const SimulationHeatmap = ({ simulation, center }) => {
-  if (!simulation || !simulation.simulation_active) return null;
-  
   const zones = useMemo(() => {
-    if (!center) return [];
+    if (!simulation || !simulation.simulation_active || !center) return [];
     
     const [centerLat, centerLng] = center;
-    const zones = [];
+    const zonesArray = [];
     
     // Générer des zones de concentration basées sur la simulation
     simulation.zones_concentration?.forEach((zone, idx) => {
       const offset = (idx + 1) * 0.002;
-      zones.push({
+      zonesArray.push({
         position: [centerLat + offset, centerLng + offset * 0.5],
         radius: 200 + zone.probabilite * 2,
         opacity: zone.probabilite / 100 * 0.4,
@@ -556,8 +554,10 @@ const SimulationHeatmap = ({ simulation, center }) => {
       });
     });
     
-    return zones;
-  }, [center, simulation.zones_concentration]);
+    return zonesArray;
+  }, [center, simulation]);
+  
+  if (zones.length === 0) return null;
   
   return (
     <>
