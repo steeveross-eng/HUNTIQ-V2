@@ -1,28 +1,98 @@
 /**
- * GENERATEUR_CARTE_BIONIC v3.1 - BIONIC Intelligence Plus
+ * GENERATEUR_CARTE_BIONIC v3.3 - BIONIC Intelligence Plus Scoring Total
  * 
  * Génère la Carte BIONIC™ complète en combinant:
- * - Modules thématiques
- * - Analyse alimentaire 200%
- * - Pondérations inter-modules
+ * - Modules thématiques avec scoring détaillé par variable
+ * - Analyse alimentaire 200% avec carences nutritionnelles
+ * - Pondérations inter-modules avancées
  * - Convergence, rareté, cohérence spatiale
  * - Hotspots et meilleurs points de chasse
- * - Recommandations IA
- * - Recommandations produits
- * - Analyse météo/saison
- * - Approche optimale
- * - Simulation IA des déplacements du gibier
+ * - Recommandations IA multi-niveaux
+ * - Recommandations produits intelligentes
+ * - Analyse météo/saison avec facteurs détaillés
+ * - Approche optimale avec simulation de vent
+ * - Moteur de simulation IA des déplacements du gibier
+ * - Scoring détaillé à chaque étape (variable, module, espèce, météo, approche, simulation)
+ * 
+ * VERSION: 3.3_BIONIC_INTELLIGENCE_PLUS_SCORING_TOTAL
  */
 
 // ═══════════════════════════════════════════════════════════════
-// CONFIGURATION GLOBALE
+// CONFIGURATION GLOBALE v3.3
 // ═══════════════════════════════════════════════════════════════
 
 export const BIONIC_GENERATOR_CONFIG = {
-  version: '3.1_BIONIC_INTELLIGENCE_PLUS',
+  version: '3.3_BIONIC_INTELLIGENCE_PLUS_SCORING_TOTAL',
   resolution_interne_m: 10,
   seuil_hotspot: 80,
-  rasterisation: true
+  rasterisation: true,
+  scoring_detaille: true,
+  afficher_variables: true
+};
+
+// ═══════════════════════════════════════════════════════════════
+// VARIABLES UNIVERSELLES DE SCORING (V1-V11)
+// ═══════════════════════════════════════════════════════════════
+
+export const VARIABLES_UNIVERSELLES = {
+  V1: { id: 'V1', nom: 'Densité du couvert', description: 'Densité du couvert forestier normalisée (0-1)', unite: '%' },
+  V2: { id: 'V2', nom: 'Type de couvert', description: 'Classification du type de couvert végétal (0-1)', unite: 'type' },
+  V3: { id: 'V3', nom: 'Distance à l\'eau', description: 'Proximité aux points d\'eau (0-1, inverse)', unite: 'm' },
+  V4: { id: 'V4', nom: 'Distance routes', description: 'Éloignement des routes (0-1)', unite: 'm' },
+  V5: { id: 'V5', nom: 'Densité sous-bois', description: 'Densité de la végétation de sous-bois (0-1)', unite: '%' },
+  V6: { id: 'V6', nom: 'Pente', description: 'Inclinaison du terrain normalisée (0-1)', unite: '°' },
+  V7: { id: 'V7', nom: 'Orientation', description: 'Exposition solaire du versant (0-1)', unite: 'cardinal' },
+  V8: { id: 'V8', nom: 'Perturbation humaine', description: 'Niveau de perturbation anthropique (0-1, inverse)', unite: 'index' },
+  V9: { id: 'V9', nom: 'Proximité alimentation', description: 'Distance aux sources alimentaires (0-1)', unite: 'm' },
+  V10: { id: 'V10', nom: 'Humidité du sol', description: 'Niveau d\'humidité du sol (0-1)', unite: '%' },
+  V11: { id: 'V11', nom: 'Distance urbain', description: 'Éloignement des zones urbaines (0-1)', unite: 'km' }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// COULEURS BIONIC SIGNATURE POUR RENDU CARTOGRAPHIQUE
+// ═══════════════════════════════════════════════════════════════
+
+export const COULEURS_BIONIC_SIGNATURE = {
+  // Couleurs principales
+  primary: '#f5a623',
+  secondary: '#ff6b00',
+  accent: '#ffd700',
+  glow: '#ff8c00',
+  
+  // Échelle de scoring
+  scoring: {
+    excellent: '#00ff88',    // 85-100
+    tres_bon: '#88ff00',     // 70-84
+    bon: '#ffdd00',          // 55-69
+    moyen: '#ff8800',        // 40-54
+    faible: '#ff3366'        // 0-39
+  },
+  
+  // Peuplements forestiers (très colorés)
+  peuplements: {
+    resineux_dense: '#00ff66',      // Vert néon intense
+    resineux: '#00cc44',            // Vert sapin vif
+    mixte_resineux: '#66ff33',      // Vert-jaune vif
+    mixte_feuillus: '#99ff00',      // Jaune-vert
+    feuillus: '#ffdd00',            // Jaune doré
+    feuillus_dense: '#ffaa00',      // Orange doré
+    jeune_foret: '#88ffcc',         // Vert clair cyan
+    foret_mature: '#009944',        // Vert profond
+    regeneration: '#ccff66',        // Lime vif
+    perturbation: '#ff6699'         // Rose vif
+  },
+  
+  // Zones spéciales
+  zones: {
+    hotspot_haute: '#ff3300',       // Rouge-orange vif
+    hotspot_moyenne: '#ff9900',     // Orange
+    hotspot_basse: '#ffcc00',       // Jaune
+    eau: '#00d4ff',                 // Cyan électrique
+    milieu_humide: '#00ffcc',       // Turquoise
+    corridor: '#cc66ff',            // Violet
+    refuge: '#6666ff',              // Bleu-violet
+    alimentation: '#66ff66'         // Vert vif
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════
