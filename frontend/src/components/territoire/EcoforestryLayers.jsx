@@ -10,6 +10,7 @@
  * 3. Orthophotographies haute résolution
  * 4. Courbes de niveau et reliefs
  * 5. Classification du couvert forestier (résineux, feuillus, mélangés)
+ * 6. CARTE BIONIC™ - Architecture multi-couches optimisée chasse
  * 
  * SYSTÈME DE FALLBACK :
  * - Détection automatique de la disponibilité de la carte écoforestière
