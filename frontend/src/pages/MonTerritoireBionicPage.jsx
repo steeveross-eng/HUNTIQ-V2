@@ -1685,6 +1685,88 @@ const MonTerritoireBionicPage = () => {
               
               {showLayersPanel && (
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      SECTION FOND DE CARTE BIONIC™
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-b border-gray-700 pb-3 mb-2">
+                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                      🗺️ Fond de carte
+                    </div>
+                    <div className="space-y-1">
+                      {/* Option BIONIC™ */}
+                      <button
+                        onClick={() => handleBaseMapChange('bionic')}
+                        className={`w-full flex items-center gap-2 px-2 py-2 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'bionic' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🎯</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">BIONIC™</div>
+                          <div className="text-[9px] text-gray-500">Terrain + Hydro + Score</div>
+                        </div>
+                        {activeBaseMap === 'bionic' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                      
+                      {/* Option Satellite */}
+                      <button
+                        onClick={() => handleBaseMapChange('satellite')}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'satellite' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🛰️</span>
+                        <span className="flex-1 text-left">Satellite</span>
+                        {activeBaseMap === 'satellite' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                      
+                      {/* Option Terrain */}
+                      <button
+                        onClick={() => handleBaseMapChange('terrain')}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'terrain' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🏔️</span>
+                        <span className="flex-1 text-left">Terrain</span>
+                        {activeBaseMap === 'terrain' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                    </div>
+                    
+                    {/* Sous-couches BIONIC si carte BIONIC sélectionnée */}
+                    {activeBaseMap === 'bionic' && (
+                      <div className="mt-2 p-2 bg-gray-800/30 rounded border border-gray-700/50">
+                        <div className="text-[9px] text-gray-400 uppercase mb-2">Couches BIONIC™</div>
+                        <div className="space-y-1 text-[9px]">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-300">🪨 Géologie</span>
+                            <span className="text-gray-500">35%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-blue-400">💧 Hydrologie</span>
+                            <span className="text-blue-400">70%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-green-400">🌲 Écoforestier</span>
+                            <span className="text-green-400">60%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#f5a623]">🎯 Score Faunique</span>
+                            <span className="text-[#f5a623]">80%</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Couches BIONIC */}
                   <div className="flex gap-1">
                     <Button size="sm" variant="outline" onClick={showAllLayers} className="flex-1 text-[10px] h-7 border-gray-700">Tout</Button>
                     <Button size="sm" variant="outline" onClick={hideAllLayers} className="flex-1 text-[10px] h-7 border-gray-700">Aucun</Button>
