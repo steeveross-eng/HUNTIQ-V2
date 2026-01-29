@@ -704,6 +704,12 @@ const MonTerritoireBionicPage = () => {
   const [filteredMicroZones, setFilteredMicroZones] = useState([]);
   const [isFilteringWater, setIsFilteringWater] = useState(false);
   
+  // ============================================
+  // HABITAT_OPTIMAL_SYNTHÈSE - Espèce cible
+  // ============================================
+  const [selectedEspece, setSelectedEspece] = useState('ORIGNAL');
+  const [carteBionic, setCarteBionic] = useState(null);
+  
   // Import du service d'exclusion permanent
   const filterWaterZonesRef = useRef(null);
   
