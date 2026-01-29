@@ -2197,7 +2197,7 @@ const MonTerritoireBionicPage = () => {
               </MapContainer>
               
               {/* BIONIC™ MAP OVERLAY - Effet visuel 10X distinctif */}
-              {activeEcoLayers.baseMap === 'bionic' && pipelineEnabled && (
+              {activeBaseMap === 'bionic' && pipelineEnabled && (
                 <BionicMapOverlay
                   active={true}
                   showBorder={true}
