@@ -676,6 +676,10 @@ const BionicMicroZones = ({
       // Filtre de base : inclure si pourcentage >= seuil minimum
       if (zone.percentage < minPercentage) return;
       
+      // HABITAT_OPTIMAL_SYNTHESE : Calculer le score ajusté selon l'espèce
+      const adjustedScore = calculateAdjustedScore(zone, selectedEspece);
+      const moduleWeight = getModuleWeight(zone.moduleId, selectedEspece);
+      
       // Identifier les zones qui se superposent (informatif uniquement)
       // AUCUNE fusion - chaque zone reste une entité indépendante
       const overlappingZones = zones.filter(other =>
@@ -716,11 +720,15 @@ const BionicMicroZones = ({
       }
       
       // SEGMENTATION : Chaque zone conserve son identité propre
-      // Pas de modification des attributs (couleur, %, contour)
+      // Enrichi avec le score habitat optimal pour l'espèce sélectionnée
       processedZones.push({
         ...zone,
         isOverlap: hasOverlap,
         overlapCount,
+        // HABITAT_OPTIMAL : Score ajusté pour l'espèce cible
+        habitatScore: adjustedScore,
+        moduleWeight: moduleWeight,
+        selectedEspece: selectedEspece,
         // Couches adjacentes (informatif - pas de fusion)
         neighboringModules: hasOverlap ? overlappingZones.map(z => ({
           id: z.moduleId,
@@ -728,9 +736,9 @@ const BionicMicroZones = ({
           color: BIONIC_MODULES[z.moduleId]?.color,
           icon: BIONIC_MODULES[z.moduleId]?.icon
         })) : [],
-        // Priorité de rendu (stratégie multi-couches)
-        // Zones fortes au-dessus, zones isolées bonus de visibilité
-        renderPriority: zone.percentage + (hasOverlap ? 0 : 10)
+        // Priorité de rendu ajustée selon le score habitat
+        // Les zones avec un score habitat élevé sont prioritaires pour l'espèce
+        renderPriority: adjustedScore + (hasOverlap ? 0 : 10)
       });
     });
     
@@ -742,8 +750,8 @@ const BionicMicroZones = ({
      * - Dernier rendu = couche supérieure (premier plan)
      * 
      * Résultat visuel :
-     * - Zones faibles dessinent leurs contours d'abord
-     * - Zones fortes dessinent PAR-DESSUS mais SANS effacer les contours existants
+     * - Zones avec faible score habitat dessinent leurs contours d'abord
+     * - Zones avec fort score habitat dessinent PAR-DESSUS
      * - Lignes d'intersection marquent les croisements
      * - Toutes les portions restent visibles et distinctes
      */
@@ -755,7 +763,7 @@ const BionicMicroZones = ({
       visibleZones: sortedZones, 
       intersections: calculatedIntersections 
     };
-  }, [zones, minPercentage]);
+  }, [zones, minPercentage, selectedEspece]);
   
   const handleHover = useCallback((zoneId) => {
     setHoveredZoneId(zoneId);
