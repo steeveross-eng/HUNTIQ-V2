@@ -461,6 +461,35 @@ const BionicMapOverlay = ({
         .bionic-forest-highlight {
           animation: bionicGlow 2s ease-in-out infinite;
         }
+        
+        /* Style pour le conteneur de carte BIONIC actif */
+        .bionic-map-active {
+          border: 4px solid #f5a623 !important;
+          box-shadow: 
+            0 0 20px rgba(245, 166, 35, 0.5),
+            0 0 40px rgba(255, 107, 0, 0.3),
+            inset 0 0 20px rgba(245, 166, 35, 0.1) !important;
+          animation: bionicBorderPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes bionicBorderPulse {
+          0%, 100% {
+            border-color: #f5a623;
+            box-shadow: 
+              0 0 20px rgba(245, 166, 35, 0.5),
+              0 0 40px rgba(255, 107, 0, 0.3);
+          }
+          50% {
+            border-color: #ff6b00;
+            box-shadow: 
+              0 0 35px rgba(255, 107, 0, 0.7),
+              0 0 60px rgba(245, 166, 35, 0.4);
+          }
+        }
+        
+        .bionic-map-active .leaflet-container {
+          filter: saturate(1.2) contrast(1.05);
+        }
       `}</style>
       
       {/* Bordure lumineux */}
