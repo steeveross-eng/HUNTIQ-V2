@@ -1,0 +1,55 @@
+{
+  "summary": "Frontend testing of real-time mode for waypoint zone analysis. All UI components are working correctly: ZoneAnalysisControlPanel visible in sidebar, Mode Temps Réel toggle ON by default, waypoint selection triggers automatic analysis with toast notifications, zone area change (2/4/10 km²) re-triggers analysis. However, a bug was found where the zone filtering logic has a coordinate format mismatch causing 0 zones to be displayed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Zone Analysis hotspot generation",
+        "issue": "Zone filtering returns 0 zones due to coordinate format mismatch in WaypointZoneAnalysis.jsx line 464-475. The generateOrganicPolygon creates [lat, lng] coordinates but filtering assumes GeoJSON [lng, lat] format.",
+        "affected_selectors": [],
+        "priority": "MEDIUM"
+      }
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "MonTerritoireBionicPage loads correctly",
+    "ZoneAnalysisControlPanel visible in sidebar (under OVERLAY TOPOGRAPHIQUE)",
+    "Mode Temps Réel toggle present and ON by default (data-state='checked')",
+    "Waypoint selector dropdown functional (2 waypoints available: test, L'Etang Ross)",
+    "Area selection buttons (2 km², 4 km², 10 km²) visible and clickable",
+    "Selecting waypoint triggers automatic analysis (toast: 'Analyse en cours...')",
+    "Map centers on selected waypoint (zoom level 14)",
+    "Zone area change (10 km², 2 km²) re-triggers analysis",
+    "Mode Temps Réel toggle can be toggled OFF/ON",
+    "When Mode Temps Réel is OFF, 'Analyser la zone' button appears",
+    "Warning message 'Sélectionnez ou créez un waypoint' visible when no waypoint selected",
+    "COMPORTEMENTS GIBIER legend visible on map",
+    "PEUPLEMENTS FORESTIERS legend visible on map"
+  ],
+  "test_report_links": [
+    "/app/test_reports/iteration_37.json"
+  ],
+  "action_items": [
+    "Fix coordinate format mismatch in WaypointZoneAnalysis.jsx filtering logic (line 464-475) - coords[0] should be lng, coords[1] should be lat for GeoJSON format"
+  ],
+  "critical_code_review_comments": [
+    "WaypointZoneAnalysis.jsx line 466-470: Coordinate access is swapped - GeoJSON uses [lng, lat] but code assumes [lat, lng]",
+    "generateOrganicPolygon in ZoneMerger.js creates coordinates as [x, y] where x=lat+offset, y=lng+offset - this is non-standard GeoJSON format",
+    "Console shows 'Encountered two children with the same key' warnings for micro-zones - duplicate key issue in BionicMicroZones component"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend only testing)",
+    "frontend": "92% (12/13 tests passed - zone filtering bug)"
+  },
+  "seed_data_creation": "None required - 2 waypoints available (test, L'Etang Ross)",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Real-time mode UI is fully functional. The issue is in the zone filtering logic that causes 0 zones to be displayed after analysis. The generateOrganicForestZones function generates zones correctly (console shows '6 zones organiques générées') but the filtering in WaypointZoneAnalysis.jsx removes all of them due to coordinate format mismatch. Fix needed in line 464-475 of WaypointZoneAnalysis.jsx.",
+  "mocked_api_note": "BIONIC data is generated client-side with BionicMapGenerator.js and ZoneMerger.js - all zone generation is MOCKED/simulated"
+}
