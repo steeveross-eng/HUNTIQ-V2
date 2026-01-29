@@ -57,6 +57,7 @@ import WaterMaskStats from '@/components/territoire/WaterMaskStats';
 import ZoneControlPanel from '@/components/territoire/ZoneControlPanel';
 import MapToolbar from '@/components/territoire/MapToolbar';
 import HabitatSynthesePanel from '@/components/territoire/HabitatSynthesePanel';
+import BionicGeneratorPanel from '@/components/territoire/BionicGeneratorPanel';
 
 import { 
   BIONIC_LAYERS, 
