@@ -671,18 +671,21 @@ Fonctionnalités implémentées:
 - [x] GPS LIVE avec flèche pointant vers le bas
 - [x] MODULE_HABITAT_OPTIMAL_SYNTHESE intégré
 - [x] Visualisation temps réel des scores habitat par espèce
-- [x] **WMS Proxy Backend** - Contournement CORS/IP pour données Québec ✅ NEW
-- [x] **Composants modulaires créés** - TerritoryHeader, LayersPanelContent ✅ NEW
+- [x] **WMS Proxy Backend** - Contournement CORS/IP pour données Québec ✅
+- [x] **Composants modulaires créés** - TerritoryHeader, LayersPanelContent ✅
+- [x] **Panneau Couches Données Québec** - UI complète avec toggles et sliders ✅
 
 ### P1 - High Priority (EN COURS)
 - [~] **Refactoring de MonTerritoireBionicPage.jsx** (~2985 lignes) - EN COURS
   - ✅ TerritoryHeader.jsx créé
   - ✅ LayersPanelContent.jsx créé
+  - ✅ QuebecLayersPanel.jsx créé et intégré
   - [ ] Remplacer le header inline par TerritoryHeader
-  - [ ] Remplacer le sidebar inline par LayersPanelContent
   - [ ] Migrer les useState vers BionicTerritoryContext
-- [ ] **Activer les couches Québec via proxy** dans MonTerritoireBionicPage
-  - Ajouter props showQuebecEco, showQuebecLidar, showQuebecTWI
+- [x] **Couches Québec activables via UI** ✅
+  - ✅ Carte Écoforestière (peuplements)
+  - ✅ LiDAR Dendrométrique (hauteur arbres)  
+  - ✅ Indice d'Humidité TWI
 - [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
 - [ ] Test complet du système de backup avec credentials utilisateur
 
