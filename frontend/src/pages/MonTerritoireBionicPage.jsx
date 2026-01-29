@@ -1897,6 +1897,30 @@ const MonTerritoireBionicPage = () => {
                     )}
                   </div>
                   
+                  {/* ═══════════════════════════════════════════════════════════
+                      GÉNÉRATEUR CARTE BIONIC™ v3.1
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-t border-gray-700 pt-2 mt-2">
+                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                      <Brain className="h-3 w-3" />
+                      Intelligence BIONIC™
+                    </div>
+                    <BionicGeneratorPanel 
+                      espece={selectedSpecies}
+                      meteo={{
+                        temperature: currentConditions?.temperature || 12,
+                        vent_direction: currentConditions?.windDirection || 'NO',
+                        vent_force: currentConditions?.windSpeed || 15,
+                        pression: currentConditions?.pressure || 1015,
+                        precipitations: currentConditions?.precipitations || 0
+                      }}
+                      compact={true}
+                      onResultsGenerated={(results) => {
+                        console.log('[BIONIC Generator] Résultats générés:', results);
+                      }}
+                    />
+                  </div>
+                  
                   {/* Mode confidentialité */}
                   <div className="border-t border-gray-700 pt-2 mt-2">
                     <div className="flex items-center justify-between">
