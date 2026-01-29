@@ -16,19 +16,19 @@ import * as turf from '@turf/turf';
 
 const MERGE_CONFIG = {
   // Distance maximale pour considérer deux zones comme adjacentes (en km)
-  adjacencyThreshold: 0.5,
+  adjacencyThreshold: 1.5,  // Augmenté de 0.5 à 1.5
   
   // Facteur de buffer pour la fusion (en km)
-  bufferDistance: 0.15,
+  bufferDistance: 0.3,  // Augmenté de 0.15 à 0.3
   
   // Tolérance pour la simplification des polygones
-  simplifyTolerance: 0.001,
+  simplifyTolerance: 0.002,  // Augmenté pour des contours plus lisses
   
   // Lissage des contours (0-1, plus haut = plus lisse)
   smoothingFactor: 0.85,
   
   // Nombre minimum de zones pour fusionner
-  minZonesToMerge: 2
+  minZonesToMerge: 1  // Réduit de 2 à 1 pour toujours fusionner
 };
 
 // ═══════════════════════════════════════════════════════════════
