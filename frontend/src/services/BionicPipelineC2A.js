@@ -348,7 +348,8 @@ export const BIONIC_HYDRIC_ADJUSTMENTS = [
       max_distance_meters: 50,
       constraints: [
         { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_FULL' },
-        { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_BUF_5M' }
+        { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_BUF_5M' },
+        { type: 'spatial', operator: 'disjoint', with_layer: 'ROAD_FULL' }
       ]
     },
     output_layer: 'Z_HYDRO_ADJUSTED'
@@ -356,15 +357,15 @@ export const BIONIC_HYDRIC_ADJUSTMENTS = [
 ];
 
 // ─────────────────────────────────────────────
-// 5. RELOCALISATION URBAINE — 2000 m vers score maximal
+// 5. RELOCALISATION — Urbain + Routier vers score maximal
 // ─────────────────────────────────────────────
 export const BIONIC_URBAN_RELOCATION = {
-  id: 'RELOCATE_FROM_URBAN_2000M',
+  id: 'RELOCATE_FROM_URBAN_AND_ROAD',
   target_layer: 'Z_HYDRO_ADJUSTED',
   condition: {
     type: 'spatial',
     operator: 'intersects',
-    with_layer: 'URBAIN_FULL_BUFFER_2000M'
+    with_layers: ['URBAIN_FULL_BUFFER_2000M', 'ROAD_FULL', 'ROAD_MAJOR_BUF_100M']
   },
   operation: {
     type: 'relocate_by_score',
@@ -373,7 +374,9 @@ export const BIONIC_URBAN_RELOCATION = {
       'URBAIN_FULL',
       'URBAIN_FULL_BUFFER_2000M',
       'WATER_FULL',
-      'WATER_BUF_5M'
+      'WATER_BUF_5M',
+      'ROAD_FULL',
+      'ROAD_MAJOR_BUF_100M'
     ],
     score_attribute: 'score',
     strategy: 'highest_score',
@@ -382,20 +385,22 @@ export const BIONIC_URBAN_RELOCATION = {
       { type: 'spatial', operator: 'disjoint', with_layer: 'URBAIN_FULL_BUFFER_2000M' },
       { type: 'distance', operator: 'greater_or_equal', value_meters: 2000 },
       { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_FULL' },
-      { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_BUF_5M' }
+      { type: 'spatial', operator: 'disjoint', with_layer: 'WATER_BUF_5M' },
+      { type: 'spatial', operator: 'disjoint', with_layer: 'ROAD_FULL' },
+      { type: 'spatial', operator: 'disjoint', with_layer: 'ROAD_MAJOR_BUF_100M' }
     ]
   },
-  output_layer: 'Z_URBAN_RELOCATED'
+  output_layer: 'Z_URBAN_ROAD_RELOCATED'
 };
 
 // ─────────────────────────────────────────────
-// 6. QA ESSENTIEL — Hydrique + Urbain (version performance)
+// 6. QA ESSENTIEL — Hydrique + Urbain + ROUTIER
 // ─────────────────────────────────────────────
 export const BIONIC_QA_CONFIG = {
   hydric_validation: {
     id: 'QA_WATER_CORE',
     inputs: {
-      target_layer: 'Z_URBAN_RELOCATED',
+      target_layer: 'Z_URBAN_ROAD_RELOCATED',
       water_layer: 'WATER_FULL',
       water_buffer_layer: 'WATER_BUF_5M'
     },
