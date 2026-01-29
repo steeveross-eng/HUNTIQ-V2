@@ -286,6 +286,182 @@ async def delete_waypoint(
     return {"status": "deleted", "waypoint_id": waypoint_id}
 
 # ─────────────────────────────────────────────────────────────
+# WMS PROXY - Contournement des restrictions CORS/IP
+# ─────────────────────────────────────────────────────────────
+
+import httpx
+
+# Configuration des sources WMS officielles du Québec
+WMS_SOURCES = {
+    "quebec_eco": {
+        "url": "https://geoegl.msp.gouv.qc.ca/ws/mffpecofor.fcgi",
+        "description": "Carte écoforestière du Québec",
+        "layers": {
+            "peuplements": "CARTE_ECO_MAJ",
+            "perturbations": "CARTE_ECO_PERTURB",
+            "essences": "CARTE_ECO_ESSENCE"
+        }
+    },
+    "quebec_lidar": {
+        "url": "https://geoegl.msp.gouv.qc.ca/ws/mffpecofor.fcgi",
+        "description": "Données LiDAR dendrométriques",
+        "layers": {
+            "lidar_dendro": "lidar_dendro_dispo",
+            "lidar_chm": "lidar_chm"
+        }
+    },
+    "quebec_terrain": {
+        "url": "https://geoegl.msp.gouv.qc.ca/ws/mffpecofor.fcgi",
+        "description": "Indices topographiques",
+        "layers": {
+            "twi": "TWI",
+            "elevation": "MNT"
+        }
+    },
+    "canada_nfi": {
+        "url": "https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms",
+        "description": "National Forest Inventory (Canada)",
+        "layers": {
+            "forest_cover": "nfi_forest_land_cover"
+        }
+    }
+}
+
+class WMSProxyRequest(BaseModel):
+    source: str = Field(..., description="Source WMS (quebec_eco, quebec_lidar, etc.)")
+    layer: str = Field(..., description="Nom de la couche")
+    bbox: str = Field(..., description="Bounding box (minx,miny,maxx,maxy)")
+    width: int = Field(default=256, ge=64, le=1024)
+    height: int = Field(default=256, ge=64, le=1024)
+    srs: str = Field(default="EPSG:4326")
+    format: str = Field(default="image/png")
+
+class WMSSourceInfo(BaseModel):
+    source_id: str
+    url: str
+    description: str
+    available_layers: Dict[str, str]
+    status: str
+
+@router.get("/wms/sources", response_model=List[WMSSourceInfo])
+async def list_wms_sources():
+    """
+    Liste toutes les sources WMS disponibles via le proxy
+    """
+    sources = []
+    for source_id, config in WMS_SOURCES.items():
+        sources.append(WMSSourceInfo(
+            source_id=source_id,
+            url=config["url"],
+            description=config["description"],
+            available_layers=config["layers"],
+            status="available"
+        ))
+    return sources
+
+@router.get("/wms/tile")
+async def proxy_wms_tile(
+    source: str = Query(..., description="Source WMS"),
+    layer: str = Query(..., description="Nom de la couche"),
+    bbox: str = Query(..., description="Bounding box"),
+    width: int = Query(default=256, ge=64, le=1024),
+    height: int = Query(default=256, ge=64, le=1024),
+    srs: str = Query(default="EPSG:4326"),
+    format: str = Query(default="image/png")
+):
+    """
+    Proxy WMS - Récupère une tuile depuis les serveurs officiels
+    Contourne les restrictions CORS/IP pour les données écoforestières du Québec
+    """
+    if source not in WMS_SOURCES:
+        raise HTTPException(status_code=400, detail=f"Source inconnue: {source}. Sources disponibles: {list(WMS_SOURCES.keys())}")
+    
+    source_config = WMS_SOURCES[source]
+    
+    # Vérifier si la couche existe
+    layer_name = source_config["layers"].get(layer, layer)
+    
+    # Construire l'URL WMS
+    wms_params = {
+        "SERVICE": "WMS",
+        "VERSION": "1.1.1",
+        "REQUEST": "GetMap",
+        "LAYERS": layer_name,
+        "BBOX": bbox,
+        "WIDTH": str(width),
+        "HEIGHT": str(height),
+        "SRS": srs,
+        "FORMAT": format,
+        "TRANSPARENT": "TRUE"
+    }
+    
+    wms_url = source_config["url"]
+    
+    logger.info(f"[WMS Proxy] Requesting {source}/{layer} - bbox: {bbox}")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(wms_url, params=wms_params)
+            
+            if response.status_code != 200:
+                logger.warning(f"[WMS Proxy] Error from {source}: {response.status_code}")
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"Erreur WMS: {response.text[:200]}"
+                )
+            
+            # Retourner l'image avec le bon content-type
+            from fastapi.responses import Response
+            return Response(
+                content=response.content,
+                media_type=response.headers.get("content-type", "image/png"),
+                headers={
+                    "Cache-Control": "public, max-age=3600",
+                    "X-WMS-Source": source,
+                    "X-WMS-Layer": layer_name
+                }
+            )
+            
+    except httpx.TimeoutException:
+        logger.error(f"[WMS Proxy] Timeout for {source}/{layer}")
+        raise HTTPException(status_code=504, detail="Timeout lors de la requête WMS")
+    except httpx.RequestError as e:
+        logger.error(f"[WMS Proxy] Request error: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"Erreur de connexion au serveur WMS: {str(e)}")
+
+@router.get("/wms/capabilities/{source}")
+async def get_wms_capabilities(source: str):
+    """
+    Récupère les capacités WMS d'une source
+    """
+    if source not in WMS_SOURCES:
+        raise HTTPException(status_code=400, detail=f"Source inconnue: {source}")
+    
+    source_config = WMS_SOURCES[source]
+    wms_url = source_config["url"]
+    
+    params = {
+        "SERVICE": "WMS",
+        "VERSION": "1.1.1",
+        "REQUEST": "GetCapabilities"
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(wms_url, params=params)
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail="Erreur GetCapabilities")
+            
+            from fastapi.responses import Response
+            return Response(
+                content=response.content,
+                media_type="application/xml"
+            )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+# ─────────────────────────────────────────────────────────────
 # HEALTH CHECK
 # ─────────────────────────────────────────────────────────────
 
@@ -297,6 +473,11 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "bionic-territory",
-        "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat()
+        "version": "1.1.0",
+        "timestamp": datetime.utcnow().isoformat(),
+        "features": {
+            "wms_proxy": True,
+            "waypoints": True,
+            "analysis": True
+        }
     }
