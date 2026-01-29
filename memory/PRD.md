@@ -76,6 +76,39 @@
 
 ## What's Been Implemented
 
+### Phase 52l (January 29, 2026) - HABITAT_OPTIMAL_SYNTHESE Visualisation Temps Réel ✅
+
+**Connexion complète du module Habitat Synthèse à la carte BIONIC™**
+
+Nouvelles fonctionnalités:
+- ✅ **Score Habitat Dynamique** - Les zones recalculent leur score selon l'espèce sélectionnée
+- ✅ **Tooltip enrichi** - Affiche le score Habitat Optimal avec niveau (EXCELLENT/TRÈS BON/BON/MOYEN/FAIBLE)
+- ✅ **Poids du module** - Chaque zone affiche son poids dans le calcul pour l'espèce cible
+- ✅ **Tri par priorité habitat** - Les zones à fort score habitat sont rendues au premier plan
+- ✅ **Endpoint auth/login** - Authentification utilisateur implémentée (manquait)
+- ✅ **Endpoint auth/register** - Inscription utilisateur implémentée
+- ✅ **Endpoint auth/verify** - Vérification de token
+
+**Fichiers modifiés:**
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Passage `selectedEspece` à BionicMicroZones
+- `/app/frontend/src/components/territoire/BionicMicroZones.jsx` - Intégration score habitat:
+  - Ajout prop `selectedEspece`
+  - Calcul `adjustedScore` avec `calculateAdjustedScore()`
+  - Calcul `moduleWeight` avec `getModuleWeight()`
+  - Nouveau bloc tooltip "🎯 Habitat Optimal" avec couleur dynamique
+  - Tri des zones par `habitatScore` au lieu de `percentage`
+- `/app/backend/server.py` - Ajout endpoints auth (login, register, verify, logout, etc.)
+
+**Flux de données:**
+```
+1. User sélectionne espèce → HabitatSynthesePanel.onEspeceChange()
+2. MonTerritoireBionicPage.setSelectedEspece(espece)
+3. BionicMicroZones reçoit selectedEspece
+4. useMemo recalcule zones avec calculateAdjustedScore(zone, espece)
+5. MicroZone affiche habitatScore dans tooltip
+6. Zones triées par renderPriority = habitatScore
+```
+
 ### Phase 52k (January 29, 2026) - MODULE_HABITAT_OPTIMAL_SYNTHESE v2.0 ✅
 
 **Module de synthèse habitat optimal intégré à Mon Territoire BIONIC™**
