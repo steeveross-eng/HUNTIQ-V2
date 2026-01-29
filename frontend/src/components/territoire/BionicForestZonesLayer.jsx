@@ -1,459 +1,531 @@
 /**
  * BionicForestZonesLayer.jsx
  * 
- * Couche de zones forestières BIONIC™ v3.3 - Très colorées et distinctives
- * Affiche les peuplements forestiers avec des couleurs vives et des effets visuels
+ * COUCHES ÉCOFORESTIÈRES RÉELLES - WMS Québec et Canada
+ * 
+ * Affiche les vraies données écoforestières depuis les services WMS officiels:
+ * - Québec: MFFP/MERN - Inventaire écoforestier
+ * - Canada: National Forest Inventory (NFI)
+ * 
+ * Les zones affichées représentent les VRAIES formes des peuplements forestiers
+ * selon les données cartographiques officielles du gouvernement.
  */
 
-import React, { useMemo, useEffect, useState } from 'react';
-import { 
-  Polygon, 
-  Popup, 
-  Tooltip,
-  useMap 
-} from 'react-leaflet';
-import { COULEURS_BIONIC_SIGNATURE } from '@/services/BionicMapGenerator';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
+import { WMSTileLayer, useMap } from 'react-leaflet';
 
 // ═══════════════════════════════════════════════════════════════
-// CONFIGURATION DES ZONES FORESTIÈRES
+// CONFIGURATION WMS ÉCOFORESTIÈRE - SERVICES OFFICIELS
 // ═══════════════════════════════════════════════════════════════
 
-const FOREST_ZONE_CONFIG = {
-  resineux_dense: {
-    id: 'resineux_dense',
-    nom: 'Résineux dense',
-    icon: '🌲',
-    color: '#00ff66',
-    fillOpacity: 0.35,
-    strokeWidth: 2,
-    score_habitat: 95,
-    description: 'Forêt de conifères à haute densité - Excellent refuge'
+const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
+
+/**
+ * Services WMS officiels du Québec (MFFP/MERN)
+ */
+const QUEBEC_WMS_CONFIG = {
+  // Carte écoforestière principale
+  carte_ecoforestiere: {
+    id: 'carte_ecoforestiere',
+    name: 'Carte Écoforestière',
+    url: 'https://servicescarto.mffp.gouv.qc.ca/pes/services/Inventaire/CarteEcoforestiere/MapServer/WMSServer',
+    layers: '0,1,2,3,4,5,6,7,8',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MFFP Québec - Inventaire écoforestier'
   },
-  resineux: {
-    id: 'resineux',
-    nom: 'Résineux',
-    icon: '🌲',
-    color: '#00cc44',
-    fillOpacity: 0.30,
-    strokeWidth: 2,
-    score_habitat: 85,
-    description: 'Forêt de conifères - Très bon habitat'
+  // Peuplements forestiers
+  peuplements: {
+    id: 'peuplements',
+    name: 'Peuplements forestiers',
+    url: 'https://servicescarto.mffp.gouv.qc.ca/pes/services/Inventaire/CarteEcoforestiere/MapServer/WMSServer',
+    layers: 'peuplement_ecoforestier',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MFFP Québec'
   },
-  mixte_resineux: {
-    id: 'mixte_resineux',
-    nom: 'Mixte à résineux',
-    icon: '🌳',
-    color: '#66ff33',
-    fillOpacity: 0.30,
-    strokeWidth: 2,
-    score_habitat: 75,
-    description: 'Forêt mixte dominée par les résineux'
+  // Essences principales
+  essences: {
+    id: 'essences',
+    name: 'Essences principales',
+    url: 'https://servicescarto.mffp.gouv.qc.ca/pes/services/Inventaire/CarteEcoforestiere/MapServer/WMSServer',
+    layers: 'essence_principale',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MFFP Québec'
   },
-  mixte_feuillus: {
-    id: 'mixte_feuillus',
-    nom: 'Mixte à feuillus',
-    icon: '🌳',
-    color: '#99ff00',
-    fillOpacity: 0.28,
-    strokeWidth: 2,
-    score_habitat: 70,
-    description: 'Forêt mixte dominée par les feuillus'
+  // Perturbations
+  perturbations: {
+    id: 'perturbations',
+    name: 'Perturbations',
+    url: 'https://servicescarto.mffp.gouv.qc.ca/pes/services/Inventaire/CarteEcoforestiere/MapServer/WMSServer',
+    layers: 'perturbation',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MFFP Québec'
   },
-  feuillus: {
-    id: 'feuillus',
-    nom: 'Feuillus',
-    icon: '🍂',
-    color: '#ffdd00',
-    fillOpacity: 0.28,
-    strokeWidth: 2,
-    score_habitat: 65,
-    description: 'Forêt de feuillus - Alimentation automnale'
+  // Densité du couvert
+  densite: {
+    id: 'densite',
+    name: 'Densité du couvert',
+    url: 'https://servicescarto.mffp.gouv.qc.ca/pes/services/Inventaire/CarteEcoforestiere/MapServer/WMSServer',
+    layers: 'densite_couvert',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MFFP Québec'
   },
-  jeune_foret: {
-    id: 'jeune_foret',
-    nom: 'Jeune forêt',
-    icon: '🌱',
-    color: '#88ffcc',
-    fillOpacity: 0.25,
-    strokeWidth: 1,
-    score_habitat: 60,
-    description: 'Régénération forestière - Zone d\'alimentation'
+  // Hydrographie
+  hydrographie: {
+    id: 'hydrographie',
+    name: 'Hydrographie',
+    url: 'https://servicescarto.mern.gouv.qc.ca/pes/services/Territoire/SDA_WMS/MapServer/WMSServer',
+    layers: '7,8,9',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© MERN Québec'
+  }
+};
+
+/**
+ * Services WMS pancanadiens (NFI - National Forest Inventory)
+ */
+const CANADA_WMS_CONFIG = {
+  // Couverture forestière nationale
+  forest_cover: {
+    id: 'nfi_forest_cover',
+    name: 'Couverture forestière Canada',
+    url: 'https://opendata.nfis.org/mapserver/cgi-bin/wms_nfi',
+    layers: 'forest_cover',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© Natural Resources Canada - NFI'
   },
-  foret_mature: {
-    id: 'foret_mature',
-    nom: 'Forêt mature',
-    icon: '🌳',
-    color: '#009944',
-    fillOpacity: 0.32,
-    strokeWidth: 2,
-    score_habitat: 90,
-    description: 'Vieille forêt - Habitat de qualité supérieure'
+  // Classification du couvert
+  land_cover: {
+    id: 'nfi_land_cover',
+    name: 'Classification du couvert',
+    url: 'https://opendata.nfis.org/mapserver/cgi-bin/wms_nfi',
+    layers: 'land_cover',
+    format: 'image/png',
+    transparent: true,
+    attribution: '© Natural Resources Canada'
+  }
+};
+
+/**
+ * Styles BIONIC pour les couches WMS
+ * Ces styles sont appliqués via SLD ou CSS filters
+ */
+const BIONIC_WMS_STYLES = {
+  // Style haute visibilité pour zones forestières
+  forest_highlight: {
+    filter: 'saturate(1.5) contrast(1.2) brightness(1.1)',
+    opacity: 0.85
   },
-  milieu_humide: {
-    id: 'milieu_humide',
-    nom: 'Milieu humide',
-    icon: '💧',
-    color: '#00ffcc',
-    fillOpacity: 0.35,
-    strokeWidth: 2,
-    score_habitat: 80,
-    description: 'Zone humide - Point d\'eau et alimentation'
+  // Style pour hydrographie
+  hydro_highlight: {
+    filter: 'saturate(2) hue-rotate(180deg)',
+    opacity: 0.9
   },
-  perturbation: {
-    id: 'perturbation',
-    nom: 'Perturbation récente',
-    icon: '⚠️',
-    color: '#ff6699',
-    fillOpacity: 0.25,
-    strokeWidth: 2,
-    score_habitat: 40,
-    description: 'Zone perturbée - Éviter pour la chasse'
+  // Style BIONIC signature
+  bionic_signature: {
+    filter: 'saturate(1.8) contrast(1.3)',
+    opacity: 0.75
   }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// GÉNÉRATEUR DE ZONES SIMULÉES
+// COMPOSANT COUCHE WMS INDIVIDUELLE
 // ═══════════════════════════════════════════════════════════════
 
-const generateForestZones = (center, radius = 0.02) => {
-  if (!center) return [];
+const BionicWMSLayer = ({ 
+  config, 
+  opacity = 0.75, 
+  visible = true,
+  zIndex = 400,
+  style = 'bionic_signature',
+  useProxy = true
+}) => {
+  const map = useMap();
   
-  const [lat, lng] = center;
-  const zones = [];
+  if (!visible || !config) return null;
   
-  // Générer des zones autour du centre avec des types variés
-  const zoneTypes = Object.keys(FOREST_ZONE_CONFIG);
+  // Construire l'URL (avec ou sans proxy)
+  const wmsUrl = useProxy 
+    ? `${API_BASE}/api/wms-proxy/tile`
+    : config.url;
   
-  // Zone centrale - Résineux dense
-  zones.push({
-    id: 'zone_central',
-    type: 'resineux_dense',
-    center: [lat, lng],
-    radius: radius * 0.3,
-    polygon: generatePolygon([lat, lng], radius * 0.3, 6)
-  });
+  // Paramètres WMS
+  const wmsParams = useProxy 
+    ? {
+        url: config.url,
+        layers: config.layers,
+        format: config.format || 'image/png',
+        transparent: true,
+        version: '1.1.1'
+      }
+    : {
+        layers: config.layers,
+        format: config.format || 'image/png',
+        transparent: true,
+        version: '1.1.1'
+      };
   
-  // Zones périphériques
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * 2 * Math.PI;
-    const distance = radius * (0.5 + Math.random() * 0.4);
-    const zoneLat = lat + Math.cos(angle) * distance;
-    const zoneLng = lng + Math.sin(angle) * distance;
-    const zoneType = zoneTypes[Math.floor(Math.random() * (zoneTypes.length - 1))]; // Éviter perturbation
-    const zoneRadius = radius * (0.15 + Math.random() * 0.2);
-    
-    zones.push({
-      id: `zone_${i}`,
-      type: zoneType,
-      center: [zoneLat, zoneLng],
-      radius: zoneRadius,
-      polygon: generatePolygon([zoneLat, zoneLng], zoneRadius, 5 + Math.floor(Math.random() * 3))
-    });
-  }
-  
-  // Ajouter quelques milieux humides
-  for (let i = 0; i < 3; i++) {
-    const angle = (i / 3) * 2 * Math.PI + 0.5;
-    const distance = radius * 0.7;
-    const zoneLat = lat + Math.cos(angle) * distance;
-    const zoneLng = lng + Math.sin(angle) * distance;
-    
-    zones.push({
-      id: `wetland_${i}`,
-      type: 'milieu_humide',
-      center: [zoneLat, zoneLng],
-      radius: radius * 0.1,
-      polygon: generatePolygon([zoneLat, zoneLng], radius * 0.1, 8)
-    });
-  }
-  
-  return zones;
-};
-
-const generatePolygon = (center, radius, sides) => {
-  const [lat, lng] = center;
-  const points = [];
-  
-  for (let i = 0; i < sides; i++) {
-    const angle = (i / sides) * 2 * Math.PI;
-    // Ajouter une légère variation pour un aspect naturel
-    const r = radius * (0.85 + Math.random() * 0.3);
-    points.push([
-      lat + Math.cos(angle) * r,
-      lng + Math.sin(angle) * r * 1.3 // Correction ratio lat/lng
-    ]);
-  }
-  
-  // Fermer le polygone
-  points.push(points[0]);
-  
-  return points;
-};
-
-// ═══════════════════════════════════════════════════════════════
-// COMPOSANT ZONE FORESTIÈRE INDIVIDUELLE
-// ═══════════════════════════════════════════════════════════════
-
-const ForestZone = ({ zone, config, onClick }) => {
-  const [hovered, setHovered] = useState(false);
-  
-  const style = useMemo(() => ({
-    color: config.color,
-    fillColor: config.color,
-    fillOpacity: hovered ? config.fillOpacity + 0.15 : config.fillOpacity,
-    weight: hovered ? config.strokeWidth + 1 : config.strokeWidth,
-    dashArray: config.id === 'perturbation' ? '5, 5' : null
-  }), [config, hovered]);
+  // Appliquer le style BIONIC via CSS
+  const layerStyle = BIONIC_WMS_STYLES[style] || BIONIC_WMS_STYLES.bionic_signature;
   
   return (
-    <Polygon
-      positions={zone.polygon}
-      pathOptions={style}
-      eventHandlers={{
-        mouseover: () => setHovered(true),
-        mouseout: () => setHovered(false),
-        click: () => onClick && onClick(zone, config)
-      }}
-    >
-      <Tooltip 
-        sticky
-        className="bionic-forest-tooltip"
-      >
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95))',
-          padding: '10px 14px',
-          borderRadius: '8px',
-          border: `2px solid ${config.color}`,
-          boxShadow: `0 0 15px ${config.color}66`,
-          color: 'white',
-          minWidth: '180px'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '8px',
-            paddingBottom: '6px',
-            borderBottom: '1px solid #333'
-          }}>
-            <span style={{ fontSize: '20px' }}>{config.icon}</span>
-            <div>
-              <div style={{ fontWeight: 'bold', color: config.color }}>
-                {config.nom}
-              </div>
-              <div style={{ fontSize: '10px', color: '#888' }}>
-                Zone BIONIC™
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '6px'
-          }}>
-            <span style={{ fontSize: '11px', color: '#aaa' }}>Score Habitat</span>
-            <span style={{
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: config.score_habitat >= 80 ? '#00ff88' : 
-                     config.score_habitat >= 60 ? '#ffdd00' : '#ff6666'
-            }}>
-              {config.score_habitat}%
-            </span>
-          </div>
-          
-          <div style={{
-            fontSize: '10px',
-            color: '#ccc',
-            padding: '6px',
-            background: `${config.color}22`,
-            borderRadius: '4px'
-          }}>
-            {config.description}
-          </div>
-        </div>
-      </Tooltip>
-      
-      <Popup className="bionic-forest-popup">
-        <div style={{
-          minWidth: '220px',
-          padding: '12px',
-          background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-          borderRadius: '10px',
-          color: 'white'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '12px',
-            paddingBottom: '10px',
-            borderBottom: `2px solid ${config.color}`
-          }}>
-            <div style={{
-              width: '45px',
-              height: '45px',
-              borderRadius: '10px',
-              background: `linear-gradient(135deg, ${config.color}88, ${config.color}44)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px',
-              boxShadow: `0 0 15px ${config.color}66`
-            }}>
-              {config.icon}
-            </div>
-            <div>
-              <div style={{ fontWeight: 'bold', fontSize: '15px', color: config.color }}>
-                {config.nom}
-              </div>
-              <div style={{ fontSize: '11px', color: '#888' }}>
-                Classification BIONIC™ v3.3
-              </div>
-            </div>
-          </div>
-          
-          {/* Barre de score */}
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              marginBottom: '4px'
-            }}>
-              <span style={{ fontSize: '11px', color: '#888' }}>Score Habitat</span>
-              <span style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                color: config.color
-              }}>
-                {config.score_habitat}/100
-              </span>
-            </div>
-            <div style={{
-              height: '8px',
-              background: '#333',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${config.score_habitat}%`,
-                height: '100%',
-                background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
-                borderRadius: '4px',
-                boxShadow: `0 0 10px ${config.color}88`
-              }} />
-            </div>
-          </div>
-          
-          <div style={{
-            padding: '8px',
-            background: '#ffffff08',
-            borderRadius: '6px',
-            fontSize: '11px',
-            color: '#ccc'
-          }}>
-            {config.description}
-          </div>
-          
-          {config.score_habitat >= 80 && (
-            <div style={{
-              marginTop: '10px',
-              padding: '6px 10px',
-              background: 'linear-gradient(135deg, #f5a62333, #ff6b0033)',
-              borderRadius: '6px',
-              fontSize: '11px',
-              color: '#f5a623',
-              textAlign: 'center',
-              border: '1px solid #f5a62366'
-            }}>
-              ⭐ ZONE PRIORITAIRE BIONIC™
-            </div>
-          )}
-        </div>
-      </Popup>
-    </Polygon>
+    <WMSTileLayer
+      url={wmsUrl}
+      params={wmsParams}
+      opacity={opacity * (layerStyle.opacity || 1)}
+      zIndex={zIndex}
+      attribution={config.attribution}
+      className={`bionic-wms-layer bionic-wms-${config.id}`}
+    />
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// COMPOSANT PRINCIPAL
+// COMPOSANT LÉGENDE WMS
+// ═══════════════════════════════════════════════════════════════
+
+const WMSLegend = ({ activeLayers, position = 'bottomright' }) => {
+  const positionStyles = {
+    bottomright: { bottom: '80px', right: '10px' },
+    bottomleft: { bottom: '80px', left: '10px' },
+    topright: { top: '80px', right: '10px' },
+    topleft: { top: '80px', left: '10px' }
+  };
+  
+  if (!activeLayers || activeLayers.length === 0) return null;
+  
+  return (
+    <div 
+      className="bionic-wms-legend"
+      style={{
+        position: 'absolute',
+        ...positionStyles[position],
+        zIndex: 1000,
+        background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95))',
+        padding: '12px',
+        borderRadius: '12px',
+        border: '2px solid #f5a623',
+        boxShadow: '0 4px 20px rgba(245, 166, 35, 0.3)',
+        minWidth: '200px',
+        maxWidth: '280px'
+      }}
+    >
+      <div style={{
+        fontSize: '12px',
+        fontWeight: 'bold',
+        color: '#f5a623',
+        marginBottom: '10px',
+        textAlign: 'center',
+        borderBottom: '1px solid #f5a62344',
+        paddingBottom: '8px'
+      }}>
+        🗺️ COUCHES ÉCOFORESTIÈRES WMS
+      </div>
+      
+      {activeLayers.map((layer, idx) => (
+        <div 
+          key={layer.id || idx}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 0',
+            borderBottom: idx < activeLayers.length - 1 ? '1px solid #333' : 'none'
+          }}
+        >
+          <div style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '3px',
+            background: layer.active ? '#00ff66' : '#666',
+            boxShadow: layer.active ? '0 0 6px #00ff66' : 'none'
+          }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11px', color: 'white' }}>
+              {layer.name}
+            </div>
+            <div style={{ fontSize: '9px', color: '#888' }}>
+              {layer.source || 'WMS Officiel'}
+            </div>
+          </div>
+        </div>
+      ))}
+      
+      <div style={{
+        marginTop: '10px',
+        paddingTop: '8px',
+        borderTop: '1px solid #333',
+        fontSize: '9px',
+        color: '#666',
+        textAlign: 'center'
+      }}>
+        Données officielles MFFP/MERN Québec
+      </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL - COUCHES ÉCOFORESTIÈRES BIONIC
 // ═══════════════════════════════════════════════════════════════
 
 const BionicForestZonesLayer = ({
   mapCenter,
   enabled = true,
-  radius = 0.025,
-  onZoneClick
+  showCarteEcoforestiere = true,
+  showPeuplements = false,
+  showEssences = false,
+  showPerturbations = false,
+  showDensite = false,
+  showHydrographie = true,
+  showCanadaForest = false,
+  opacity = 0.75,
+  showLegend = true,
+  onLayerLoad,
+  onLayerError
 }) => {
   const map = useMap();
+  const [layersStatus, setLayersStatus] = useState({});
+  const [wmsAvailable, setWmsAvailable] = useState(true);
   
-  // Générer les zones quand le centre change - utiliser useMemo
-  const zones = useMemo(() => {
-    if (mapCenter && enabled) {
-      return generateForestZones(mapCenter, radius);
-    }
-    return [];
-  }, [mapCenter, enabled, radius]);
-  
-  // Injecter les styles CSS
+  // Vérifier la disponibilité des services WMS
   useEffect(() => {
-    const styleId = 'bionic-forest-zones-css';
+    const checkWMSAvailability = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/wms-proxy/check?url=${encodeURIComponent(QUEBEC_WMS_CONFIG.carte_ecoforestiere.url)}`);
+        const data = await response.json();
+        setWmsAvailable(data.available !== false);
+      } catch (error) {
+        console.warn('[BIONIC WMS] Erreur vérification WMS:', error);
+        setWmsAvailable(false);
+      }
+    };
+    
+    if (enabled) {
+      checkWMSAvailability();
+    }
+  }, [enabled]);
+  
+  // Injecter les styles CSS pour les couches WMS
+  useEffect(() => {
+    const styleId = 'bionic-wms-styles';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
       style.textContent = `
-        .bionic-forest-tooltip {
-          background: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-          padding: 0 !important;
+        /* Styles BIONIC pour couches WMS écoforestières */
+        .bionic-wms-layer {
+          filter: saturate(1.5) contrast(1.2);
         }
         
-        .bionic-forest-tooltip::before {
-          display: none !important;
+        .bionic-wms-carte_ecoforestiere {
+          filter: saturate(1.8) contrast(1.3) brightness(1.05);
         }
         
-        .bionic-forest-popup .leaflet-popup-content-wrapper {
-          background: transparent !important;
-          box-shadow: none !important;
-          padding: 0 !important;
-          border-radius: 10px !important;
+        .bionic-wms-peuplements {
+          filter: saturate(2) contrast(1.4) hue-rotate(20deg);
         }
         
-        .bionic-forest-popup .leaflet-popup-tip {
-          background: #1a1a2e !important;
+        .bionic-wms-essences {
+          filter: saturate(1.6) contrast(1.2);
         }
         
-        .bionic-forest-popup .leaflet-popup-content {
-          margin: 0 !important;
+        .bionic-wms-hydrographie {
+          filter: saturate(2.5) brightness(1.2) hue-rotate(-10deg);
+        }
+        
+        .bionic-wms-nfi_forest_cover {
+          filter: saturate(1.4) contrast(1.1);
+        }
+        
+        /* Animation de chargement */
+        .bionic-wms-loading {
+          animation: bionicWmsLoad 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes bionicWmsLoad {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
         }
       `;
       document.head.appendChild(style);
     }
   }, []);
   
-  if (!enabled || zones.length === 0) return null;
+  // Liste des couches actives pour la légende
+  const activeLayers = useMemo(() => {
+    const layers = [];
+    
+    if (showCarteEcoforestiere) {
+      layers.push({ 
+        id: 'carte_ecoforestiere', 
+        name: 'Carte Écoforestière', 
+        source: 'MFFP Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showPeuplements) {
+      layers.push({ 
+        id: 'peuplements', 
+        name: 'Peuplements forestiers', 
+        source: 'MFFP Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showEssences) {
+      layers.push({ 
+        id: 'essences', 
+        name: 'Essences principales', 
+        source: 'MFFP Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showPerturbations) {
+      layers.push({ 
+        id: 'perturbations', 
+        name: 'Perturbations', 
+        source: 'MFFP Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showDensite) {
+      layers.push({ 
+        id: 'densite', 
+        name: 'Densité du couvert', 
+        source: 'MFFP Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showHydrographie) {
+      layers.push({ 
+        id: 'hydrographie', 
+        name: 'Hydrographie', 
+        source: 'MERN Québec',
+        active: wmsAvailable 
+      });
+    }
+    if (showCanadaForest) {
+      layers.push({ 
+        id: 'nfi_forest_cover', 
+        name: 'Couverture forestière Canada', 
+        source: 'RNCan NFI',
+        active: true 
+      });
+    }
+    
+    return layers;
+  }, [showCarteEcoforestiere, showPeuplements, showEssences, showPerturbations, showDensite, showHydrographie, showCanadaForest, wmsAvailable]);
+  
+  if (!enabled) return null;
+  
+  // Message si WMS non disponible
+  if (!wmsAvailable && !showCanadaForest) {
+    return (
+      <>
+        <WMSLegend 
+          activeLayers={[{ 
+            id: 'unavailable', 
+            name: 'Service WMS temporairement indisponible', 
+            source: 'Réessayer plus tard',
+            active: false 
+          }]} 
+          position="bottomright" 
+        />
+      </>
+    );
+  }
   
   return (
     <>
-      {zones.map((zone) => {
-        const config = FOREST_ZONE_CONFIG[zone.type];
-        if (!config) return null;
-        
-        return (
-          <ForestZone
-            key={zone.id}
-            zone={zone}
-            config={config}
-            onClick={onZoneClick}
-          />
-        );
-      })}
+      {/* Couches WMS Québec */}
+      {showCarteEcoforestiere && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.carte_ecoforestiere}
+          opacity={opacity}
+          zIndex={400}
+          style="bionic_signature"
+        />
+      )}
+      
+      {showPeuplements && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.peuplements}
+          opacity={opacity * 0.9}
+          zIndex={401}
+          style="forest_highlight"
+        />
+      )}
+      
+      {showEssences && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.essences}
+          opacity={opacity * 0.85}
+          zIndex={402}
+          style="forest_highlight"
+        />
+      )}
+      
+      {showPerturbations && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.perturbations}
+          opacity={opacity * 0.8}
+          zIndex={403}
+          style="bionic_signature"
+        />
+      )}
+      
+      {showDensite && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.densite}
+          opacity={opacity * 0.85}
+          zIndex={404}
+          style="forest_highlight"
+        />
+      )}
+      
+      {showHydrographie && wmsAvailable && (
+        <BionicWMSLayer
+          config={QUEBEC_WMS_CONFIG.hydrographie}
+          opacity={opacity}
+          zIndex={405}
+          style="hydro_highlight"
+        />
+      )}
+      
+      {/* Couches WMS Canada */}
+      {showCanadaForest && (
+        <BionicWMSLayer
+          config={CANADA_WMS_CONFIG.forest_cover}
+          opacity={opacity * 0.7}
+          zIndex={399}
+          style="bionic_signature"
+          useProxy={false}
+        />
+      )}
+      
+      {/* Légende */}
+      {showLegend && activeLayers.length > 0 && (
+        <WMSLegend 
+          activeLayers={activeLayers} 
+          position="bottomright" 
+        />
+      )}
     </>
   );
 };
 
+// Exports
 export default BionicForestZonesLayer;
-export { FOREST_ZONE_CONFIG, generateForestZones };
+export { 
+  QUEBEC_WMS_CONFIG, 
+  CANADA_WMS_CONFIG, 
+  BIONIC_WMS_STYLES,
+  BionicWMSLayer,
+  WMSLegend
+};
