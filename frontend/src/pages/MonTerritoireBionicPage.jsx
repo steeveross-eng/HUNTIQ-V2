@@ -1756,21 +1756,38 @@ const MonTerritoireBionicPage = () => {
                     
                     {/* Sous-couches BIONIC™ - Architecture pan-canadienne fusionnée */}
                     {activeBaseMap === 'bionic' && (
-                      <div className={`mt-2 p-2 rounded border transition-all ${
+                      <div className={`mt-2 rounded border transition-all ${
                         pipelineEnabled 
                           ? 'bg-[#f5a623]/10 border-[#f5a623]/30' 
                           : 'bg-gray-800/30 border-gray-700/30 opacity-60'
                       }`}>
-                        {/* Header avec toggle ON-OFF */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-1">
+                        {/* Header avec toggle ON-OFF et bouton réduire */}
+                        <div 
+                          className="flex items-center justify-between p-2 cursor-pointer hover:bg-white/5 rounded-t transition-colors"
+                          onClick={() => setPipelineCollapsed(!pipelineCollapsed)}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {/* Chevron pour expand/collapse */}
+                            <ChevronDown 
+                              className={`h-3 w-3 transition-transform duration-200 ${
+                                pipelineCollapsed ? '-rotate-90' : 'rotate-0'
+                              } ${pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}`}
+                            />
                             <span className={pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}>🎯</span>
                             <span className={`text-[9px] uppercase ${pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}`}>
                               Pipeline v1.0
                             </span>
+                            {pipelineCollapsed && pipelineEnabled && (
+                              <span className="text-[8px] text-gray-500 ml-1">
+                                (8 couches)
+                              </span>
+                            )}
                           </div>
                           <button
-                            onClick={() => setPipelineEnabled(!pipelineEnabled)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPipelineEnabled(!pipelineEnabled);
+                            }}
                             className={`px-2 py-0.5 rounded text-[8px] font-bold transition-all ${
                               pipelineEnabled 
                                 ? 'bg-[#f5a623] text-black shadow-lg shadow-[#f5a623]/30' 
@@ -1781,9 +1798,9 @@ const MonTerritoireBionicPage = () => {
                           </button>
                         </div>
                         
-                        {/* Sous-couches - affichées seulement si pipeline activé */}
-                        {pipelineEnabled && (
-                          <>
+                        {/* Contenu - affiché seulement si non réduit ET pipeline activé */}
+                        {!pipelineCollapsed && pipelineEnabled && (
+                          <div className="px-2 pb-2">
                             <div className="space-y-1 text-[9px]">
                               <div className="flex items-center justify-between">
                                 <span className="text-amber-400">⛰️ Topographie</span>
@@ -1828,6 +1845,18 @@ const MonTerritoireBionicPage = () => {
                                 <div className="text-center p-0.5 rounded bg-blue-700/50 text-blue-300">11-14</div>
                                 <div className="text-center p-0.5 rounded bg-green-700/50 text-green-300">15-18</div>
                               </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Message si désactivé (affiché même si réduit) */}
+                        {!pipelineCollapsed && !pipelineEnabled && (
+                          <div className="px-2 pb-2">
+                            <div className="text-[9px] text-gray-500 text-center py-2">
+                              Pipeline désactivé - Hotspots et simulation masqués
+                            </div>
+                          </div>
+                        )}
                             </div>
                           </>
                         )}
