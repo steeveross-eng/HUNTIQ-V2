@@ -87,6 +87,8 @@ Nouvelles fonctionnalités:
 - ✅ **Intégration UI** - Nouvelle option "BIONIC™ Canada" dans le panneau de couches
 - ✅ **Sous-couches affichées** avec pourcentages d'opacité et indicateurs zoom
 - ✅ **Configuration BionicMapConfig.js** mise à jour avec exports du pipeline
+- ✅ **BionicVectorTileLayer.jsx** - Composant de rendu tuiles vectorielles avec leaflet.vectorgrid
+- ✅ **BionicCanadaVectorLayer** - Wrapper intégré au système de carte existant
 
 **Architecture du pipeline:**
 ```
@@ -94,6 +96,7 @@ BIONIC_VECTOR_TILES_CANADA v1.0.0
 ├── Couverture: Canada [-141.0, 41.7] à [-52.6, 83.1]
 ├── Projection: EPSG:3857 (Web Mercator)
 ├── Format: Vector tiles (.pbf)
+├── Source: Mapbox Vector Tiles (fallback)
 └── Zoom levels:
     ├── [0-4] Global - Simplification aggressive (5000m tolerance)
     ├── [5-7] Régional - Simplification moderate (1000m tolerance)
@@ -116,18 +119,15 @@ BIONIC_VECTOR_TILES_CANADA v1.0.0
 
 **Fichiers créés/modifiés:**
 - `/app/frontend/src/services/BionicVectorTilesCanada.js` - **NOUVEAU** - Service pipeline complet (600+ lignes)
+- `/app/frontend/src/components/territoire/BionicVectorTileLayer.jsx` - **NOUVEAU** - Composant rendu tuiles vectorielles
 - `/app/frontend/src/config/BionicMapConfig.js` - Intégration pipeline + exports utilitaires
-- `/app/frontend/src/components/territoire/EcoforestryLayers.jsx` - Ajout BASE_MAP bionic_canada
+- `/app/frontend/src/components/territoire/EcoforestryLayers.jsx` - Ajout BASE_MAP bionic_canada + intégration BionicCanadaVectorLayer
 - `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Ajout bouton BIONIC Canada + sous-couches UI
 
-**Fonctions utilitaires exposées:**
-- `getZoomConfig(zoom)` - Configuration pour un niveau de zoom
-- `getVisibleLayersForZoom(zoom)` - Couches visibles à un zoom
-- `getSimplificationParams(zoom)` - Paramètres de simplification
-- `getTileUrl(z, x, y)` - URL de tuile vectorielle
-- `isLayerVisibleAtZoom(layerId, featureType, zoom)` - Visibilité couche
-- `isWithinCanadaCoverage(lat, lng)` - Validation couverture Canada
-- `estimateProcessingStats(bounds, maxZoom)` - Estimation traitement
+**Dépendances ajoutées:**
+- `leaflet.vectorgrid` - Rendu tuiles vectorielles .pbf
+- `pbf` - Parser Protocol Buffers
+- `vector-tile` - Décodage tuiles vectorielles
 
 ### Phase 52l (January 29, 2026) - HABITAT_OPTIMAL_SYNTHESE Visualisation Temps Réel ✅
 
