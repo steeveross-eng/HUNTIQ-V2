@@ -2118,6 +2118,18 @@ const MonTerritoireBionicPage = () => {
                   showLegend={topoEnabled && topoContours}
                 />
                 
+                {/* ANALYSE PAR WAYPOINT - Zone focalisée avec hotspot unique */}
+                <WaypointZoneAnalysis
+                  enabled={zoneAnalysisEnabled}
+                  waypoint={zoneAnalysisWaypoint}
+                  analysisArea={zoneAnalysisArea}
+                  targetSpecies={selectedEspece}
+                  onAnalysisComplete={handleZoneAnalysisComplete}
+                  showBoundary={true}
+                  showZones={true}
+                  showHotspot={true}
+                />
+                
                 {/* Hotspots et trajets d'approche BIONIC - Toujours actif sur tous les fonds de carte */}
                 {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
