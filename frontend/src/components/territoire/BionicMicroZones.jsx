@@ -352,9 +352,10 @@ const IntersectionLine = ({ intersection, zoom }) => {
  * 3. Lignes vectorielles ultra-fines et adaptatives au zoom
  * 4. Aucune fusion avec les zones voisines
  * 5. CLIPPING GÉOMÉTRIQUE : contours distincts même en superposition
+ * 6. HABITAT_OPTIMAL : Score ajusté visible selon l'espèce sélectionnée
  */
 const MicroZone = ({ zone, isHovered, onHover, onLeave, showConcentric, isFavorite, onToggleFavorite, currentZoom }) => {
-  const { center, radiusMeters, moduleId, percentage, isOverlap, neighboringModules, overlapCount, renderPriority } = zone;
+  const { center, radiusMeters, moduleId, percentage, isOverlap, neighboringModules, overlapCount, habitatScore, moduleWeight, selectedEspece } = zone;
   
   // Zoom actuel pour calcul vectoriel des épaisseurs
   const zoom = currentZoom || zone.zoom || 12;
@@ -363,23 +364,48 @@ const MicroZone = ({ zone, isHovered, onHover, onLeave, showConcentric, isFavori
   // STYLE "DANY LAVOIE" : Chaque zone conserve SON PROPRE pourcentage (AUCUNE fusion)
   const displayPercentage = percentage;
   
-  // Calculs vectoriels adaptatifs au zoom
-  const fillOpacity = getFillOpacity(displayPercentage, isHovered);
-  const strokeWeight = getStrokeWeight(displayPercentage, isHovered, zoom);
-  const strokeOpacity = getStrokeOpacity(displayPercentage, isHovered);
+  // HABITAT_OPTIMAL : Utiliser le score ajusté pour l'intensité visuelle
+  const effectiveScore = habitatScore || percentage;
+  
+  // Calculs vectoriels adaptatifs au zoom - basés sur le score habitat
+  const fillOpacity = getFillOpacity(effectiveScore, isHovered);
+  const strokeWeight = getStrokeWeight(effectiveScore, isHovered, zoom);
+  const strokeOpacity = getStrokeOpacity(effectiveScore, isHovered);
+  
+  // Fonction pour obtenir la couleur habitat selon le score
+  const getHabitatColor = (score) => {
+    if (score >= 80) return '#22c55e'; // Excellent - vert
+    if (score >= 65) return '#84cc16'; // Très bon - lime
+    if (score >= 50) return '#eab308'; // Bon - jaune
+    if (score >= 35) return '#f97316'; // Moyen - orange
+    return '#ef4444'; // Faible - rouge
+  };
+  
+  // Fonction pour obtenir le niveau habitat
+  const getHabitatLevel = (score) => {
+    if (score >= 80) return 'EXCELLENT';
+    if (score >= 65) return 'TRÈS BON';
+    if (score >= 50) return 'BON';
+    if (score >= 35) return 'MOYEN';
+    return 'FAIBLE';
+  };
+  
+  // Couleur du halo habitat (indicateur visuel)
+  const habitatColor = getHabitatColor(effectiveScore);
+  const habitatLevel = getHabitatLevel(effectiveScore);
   
   // Cercles concentriques avec épaisseur adaptative au zoom
   const concentricRadii = useMemo(() => {
-    if (!showConcentric || displayPercentage < 70 || zoom < 12) return [];
+    if (!showConcentric || effectiveScore < 70 || zoom < 12) return [];
     const radii = [];
-    if (displayPercentage >= 85) {
+    if (effectiveScore >= 85) {
       radii.push({ radius: radiusMeters * 0.70, weight: getConcentricStrokeWeight(zoom, 0) });
       radii.push({ radius: radiusMeters * 0.40, weight: getConcentricStrokeWeight(zoom, 1) });
-    } else if (displayPercentage >= 70) {
+    } else if (effectiveScore >= 70) {
       radii.push({ radius: radiusMeters * 0.60, weight: getConcentricStrokeWeight(zoom, 0) });
     }
     return radii;
-  }, [showConcentric, displayPercentage, radiusMeters, zoom]);
+  }, [showConcentric, effectiveScore, radiusMeters, zoom]);
 
   return (
     <>
