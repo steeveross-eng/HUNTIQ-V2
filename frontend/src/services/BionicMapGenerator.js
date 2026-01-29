@@ -96,7 +96,7 @@ export const COULEURS_BIONIC_SIGNATURE = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// ÉTAPE 1: NORMALISATION DES DONNÉES
+// ÉTAPE 1: NORMALISATION DES DONNÉES (avec variables V1-V11)
 // ═══════════════════════════════════════════════════════════════
 
 export const normaliserDonnees = (donnees) => {
@@ -111,6 +111,9 @@ export const normaliserDonnees = (donnees) => {
     date_saison
   } = donnees;
 
+  // Calculer les variables universelles normalisées
+  const variables = calculerVariablesUniverselles(donnees);
+
   return {
     ecoforestier: normaliserCouche(ecoforestier, 'ecoforestier'),
     elevation: normaliserCouche(mnt_lidar, 'elevation'),
@@ -120,7 +123,92 @@ export const normaliserDonnees = (donnees) => {
     waypoints: waypoints || [],
     meteo: meteo || getMeteoDefaut(),
     date_saison: date_saison || getDateSaisonActuelle(),
-    resolution_m: BIONIC_GENERATOR_CONFIG.resolution_interne_m
+    resolution_m: BIONIC_GENERATOR_CONFIG.resolution_interne_m,
+    variables_universelles: variables,
+    scoring_detaille: {
+      actif: BIONIC_GENERATOR_CONFIG.scoring_detaille,
+      variables_calculees: Object.keys(variables).length
+    }
+  };
+};
+
+/**
+ * Calcule les 11 variables universelles normalisées (0-1)
+ */
+const calculerVariablesUniverselles = (donnees) => {
+  const eco = donnees.ecoforestier?.data || {};
+  const elev = donnees.mnt_lidar?.data || {};
+  const hydro = donnees.hydrographie?.data || {};
+  const routes = donnees.reseau_routier?.data || {};
+  const urbain = donnees.zones_urbaines?.data || {};
+  
+  return {
+    V1: { 
+      valeur: eco.densite || 0.65, 
+      nom: VARIABLES_UNIVERSELLES.V1.nom,
+      description: 'Couvert forestier dense favorable',
+      score_contribution: (eco.densite || 0.65) * 100
+    },
+    V2: { 
+      valeur: eco.type_couvert || 0.7, 
+      nom: VARIABLES_UNIVERSELLES.V2.nom,
+      description: 'Type de couvert mixte à résineux',
+      score_contribution: (eco.type_couvert || 0.7) * 100
+    },
+    V3: { 
+      valeur: 1 - (hydro.distance_eau || 0.4), 
+      nom: VARIABLES_UNIVERSELLES.V3.nom,
+      description: 'Proximité aux points d\'eau',
+      score_contribution: (1 - (hydro.distance_eau || 0.4)) * 100
+    },
+    V4: { 
+      valeur: routes.distance_routes || 0.6, 
+      nom: VARIABLES_UNIVERSELLES.V4.nom,
+      description: 'Éloignement des perturbations routières',
+      score_contribution: (routes.distance_routes || 0.6) * 100
+    },
+    V5: { 
+      valeur: eco.sous_bois || 0.55, 
+      nom: VARIABLES_UNIVERSELLES.V5.nom,
+      description: 'Végétation de sous-bois présente',
+      score_contribution: (eco.sous_bois || 0.55) * 100
+    },
+    V6: { 
+      valeur: elev.pente_norm || 0.35, 
+      nom: VARIABLES_UNIVERSELLES.V6.nom,
+      description: 'Pente modérée favorable',
+      score_contribution: (elev.pente_norm || 0.35) * 100
+    },
+    V7: { 
+      valeur: elev.orientation || 0.6, 
+      nom: VARIABLES_UNIVERSELLES.V7.nom,
+      description: 'Orientation sud-ouest favorable',
+      score_contribution: (elev.orientation || 0.6) * 100
+    },
+    V8: { 
+      valeur: 1 - (urbain.perturbation || 0.2), 
+      nom: VARIABLES_UNIVERSELLES.V8.nom,
+      description: 'Faible perturbation humaine',
+      score_contribution: (1 - (urbain.perturbation || 0.2)) * 100
+    },
+    V9: { 
+      valeur: eco.alimentation || 0.7, 
+      nom: VARIABLES_UNIVERSELLES.V9.nom,
+      description: 'Ressources alimentaires accessibles',
+      score_contribution: (eco.alimentation || 0.7) * 100
+    },
+    V10: { 
+      valeur: hydro.humidite_sol || 0.5, 
+      nom: VARIABLES_UNIVERSELLES.V10.nom,
+      description: 'Humidité du sol modérée',
+      score_contribution: (hydro.humidite_sol || 0.5) * 100
+    },
+    V11: { 
+      valeur: urbain.distance_urbain || 0.8, 
+      nom: VARIABLES_UNIVERSELLES.V11.nom,
+      description: 'Zone éloignée des centres urbains',
+      score_contribution: (urbain.distance_urbain || 0.8) * 100
+    }
   };
 };
 
