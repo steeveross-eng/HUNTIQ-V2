@@ -1748,55 +1748,13 @@ const MonTerritoireBionicPage = () => {
                         <span className="flex-1 text-left">Terrain</span>
                         {activeBaseMap === 'terrain' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
                       </button>
-                      
-                      {/* Option BIONIC™ Canada - Vector Tiles */}
-                      <button
-                        onClick={() => handleBaseMapChange('bionic_canada')}
-                        className={`w-full flex items-center gap-2 px-2 py-2 rounded text-[11px] transition-all ${
-                          activeBaseMap === 'bionic_canada' 
-                            ? 'bg-red-500/20 text-white border border-red-500/50' 
-                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-                        }`}
-                      >
-                        <span>🍁</span>
-                        <div className="flex-1 text-left">
-                          <div className="font-medium">BIONIC™ Canada</div>
-                          <div className="text-[9px] text-gray-500">Tuiles vectorielles pan-canadiennes</div>
-                        </div>
-                        {activeBaseMap === 'bionic_canada' && <Badge className="bg-red-500 text-white text-[8px]">Actif</Badge>}
-                      </button>
                     </div>
                     
-                    {/* Sous-couches BIONIC si carte BIONIC sélectionnée */}
+                    {/* Sous-couches BIONIC™ - Architecture pan-canadienne fusionnée */}
                     {activeBaseMap === 'bionic' && (
-                      <div className="mt-2 p-2 bg-gray-800/30 rounded border border-gray-700/50">
-                        <div className="text-[9px] text-gray-400 uppercase mb-2">Couches BIONIC™</div>
-                        <div className="space-y-1 text-[9px]">
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-300">🪨 Géologie</span>
-                            <span className="text-gray-500">35%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-blue-400">💧 Hydrologie</span>
-                            <span className="text-blue-400">70%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-green-400">🌲 Écoforestier</span>
-                            <span className="text-green-400">60%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#f5a623]">🎯 Score Faunique</span>
-                            <span className="text-[#f5a623]">80%</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Sous-couches BIONIC CANADA si carte BIONIC Canada sélectionnée */}
-                    {activeBaseMap === 'bionic_canada' && (
-                      <div className="mt-2 p-2 bg-red-900/20 rounded border border-red-700/30">
-                        <div className="text-[9px] text-red-400 uppercase mb-2 flex items-center gap-1">
-                          🍁 Pipeline BIONIC_VECTOR_TILES_CANADA v1.0
+                      <div className="mt-2 p-2 bg-[#f5a623]/10 rounded border border-[#f5a623]/30">
+                        <div className="text-[9px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                          🎯 Pipeline BIONIC_VECTOR_TILES_CANADA v1.0
                         </div>
                         <div className="space-y-1 text-[9px]">
                           <div className="flex items-center justify-between">
@@ -1833,7 +1791,7 @@ const MonTerritoireBionicPage = () => {
                           </div>
                         </div>
                         {/* Info niveaux de zoom */}
-                        <div className="mt-2 pt-2 border-t border-red-700/30">
+                        <div className="mt-2 pt-2 border-t border-[#f5a623]/30">
                           <div className="text-[8px] text-gray-500 mb-1">Niveaux de zoom adaptatifs</div>
                           <div className="grid grid-cols-5 gap-0.5 text-[7px]">
                             <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">0-4</div>
