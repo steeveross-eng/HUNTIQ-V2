@@ -99,38 +99,41 @@
 
 ## What's Been Implemented
 
-### Phase 52q (January 29, 2026 - Session 3) - Refactoring Architectural Majeur ✅
+### Phase 52q (January 29, 2026 - Session 3) - Refactoring Architectural + Analyse Zone ✅
 
-**Migration vers architecture modulaire: TerritoryHeader intégré**
+**Migration vers architecture modulaire + Fonctionnalité Analyse par Waypoint**
 
 #### 🏗️ Refactoring Complété
 - ✅ **Intégration de TerritoryHeader** dans `MonTerritoireBionicPage.jsx`
   - Header inline de ~350 lignes remplacé par le composant modulaire
-  - Réduction de 3192 → 2869 lignes (-323 lignes, -10%)
+  - Réduction de 3192 → 2934 lignes (-258 lignes, -8%)
   - Props passées: tabs, LIVE mode, sync, notifications, groupes, waypoints, espèce
-- ✅ **Suppression du code dupliqué**
-  - Menu dropdown waypoint (GPS, clic carte, saisie manuelle)
-  - Sélecteur d'espèce cible
-  - Dropdown Score Global avec détails
 - ✅ **Variables d'état nettoyées**
   - `showNotificationsPanel` supprimé (géré dans TerritoryHeader)
-- ✅ **Nouveaux callbacks créés**
-  - `handleCancelWaypointMode` - Annulation mode création
-  - `handleEnableMapClickMode` - Activation mode clic carte
-  - `handleSelectGroup` - Sélection d'un groupe
 
-#### 📊 Métriques de Réduction
-| Fichier | Avant | Après | Réduction |
-|---------|-------|-------|-----------|
-| `MonTerritoireBionicPage.jsx` | 3192 lignes | 2869 lignes | -323 (-10%) |
+#### 🎯 Analyse par Waypoint (ZoneAnalysisControlPanel) ✅
+- ✅ **ZoneAnalysisControlPanel intégré** dans le sidebar sous OVERLAY TOPOGRAPHIQUE
+  - Sélecteur de waypoint avec dropdown (4 waypoints disponibles)
+  - Sélection de zone d'analyse: 2 km² (restreinte), 4 km² (moyenne), 10 km² (étendue)
+  - Bouton "Analyser la zone" avec feedback visuel
+  - Message d'avertissement UX si pas de waypoint sélectionné
+- ✅ **WaypointZoneAnalysis** intégré dans le MapContainer
+  - Affichage de la zone d'analyse circulaire
+  - Identification du hotspot optimal
+  - Toast de notification avec score et distance
 
-#### ✅ Tests Visuels
-- Page charge correctement avec le nouveau header
-- Tous les éléments UI présents et fonctionnels
-- Navigation tabs: Carte BIONIC™, Waypoints actifs, Lieux enregistrés
-- Bouton "Enregistrer un Waypoint" avec dropdown
-- Sélecteur d'espèce (Orignal par défaut)
-- Mode LIVE, Sync, Groupe fonctionnels
+#### 📊 États ajoutés pour l'analyse
+- `zoneAnalysisEnabled` - Activation/désactivation de l'analyse
+- `zoneAnalysisWaypoint` - Waypoint sélectionné pour l'analyse
+- `zoneAnalysisArea` - Zone sélectionnée ('2', '4', '10' km²)
+- `zoneAnalysisResult` - Résultat de l'analyse (hotspot)
+- `zoneAnalysisCollapsed` - État du panneau (replié/déplié)
+
+#### ✅ Tests Validés (100% succès)
+- 22/22 tests frontend passés
+- ZoneAnalysisControlPanel visible et fonctionnel
+- Légendes COMPORTEMENTS GIBIER et PEUPLEMENTS FORESTIERS visibles
+- Scores BIONIC: HABITAT 63, METEO 50, APPROCHE 96
 
 ### Phase 52p (January 29, 2026 - Session 2) - Architecture Modulaire + WMS Proxy ✅
 
