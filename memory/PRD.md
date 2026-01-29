@@ -713,14 +713,20 @@ Fonctionnalités implémentées:
 - [x] **Intégration TerritoryHeader** - Header modulaire intégré (Phase 52q) ✅
 
 ### P1 - High Priority (EN COURS)
-- [~] **Refactoring de MonTerritoireBionicPage.jsx** (2869 lignes restantes) - EN COURS
-  - ✅ TerritoryHeader.jsx créé et intégré
+- [~] **Refactoring de MonTerritoireBionicPage.jsx** (2934 lignes restantes) - EN COURS
+  - ✅ TerritoryHeader.jsx intégré dans la page
   - ✅ LayersPanelContent.jsx créé
   - ✅ QuebecLayersPanel.jsx créé et intégré
-  - ✅ Remplacer le header inline par TerritoryHeader ✅ (fait dans Phase 52q)
-  - [ ] Migrer les useState vers BionicTerritoryContext
-  - [ ] Intégrer LayersPanelContent dans le sidebar
+  - ✅ ZoneAnalysisControlPanel intégré dans le sidebar
+  - ✅ WaypointZoneAnalysis intégré dans MapContainer
+  - [ ] Migrer les 61 useState vers BionicTerritoryContext (P1 futur)
+  - [ ] Intégrer LayersPanelContent modulaire dans le sidebar
   - [ ] Réduire sous 2000 lignes (cible: 1500)
+- [x] **Analyse par Waypoint (ZoneAnalysisControlPanel)** ✅
+  - ✅ Sélecteur de waypoint
+  - ✅ Zones d'analyse 2, 4, 10 km²
+  - ✅ Bouton "Analyser la zone"
+  - ✅ Affichage du hotspot optimal
 - [x] **Couches Québec activables via UI** ✅
   - ✅ Carte Écoforestière (peuplements)
   - ✅ LiDAR Dendrométrique (hauteur arbres)  
