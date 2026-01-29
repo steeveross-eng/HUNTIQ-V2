@@ -2170,7 +2170,7 @@ const MonTerritoireBionicPage = () => {
                 )}
                 
                 {/* BIONIC™ ZONES FORESTIÈRES COLORÉES - Visible quand BIONIC est actif */}
-                {activeEcoLayers.baseMap === 'bionic' && pipelineEnabled && (
+                {activeBaseMap === 'bionic' && pipelineEnabled && (
                   <BionicForestZonesLayer
                     mapCenter={mapCenter}
                     enabled={true}
