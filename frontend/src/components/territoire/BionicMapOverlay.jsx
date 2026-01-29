@@ -68,11 +68,11 @@ const BionicBorderGlow = ({ active, intensity = 'high' }) => {
         right: 0,
         bottom: 0,
         pointerEvents: 'none',
-        zIndex: 1000,
+        zIndex: 9999,
         border: `${BIONIC_VISUAL_CONFIG.effects.borderWidth}px solid ${BIONIC_VISUAL_CONFIG.colors.primary}`,
         boxShadow: `
-          inset 0 0 ${config.blur}px ${config.spread}px ${BIONIC_VISUAL_CONFIG.colors.glow}${Math.round(config.opacity * 255).toString(16)},
-          0 0 ${config.blur}px ${config.spread}px ${BIONIC_VISUAL_CONFIG.colors.glow}${Math.round(config.opacity * 255).toString(16)}
+          inset 0 0 ${config.blur}px ${config.spread}px ${BIONIC_VISUAL_CONFIG.colors.glow}${Math.round(config.opacity * 255).toString(16).padStart(2, '0')},
+          0 0 ${config.blur}px ${config.spread}px ${BIONIC_VISUAL_CONFIG.colors.glow}${Math.round(config.opacity * 255).toString(16).padStart(2, '0')}
         `,
         animation: 'bionicPulse 3s ease-in-out infinite',
         borderRadius: '0px'
