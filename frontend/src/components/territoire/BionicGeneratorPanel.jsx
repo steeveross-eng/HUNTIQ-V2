@@ -48,7 +48,7 @@ const BionicGeneratorPanel = ({
     recommandations: false,
     produits: false
   });
-  const [shouldGenerate, setShouldGenerate] = useState(true);
+  const prevEspeceRef = useRef(espece);
 
   const generer = useCallback(async () => {
     setIsGenerating(true);
@@ -73,22 +73,18 @@ const BionicGeneratorPanel = ({
     setIsGenerating(false);
   }, [donnees, meteo, espece, onResultsGenerated]);
 
-  // Générer la carte au montage ou changement d'espèce
+  // Générer au montage et quand l'espèce change (utilise ref pour comparer)
   useEffect(() => {
-    if (shouldGenerate) {
-      setShouldGenerate(false);
-      // Utiliser setTimeout pour éviter le setState synchrone dans l'effet
+    const shouldRegenerate = prevEspeceRef.current !== espece || resultats === null;
+    prevEspeceRef.current = espece;
+    
+    if (shouldRegenerate) {
       const timer = setTimeout(() => {
         generer();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [shouldGenerate, generer]);
-  
-  // Regénérer quand l'espèce change
-  useEffect(() => {
-    setShouldGenerate(true);
-  }, [espece]);
+  }, [espece, generer, resultats]);
 
   const toggleSection = (section) => {
     setSectionsOuvertes(prev => ({
