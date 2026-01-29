@@ -1,14 +1,18 @@
 /**
  * BionicForestZonesLayer.jsx
  * 
- * COUCHES ÉCOFORESTIÈRES RÉELLES - GeoJSON Québec et Canada
+ * COUCHES ÉCOFORESTIÈRES RÉELLES - WMS Proxy Québec et Canada
  * 
  * Affiche les vraies données écoforestières depuis:
- * - GeoJSON Données Québec (peuplements forestiers)
+ * - Proxy WMS Backend (contourne les restrictions CORS/IP)
+ * - Données Québec: Peuplements, LiDAR, Indices topographiques
  * - Couches WMS Canada NFI (fallback)
  * 
  * Les zones affichées représentent les VRAIES formes des peuplements forestiers
  * avec filtrage à 80-100% uniquement.
+ * 
+ * Architecture: Micro-Frontend Ready
+ * Version: 2.0.0 - Avec Proxy WMS Backend
  */
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
@@ -28,14 +32,48 @@ const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 const MIN_SCORE_THRESHOLD = 80; // Seulement zones 80-100%
 
 /**
- * Services WMS pancanadiens (fallback)
+ * Configuration du Proxy WMS Backend
+ * Utilise le microservice bionic-territory pour contourner les restrictions CORS/IP
+ */
+const WMS_PROXY_CONFIG = {
+  // Données écoforestières Québec (via proxy)
+  quebec_eco: {
+    id: 'quebec_eco_proxy',
+    name: 'Carte Écoforestière Québec',
+    proxyUrl: `${API_BASE}/api/bionic-territory/wms/tile`,
+    source: 'quebec_eco',
+    layer: 'peuplements',
+    attribution: '© MFFP Québec - Carte écoforestière'
+  },
+  // Données LiDAR dendrométriques (via proxy)
+  quebec_lidar: {
+    id: 'quebec_lidar_proxy',
+    name: 'LiDAR Dendrométrique',
+    proxyUrl: `${API_BASE}/api/bionic-territory/wms/tile`,
+    source: 'quebec_lidar',
+    layer: 'lidar_dendro',
+    attribution: '© MFFP Québec - Données LiDAR'
+  },
+  // Indice humidité topographique (via proxy)
+  quebec_twi: {
+    id: 'quebec_twi_proxy',
+    name: 'Indice Humidité (TWI)',
+    proxyUrl: `${API_BASE}/api/bionic-territory/wms/tile`,
+    source: 'quebec_terrain',
+    layer: 'twi',
+    attribution: '© MFFP Québec - Indices topographiques'
+  }
+};
+
+/**
+ * Services WMS pancanadiens (fallback direct - pas de proxy nécessaire)
  */
 const CANADA_WMS_CONFIG = {
   forest_cover: {
     id: 'nfi_forest_cover',
     name: 'Couverture forestière Canada',
-    url: 'https://opendata.nfis.org/mapserver/cgi-bin/wms_nfi',
-    layers: 'forest_cover',
+    url: 'https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms',
+    layers: 'nfi_forest_land_cover',
     format: 'image/png',
     transparent: true,
     attribution: '© Ressources naturelles Canada - Inventaire forestier national'
