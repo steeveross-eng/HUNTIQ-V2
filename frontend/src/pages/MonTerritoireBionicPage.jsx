@@ -835,18 +835,53 @@ const MonTerritoireBionicPage = () => {
   const [zoneAnalysisArea, setZoneAnalysisArea] = useState('4'); // '2', '4', '10' km²
   const [zoneAnalysisResult, setZoneAnalysisResult] = useState(null);
   const [zoneAnalysisCollapsed, setZoneAnalysisCollapsed] = useState(false);
+  const [zoneAnalysisAutoMode, setZoneAnalysisAutoMode] = useState(true); // Mode temps réel activé par défaut
   
   // Callback quand l'analyse est complète
   const handleZoneAnalysisComplete = useCallback((result) => {
     setZoneAnalysisResult(result);
-    if (result) {
-      toast.success(`Hotspot optimal identifié: ${result.score}%`, {
-        description: `${result.distanceFromCenter}m du waypoint`
+    if (result && result.score) {
+      toast.success(`🎯 Hotspot optimal identifié: ${result.score}%`, {
+        description: `${result.distanceFromCenter || 0}m du waypoint • Zone ${zoneAnalysisArea} km²`
       });
     }
-  }, []);
+  }, [zoneAnalysisArea]);
   
-  // Toggle l'analyse de zone
+  // Sélection d'un waypoint avec activation automatique
+  const handleSelectZoneWaypoint = useCallback((wp) => {
+    setZoneAnalysisWaypoint(wp);
+    if (wp) {
+      // Centrer la carte sur le waypoint
+      setMapCenter([wp.lat, wp.lng]);
+      setMapZoom(14);
+      
+      // Activation automatique en mode temps réel
+      if (zoneAnalysisAutoMode) {
+        setZoneAnalysisEnabled(true);
+        setZoneAnalysisResult(null); // Reset le résultat précédent
+        toast.info(`🔍 Analyse en cours...`, {
+          description: `Zone de ${zoneAnalysisArea} km² autour de "${wp.name || 'Waypoint'}"`
+        });
+      }
+    } else {
+      setZoneAnalysisEnabled(false);
+      setZoneAnalysisResult(null);
+    }
+  }, [zoneAnalysisAutoMode, zoneAnalysisArea]);
+  
+  // Changement de zone avec re-analyse automatique
+  const handleZoneAreaChange = useCallback((newArea) => {
+    setZoneAnalysisArea(newArea);
+    // Re-déclencher l'analyse si un waypoint est sélectionné
+    if (zoneAnalysisWaypoint && zoneAnalysisAutoMode) {
+      setZoneAnalysisResult(null);
+      toast.info(`🔄 Mise à jour de la zone...`, {
+        description: `Nouvelle zone: ${newArea} km²`
+      });
+    }
+  }, [zoneAnalysisWaypoint, zoneAnalysisAutoMode]);
+  
+  // Toggle l'analyse de zone (mode manuel)
   const toggleZoneAnalysis = useCallback(() => {
     if (!zoneAnalysisEnabled && !zoneAnalysisWaypoint) {
       toast.warning('Sélectionnez un waypoint d\'abord');
