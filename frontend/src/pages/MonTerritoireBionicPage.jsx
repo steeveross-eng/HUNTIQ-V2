@@ -1405,187 +1405,54 @@ const MonTerritoireBionicPage = () => {
     };
   }, [scores?.breakdown, currentMapCenter.lat, currentMapCenter.lng]);
 
+  // Callbacks pour le header modulaire
+  const handleCancelWaypointMode = useCallback(() => {
+    setMapClickMode(false);
+    setQuickWaypointMode(false);
+    toast.info('Mode création désactivé');
+  }, []);
+
+  const handleEnableMapClickMode = useCallback(() => {
+    setQuickWaypointMode(true);
+    setMapClickMode(true);
+    toast.info('Mode création activé', {
+      description: 'Cliquez sur la carte pour placer votre waypoint'
+    });
+  }, []);
+
+  const handleSelectGroup = useCallback((group) => {
+    setSelectedGroup(group);
+    setShowGroupDashboard(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-black pt-16" data-testid="mon-territoire-bionic-page">
-      {/* Header de la page */}
-      <div className="bg-gradient-to-r from-black via-gray-900 to-black border-b border-[#f5a623]/30">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-gray-400 hover:text-white">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour
-              </Button>
-              <div className="h-6 w-px bg-gray-700" />
-              <div className="flex items-center gap-3">
-                <Brain className="h-6 w-6 text-[#f5a623]" />
-                <div>
-                  <h1 className="text-lg font-bold text-white">Mon Territoire BIONIC™</h1>
-                  <p className="text-[10px] text-gray-400">Analyse • Waypoints • Lieux</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              {/* Mode LIVE */}
-              <div className="flex items-center gap-2 bg-gray-900/80 rounded-lg px-3 py-1.5 border border-gray-700">
-                <Zap className={`h-4 w-4 ${liveMode ? 'text-green-400' : 'text-gray-500'}`} />
-                <span className="text-xs text-gray-400">LIVE</span>
-                <Switch checked={liveMode} onCheckedChange={setLiveMode} className="data-[state=checked]:bg-green-500" />
-              </div>
-              
-              {/* Statut Sync */}
-              <div className={`flex items-center gap-2 bg-gray-900/80 rounded-lg px-3 py-1.5 border ${isOnline ? 'border-green-700/50' : 'border-red-700/50'}`}>
-                {isOnline ? (
-                  <Wifi className="h-4 w-4 text-green-400" />
-                ) : (
-                  <WifiOff className="h-4 w-4 text-red-400" />
-                )}
-                {syncing ? (
-                  <RefreshCw className="h-3 w-3 text-blue-400 animate-spin" />
-                ) : (
-                  <Cloud className={`h-3 w-3 ${isOnline ? 'text-green-400' : 'text-red-400'}`} />
-                )}
-                <span className="text-[10px] text-gray-400">
-                  {syncing ? 'Sync...' : isOnline ? 'Sync' : 'Offline'}
-                </span>
-              </div>
-              
-              {/* Notifications */}
-              <div className="relative">
-                <NotificationBell 
-                  count={unreadCount} 
-                  onClick={() => setShowNotificationsPanel(!showNotificationsPanel)}
-                />
-                
-                {/* Panel de notifications */}
-                {showNotificationsPanel && (
-                  <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50">
-                    <div className="p-3 border-b border-gray-700 flex items-center justify-between">
-                      <span className="text-sm font-medium text-white">Notifications</span>
-                      {unreadCount > 0 && (
-                        <button 
-                          onClick={markAllAsRead}
-                          className="text-xs text-[#f5a623] hover:underline"
-                        >
-                          Tout marquer lu
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500 text-sm">
-                          Aucune notification
-                        </div>
-                      ) : (
-                        notifications.slice(0, 10).map(notif => (
-                          <div 
-                            key={notif.id}
-                            className={`p-3 border-b border-gray-800 hover:bg-gray-800/50 cursor-pointer ${!notif.read ? 'bg-[#f5a623]/5' : ''}`}
-                            onClick={() => markAsRead(notif.id)}
-                          >
-                            <div className="flex items-start gap-2">
-                              {!notif.read && (
-                                <span className="w-2 h-2 bg-[#f5a623] rounded-full mt-1.5 flex-shrink-0" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{notif.title}</p>
-                                <p className="text-xs text-gray-400 mt-0.5">{notif.message}</p>
-                                <p className="text-[10px] text-gray-600 mt-1">
-                                  {new Date(notif.created_at).toLocaleDateString('fr-FR')}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Menu Groupes de Chasse */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[#f5a623]/50 text-[#f5a623] hover:bg-[#f5a623]/10"
-                    data-testid="group-menu-btn"
-                  >
-                    <Users className="h-4 w-4 mr-1" />
-                    Groupe
-                    {myGroups.length > 0 && (
-                      <Badge className="ml-1 bg-[#f5a623] text-black text-[10px]">{myGroups.length}</Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-900 border-gray-700 min-w-[200px]">
-                  <DropdownMenuItem 
-                    onClick={() => setShowCreateGroupDialog(true)}
-                    className="text-[#f5a623] cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Créer un groupe
-                  </DropdownMenuItem>
-                  
-                  {myGroups.length > 0 && (
-                    <>
-                      <DropdownMenuSeparator className="bg-gray-700" />
-                      <div className="px-2 py-1 text-xs text-gray-500">Mes groupes</div>
-                      {myGroups.map(group => (
-                        <DropdownMenuItem 
-                          key={group.id}
-                          onClick={() => {
-                            setSelectedGroup(group);
-                            setShowGroupDashboard(true);
-                          }}
-                          className="text-white cursor-pointer hover:bg-gray-800"
-                        >
-                          <Users className="h-4 w-4 mr-2 text-gray-400" />
-                          <span className="flex-1 truncate">{group.name}</span>
-                          {group.member_count && (
-                            <Badge className="ml-1 bg-gray-700 text-gray-300 text-[10px]">{group.member_count}</Badge>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  )}
-                  
-                  {myGroups.length === 0 && (
-                    <div className="px-3 py-2 text-xs text-gray-500 text-center">
-                      Aucun groupe pour l'instant
-                    </div>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          
-          {/* Sous-onglets */}
-          <div className="mt-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex items-center gap-3">
-                <TabsList className="bg-gray-900/50 border border-gray-800">
-                  <TabsTrigger value="carte" className="data-[state=active]:bg-[#f5a623]/20 data-[state=active]:text-[#f5a623]">
-                    <Map className="h-4 w-4 mr-2" />
-                    Carte BIONIC™
-                  </TabsTrigger>
-                  <TabsTrigger value="waypoints" className="data-[state=active]:bg-[#f5a623]/20 data-[state=active]:text-[#f5a623]">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Waypoints actifs
-                    {activeWaypoints.length > 0 && (
-                      <Badge className="ml-2 bg-[#f5a623] text-black text-[10px]">{activeWaypoints.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="lieux" className="data-[state=active]:bg-[#f5a623]/20 data-[state=active]:text-[#f5a623]">
-                    <BookMarked className="h-4 w-4 mr-2" />
-                    Lieux enregistrés
-                    {savedPlaces.length > 0 && (
-                      <Badge className="ml-2 bg-blue-500 text-white text-[10px]">{savedPlaces.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
+      {/* Header modulaire BIONIC™ */}
+      <TerritoryHeader
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        liveMode={liveMode}
+        onLiveModeChange={setLiveMode}
+        isOnline={isOnline}
+        syncing={syncing}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+        groups={myGroups}
+        onCreateGroup={() => setShowCreateGroupDialog(true)}
+        onSelectGroup={handleSelectGroup}
+        activeWaypointsCount={activeWaypoints.length}
+        savedPlacesCount={savedPlaces.length}
+        mapClickMode={mapClickMode}
+        quickWaypointMode={quickWaypointMode}
+        onQuickWaypointFromGPS={handleQuickWaypointFromGPS}
+        onEnableMapClickMode={handleEnableMapClickMode}
+        onShowAddWaypointDialog={() => setShowAddWaypointDialog(true)}
+        onCancelWaypointMode={handleCancelWaypointMode}
+        selectedEspece={selectedEspece}
+        onSelectEspece={setSelectedEspece}
+      />
                 
                 {/* Bouton Enregistrer un Waypoint avec menu déroulant amélioré */}
                 <DropdownMenu>
