@@ -5,7 +5,7 @@
  * Affiche: Modules, Météo, Habitat, Approche, Simulation, Hotspots, Recommandations
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   ChevronDown, ChevronUp, Target, Thermometer, Wind, 
   Navigation, Brain, MapPin, ShoppingBag, AlertCircle,
