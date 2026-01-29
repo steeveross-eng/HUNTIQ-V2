@@ -1857,16 +1857,6 @@ const MonTerritoireBionicPage = () => {
                             </div>
                           </div>
                         )}
-                            </div>
-                          </>
-                        )}
-                        
-                        {/* Message si désactivé */}
-                        {!pipelineEnabled && (
-                          <div className="text-[9px] text-gray-500 text-center py-2">
-                            Pipeline désactivé - Hotspots et simulation masqués
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
