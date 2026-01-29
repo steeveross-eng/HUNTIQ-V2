@@ -99,6 +99,53 @@
 
 ## What's Been Implemented
 
+### Phase 52p (January 29, 2026 - Session 2) - Architecture Modulaire + WMS Proxy ✅
+
+**Refactoring architectural + Proxy WMS pour données Québec**
+
+Nouvelles fonctionnalités implémentées:
+
+#### 🔧 Backend - WMS Proxy Service
+- ✅ **WMS Proxy Endpoints** dans `territory_routes.py`
+  - `GET /api/bionic-territory/wms/sources` - Liste des sources WMS disponibles
+  - `GET /api/bionic-territory/wms/tile` - Proxy pour récupérer les tuiles WMS
+  - `GET /api/bionic-territory/wms/capabilities/{source}` - Capacités WMS d'une source
+- ✅ **4 sources WMS configurées** :
+  - `quebec_eco` - Carte écoforestière du Québec (peuplements)
+  - `quebec_lidar` - Données LiDAR dendrométriques
+  - `quebec_terrain` - Indices topographiques (TWI)
+  - `canada_nfi` - National Forest Inventory (fallback)
+- ✅ **Contournement CORS/IP** - Le proxy backend fait les requêtes serveur-à-serveur
+
+#### 🎨 Frontend - Nouveaux composants modulaires
+- ✅ **TerritoryHeader.jsx** (400+ lignes)
+  - Header complet avec navigation, tabs, notifications, groupes
+  - Sous-composants: `NotificationsPanel`, `WaypointCreationMenu`, `GroupsMenu`, `SpeciesSelector`
+- ✅ **LayersPanelContent.jsx** (350+ lignes)
+  - Contenu du panneau latéral modulaire
+  - Sous-composants: `BaseMapSection`, `PipelineSection`, `BionicLayersSection`, `EcoforestrySection`, `PrivacySection`
+- ✅ **BionicForestZonesLayer.jsx** v2.0
+  - Support des couches WMS Québec via proxy
+  - Props: `showQuebecEco`, `showQuebecLidar`, `showQuebecTWI`
+  - Export de `WMS_PROXY_CONFIG`
+
+#### 📦 Module bionic-territory v1.1
+- ✅ **index.js** mis à jour avec nouveaux exports
+- ✅ Nouveaux composants disponibles via le module
+
+**API Endpoints ajoutés:**
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/bionic-territory/wms/sources` | Liste des sources WMS |
+| GET | `/api/bionic-territory/wms/tile` | Proxy tuile WMS |
+| GET | `/api/bionic-territory/wms/capabilities/{source}` | GetCapabilities XML |
+| GET | `/api/bionic-territory/health` | Health check v1.1 |
+
+**Tests réussis:**
+- ✅ Proxy WMS fonctionne (code 200)
+- ✅ Build frontend réussi
+- ✅ Page Mon Territoire charge correctement
+
 ### Phase 52o (January 29, 2026) - BIONIC™ v3.3 Intelligence Plus + Visuel 10X ✅
 
 **Carte BIONIC™ avec effet visuel 10X plus distinctif**
