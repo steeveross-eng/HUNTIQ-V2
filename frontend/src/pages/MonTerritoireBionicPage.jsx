@@ -62,6 +62,16 @@ import BionicHotspotsLayer from '@/components/territoire/BionicHotspotsLayer';
 import BionicMapOverlay from '@/components/territoire/BionicMapOverlay';
 import BionicForestZonesLayer from '@/components/territoire/BionicForestZonesLayer';
 
+// Module Architecture - BIONIC Territory
+import { 
+  BionicTerritoryProvider,
+  LayersSidebar,
+  MapControlButtons,
+  WaypointModeIndicator,
+  BASE_MAPS,
+  PIPELINE_LAYERS
+} from '@/modules/bionic-territory';
+
 import { 
   BIONIC_LAYERS, 
   SCORE_CATEGORIES,
