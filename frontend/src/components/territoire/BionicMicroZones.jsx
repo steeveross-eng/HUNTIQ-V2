@@ -15,6 +15,7 @@
  *    - Fort zoom (analyse locale) : épaisseur augmentée pour précision visuelle
  *    - Faible zoom (vue globale) : réduction drastique pour carte non saturée
  * 8. Lisibilité parfaite même en superposition multiple
+ * 9. HABITAT_OPTIMAL_SYNTHESE : Scores ajustés selon l'espèce cible
  */
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
@@ -28,6 +29,9 @@ import {
   getLeafletCircleStyle, 
   getLeafletHaloStyle 
 } from '@/styles/BionicZoneStyles';
+
+// Import du système de pondération habitat optimal
+import { calculateAdjustedScore, getModuleWeight } from '@/hooks/useHabitatOptimal';
 
 // Configuration des modules thématiques - COULEURS OFFICIELLES BIONIC™
 // Mapping vers les nouvelles couleurs définies
