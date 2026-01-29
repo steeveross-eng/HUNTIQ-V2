@@ -380,14 +380,14 @@ export const generateOrganicForestZones = (center, radius = 0.03, options = {}) 
           };
           features.push(merged);
         } else {
-          // Fallback: ajouter individuellement
-          features.push(...group);
+          // Fallback: ajouter le premier du groupe (simplifié)
+          features.push(group[0]);
         }
-      });
-    } else {
-      // Une seule zone, ajouter directement
-      features.push(...polygons);
-    }
+      } else {
+        // Un seul polygone dans le groupe, l'ajouter directement
+        features.push(group[0]);
+      }
+    });
   });
   
   return {
