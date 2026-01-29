@@ -271,6 +271,7 @@ export const classifyZoneBehavior = (zoneProps, options = {}) => {
 
 /**
  * Génère le style visuel pour une zone selon son comportement
+ * VERSION PUISSANTE - Couleurs saturées et bordures épaisses
  * @param {Object} behaviorResult - Résultat de classifyZoneBehavior
  * @returns {Object} Style Leaflet
  */
@@ -281,23 +282,26 @@ export const getBehaviorStyle = (behaviorResult) => {
     return {
       fillColor: WILDLIFE_BEHAVIORS.hotspot.color,
       color: WILDLIFE_BEHAVIORS.hotspot.glowColor,
-      weight: 3,
+      weight: 5,
       opacity: 1,
-      fillOpacity: 0.7,
-      className: 'bionic-hotspot-zone bionic-pulse'
+      fillOpacity: 0.75,
+      className: 'bionic-hotspot-zone bionic-behavior-zone'
     };
   }
   
   const behavior = WILDLIFE_BEHAVIORS[primary.id];
-  const opacity = 0.4 + (primary.score / 100) * 0.4;
+  // Opacités plus élevées pour meilleure visibilité
+  const fillOpacity = 0.5 + (primary.score / 100) * 0.35;
+  const strokeOpacity = 0.8 + (primary.score / 100) * 0.2;
+  const strokeWeight = primary.score >= 70 ? 3 : 2;
   
   return {
     fillColor: behavior.color,
     color: behavior.glowColor,
-    weight: primary.score >= 70 ? 2 : 1,
-    opacity: primary.score >= 70 ? 0.9 : 0.6,
-    fillOpacity: opacity,
-    className: `bionic-${primary.id}-zone`
+    weight: strokeWeight,
+    opacity: strokeOpacity,
+    fillOpacity: fillOpacity,
+    className: `bionic-${primary.id}-zone bionic-behavior-zone`
   };
 };
 
