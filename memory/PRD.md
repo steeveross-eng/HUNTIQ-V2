@@ -470,24 +470,28 @@ Fonctionnalités implémentées:
 ### P0 - Critical (Completed) ✅
 - [x] Relocalisation des zones BIONIC hors de l'eau (BIONIC_water_mask_v5)
 - [x] GPS LIVE avec flèche pointant vers le bas
+- [x] MODULE_HABITAT_OPTIMAL_SYNTHESE intégré
+- [x] Visualisation temps réel des scores habitat par espèce
 
 ### P1 - High Priority
+- [ ] **Refactoring de MonTerritoireBionicPage.jsx** (~2700 lignes) - URGENT
+  - Intégrer `ZoneControlPanel.jsx`, `MapToolbar.jsx`, `LayersPanel.jsx`
+  - Intégrer `WaypointCreationMenu.jsx`, `TerritoryTabsHeader.jsx`
+- [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
 - [ ] Test complet du système de backup avec credentials utilisateur
 - [ ] Import/Export GPX/KML pour les waypoints
-- [ ] Intégration paiement Stripe pour e-commerce
-- [ ] Notifications push pour alertes chasse
 
 ### P2 - Medium Priority
-- [ ] Refactoring de MonTerritoireBionicPage.jsx (fichier trop volumineux)
+- [ ] Bouton "Exporter Styles" (QGIS/ArcGIS) via BionicStyleExporter.js
+- [ ] Correction de la flèche GPS LIVE (stem non visible)
 - [ ] Correction des warnings ESLint (apostrophes non-échappées)
 - [ ] Chat en temps réel pour groupes de chasse
-- [ ] Gamification avec badges chasseur
 
 ### P3 - Low Priority
+- [ ] Dashboard statistiques des backups dans Admin
 - [ ] Application mobile (React Native)
 - [ ] Export PDF des analyses
 - [ ] Intégration calendrier Google
-- [ ] Statistiques avancées chasseur
 
 ---
 
