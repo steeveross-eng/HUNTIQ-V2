@@ -158,7 +158,9 @@ export const ZoneAnalysisControlPanel = memo(({
   onAreaChange,
   analysisResult,
   collapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  autoMode = true,
+  onAutoModeChange
 }) => {
   const areaConfig = ANALYSIS_AREAS[analysisArea] || ANALYSIS_AREAS['4'];
   
