@@ -1320,15 +1320,6 @@ const MonTerritoireBionicPage = () => {
             </div>
             
             <div className="flex items-center gap-3">
-              {/* Score Global */}
-              <div className="bg-gray-900/80 rounded-lg px-3 py-1.5 border border-gray-700">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-white">{displayScore}</span>
-                  <span className="text-gray-500 text-sm">/100</span>
-                  <Badge className={`${rating.color} text-white text-[10px]`}>{rating.label}</Badge>
-                </div>
-              </div>
-              
               {/* Mode LIVE */}
               <div className="flex items-center gap-2 bg-gray-900/80 rounded-lg px-3 py-1.5 border border-gray-700">
                 <Zap className={`h-4 w-4 ${liveMode ? 'text-green-400' : 'text-gray-500'}`} />
