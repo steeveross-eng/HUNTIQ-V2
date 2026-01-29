@@ -431,7 +431,7 @@ export const BIONIC_QA_CONFIG = {
   urban_validation: {
     id: 'QA_URBAN_CORE',
     inputs: {
-      target_layer: 'Z_URBAN_RELOCATED',
+      target_layer: 'Z_URBAN_ROAD_RELOCATED',
       urban_layer: 'URBAIN_FULL',
       urban_buffer_layer: 'URBAIN_FULL_BUFFER_2000M'
     },
@@ -462,6 +462,56 @@ export const BIONIC_QA_CONFIG = {
         id: 'QA_URBAN_REPORT',
         type: 'qa_report',
         include_layers: ['QA_URBAN_INTERSECT', 'QA_URBAN_BUFFER_INTERSECT', 'QA_URBAN_DISTANCE']
+      }
+    ]
+  },
+  // NOUVEAU: Validation routière
+  road_validation: {
+    id: 'QA_ROAD_CORE',
+    inputs: {
+      target_layer: 'Z_URBAN_ROAD_RELOCATED',
+      road_layer: 'ROAD_FULL',
+      road_major_buffer_layer: 'ROAD_MAJOR_BUF_100M'
+    },
+    checks: [
+      {
+        id: 'QA_ROAD_INTERSECT',
+        type: 'spatial',
+        operator: 'intersects',
+        with_layer: 'ROAD_FULL',
+        output_layer: 'QA_ROAD_INTERSECT',
+        description: 'Zone intersecte une route/chemin'
+      },
+      {
+        id: 'QA_ROAD_MAJOR_BUFFER_INTERSECT',
+        type: 'spatial',
+        operator: 'intersects',
+        with_layer: 'ROAD_MAJOR_BUF_100M',
+        output_layer: 'QA_ROAD_MAJOR_BUFFER_INTERSECT',
+        description: 'Zone dans buffer 100m autoroute/nationale'
+      },
+      {
+        id: 'QA_ROAD_CENTROID',
+        type: 'spatial',
+        operator: 'within',
+        geometry_source: 'centroid',
+        with_layer: 'ROAD_FULL',
+        output_layer: 'QA_ROAD_CENTROID',
+        description: 'Centre de zone sur une route'
+      },
+      {
+        id: 'QA_ROAD_OVERLAP',
+        type: 'expression',
+        expression: '( area(intersection($geometry, ROAD_FULL)) / area($geometry) ) > 0.05',
+        output_layer: 'QA_ROAD_OVERLAP',
+        description: 'Zone chevauche >5% de surface routière'
+      }
+    ],
+    outputs: [
+      {
+        id: 'QA_ROAD_REPORT',
+        type: 'qa_report',
+        include_layers: ['QA_ROAD_INTERSECT', 'QA_ROAD_MAJOR_BUFFER_INTERSECT', 'QA_ROAD_CENTROID', 'QA_ROAD_OVERLAP']
       }
     ]
   }
