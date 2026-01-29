@@ -76,9 +76,9 @@
 
 ## What's Been Implemented
 
-### Phase 52n (January 29, 2026) - GENERATEUR_CARTE_BIONIC v3.1 + Rendu Visuel ✅
+### Phase 52n (January 29, 2026) - GENERATEUR_CARTE_BIONIC v3.1 + Rendu Visuel + Toggle ON-OFF ✅
 
-**Intelligence BIONIC™ Plus - Génération complète de carte avec analyse IA + Visualisation**
+**Intelligence BIONIC™ Plus - Génération complète de carte avec analyse IA + Visualisation + Contrôle**
 
 Nouvelles fonctionnalités implémentées:
 - ✅ **Service BionicMapGenerator.js** (600+ lignes) - Moteur de génération complet
@@ -92,7 +92,8 @@ Nouvelles fonctionnalités implémentées:
 - ✅ **Recommandations IA** - Affût, salines, nutrition, déplacement, saison, approche, fenêtres tir
 - ✅ **Recommandations Produits BIONIC™** - Catalogue avec suggestions basées sur carences
 - ✅ **BionicGeneratorPanel.jsx** - Interface utilisateur avec sections collapsibles
-- ✅ **BionicHotspotsLayer.jsx** - Rendu visuel sur carte Leaflet:
+- ✅ **BionicHotspotsLayer.jsx** - Rendu visuel sur carte Leaflet
+- ✅ **Toggle ON-OFF Pipeline** - Bouton pour activer/désactiver le pipeline et les hotspots
   - Hotspots avec cercles colorés (haute/moyenne/basse priorité)
   - Marqueurs animés avec score et icône
   - Trajet d'approche avec ligne pointillée violette
