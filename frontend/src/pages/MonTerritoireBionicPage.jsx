@@ -2203,7 +2203,7 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
-                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES - Données réelles GeoJSON + WMS Canada */}
+                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES - Données réelles GeoJSON + WMS Québec/Canada */}
                 {pipelineEnabled && (
                   <BionicForestZonesLayer
                     mapCenter={mapCenter}
@@ -2211,6 +2211,15 @@ const MonTerritoireBionicPage = () => {
                     opacity={0.75}
                     showLegend={true}
                     showCanadaWMS={true}
+                    // Couches WMS Québec via proxy backend
+                    showQuebecEco={quebecLayers.ecoforestry.enabled}
+                    showQuebecLidar={quebecLayers.lidar.enabled}
+                    showQuebecTWI={quebecLayers.twi.enabled}
+                    quebecOpacities={{
+                      eco: quebecLayers.ecoforestry.opacity / 100,
+                      lidar: quebecLayers.lidar.opacity / 100,
+                      twi: quebecLayers.twi.opacity / 100
+                    }}
                     onFeatureClick={(feature) => {
                       console.log('[BIONIC] Zone forestière cliquée:', feature.properties);
                     }}
