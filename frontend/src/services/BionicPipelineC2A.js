@@ -3,7 +3,7 @@
  * Pipeline total BIONIC™ optimisé performance (C2-A)
  * 
  * Intègre:
- * - Hydrique + Urbain
+ * - Hydrique + Urbain + ROUTIER
  * - Relocalisation intelligente
  * - QA essentiels
  * - Autocorrection hydrique
@@ -32,7 +32,16 @@ export const BIONIC_INPUTS = {
     URBAIN_COMMERCIAL: { id: 'U_COMMERCIAL' },
     URBAIN_INDUSTRIEL: { id: 'U_INDUSTRIEL' },
     URBAIN_DENSE: { id: 'U_DENSE' },
-    URBAIN_MUNICIPAL: { id: 'U_MUNICIPAL' }
+    URBAIN_MUNICIPAL: { id: 'U_MUNICIPAL' },
+    // Couches routières (NOUVEAU)
+    ROUTE_AUTOROUTE: { id: 'R_AUTOROUTE' },
+    ROUTE_NATIONALE: { id: 'R_NATIONALE' },
+    ROUTE_REGIONALE: { id: 'R_REGIONALE' },
+    ROUTE_LOCALE: { id: 'R_LOCALE' },
+    ROUTE_CHEMIN: { id: 'R_CHEMIN' },
+    ROUTE_SENTIER: { id: 'R_SENTIER' },
+    ROUTE_VOIE_FERREE: { id: 'R_VOIE_FERREE' },
+    ROUTE_PISTE_CYCLABLE: { id: 'R_PISTE_CYCLABLE' }
   }
 };
 
