@@ -2239,6 +2239,8 @@ const MonTerritoireBionicPage = () => {
                       lidar: quebecLayers.lidar.opacity / 100,
                       twi: quebecLayers.twi.opacity / 100
                     }}
+                    // Callback pour le statut de chargement
+                    onLoadingStatusChange={handleQuebecLoadingStatus}
                     onFeatureClick={(feature) => {
                       console.log('[BIONIC] Zone forestière cliquée:', feature.properties);
                     }}
