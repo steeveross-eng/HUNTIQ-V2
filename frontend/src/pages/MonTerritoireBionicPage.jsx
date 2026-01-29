@@ -1763,6 +1763,7 @@ const MonTerritoireBionicPage = () => {
                     showBufferZones={showCorridors}
                     onZoneClick={setSelectedZone}
                     isZoneFavorite={isZoneFavorite}
+                    selectedEspece={selectedEspece}
                     onAddFavorite={async (zone) => {
                       // Ouvrir un dialog pour nommer la zone
                       const name = prompt(`Nom pour cette zone ${BIONIC_MODULES[zone.moduleId]?.label || zone.moduleId} (${zone.percentage}%) ?`, `Zone ${BIONIC_MODULES[zone.moduleId]?.label}`);
