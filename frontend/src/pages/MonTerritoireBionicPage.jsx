@@ -1571,6 +1571,58 @@ const MonTerritoireBionicPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
+                {/* Espèce cible - Sélecteur harmonisé */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="bg-gray-900/80 hover:bg-gray-800 border border-gray-700 hover:border-[#f5a623]/50 rounded-md px-4 h-10"
+                      data-testid="espece-cible-dropdown"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">Espèce cible</span>
+                        <span className="text-sm font-medium text-white">
+                          {selectedEspece === 'ORIGNAL' ? '🦌 Orignal' : 
+                           selectedEspece === 'CHEVREUIL' ? '🦌 Chevreuil' :
+                           selectedEspece === 'OURS_NOIR' ? '🐻 Ours Noir' :
+                           selectedEspece === 'DINDON' ? '🦃 Dindon' : selectedEspece}
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-gray-900 border border-gray-700 w-56 z-[9999]" align="center">
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedEspece('ORIGNAL')}
+                      className={`cursor-pointer ${selectedEspece === 'ORIGNAL' ? 'bg-[#f5a623]/20 text-[#f5a623]' : 'text-white hover:bg-gray-800'}`}
+                    >
+                      <span className="mr-2">🦌</span> Orignal
+                      {selectedEspece === 'ORIGNAL' && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedEspece('CHEVREUIL')}
+                      className={`cursor-pointer ${selectedEspece === 'CHEVREUIL' ? 'bg-[#f5a623]/20 text-[#f5a623]' : 'text-white hover:bg-gray-800'}`}
+                    >
+                      <span className="mr-2">🦌</span> Chevreuil
+                      {selectedEspece === 'CHEVREUIL' && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedEspece('OURS_NOIR')}
+                      className={`cursor-pointer ${selectedEspece === 'OURS_NOIR' ? 'bg-[#f5a623]/20 text-[#f5a623]' : 'text-white hover:bg-gray-800'}`}
+                    >
+                      <span className="mr-2">🐻</span> Ours Noir
+                      {selectedEspece === 'OURS_NOIR' && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedEspece('DINDON')}
+                      className={`cursor-pointer ${selectedEspece === 'DINDON' ? 'bg-[#f5a623]/20 text-[#f5a623]' : 'text-white hover:bg-gray-800'}`}
+                    >
+                      <span className="mr-2">🦃</span> Dindon Sauvage
+                      {selectedEspece === 'DINDON' && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
                 {/* Score Global - Style harmonisé avec bouton Waypoint */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
