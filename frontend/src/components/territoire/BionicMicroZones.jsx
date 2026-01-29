@@ -622,7 +622,9 @@ const BionicMicroZones = ({
   // Props pour les favoris
   isZoneFavorite = () => false,
   onAddFavorite = null,
-  onRemoveFavorite = null
+  onRemoveFavorite = null,
+  // Espèce cible pour HABITAT_OPTIMAL_SYNTHESE
+  selectedEspece = 'ORIGNAL'
 }) => {
   const [hoveredZoneId, setHoveredZoneId] = useState(null);
   const map = useMap();
