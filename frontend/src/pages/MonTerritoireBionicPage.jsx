@@ -2147,8 +2147,8 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
-                {/* Hotspots et trajets d'approche BIONIC */}
-                {carteBionic && (
+                {/* Hotspots et trajets d'approche BIONIC - Contrôlé par pipelineEnabled */}
+                {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
                     generatorResults={carteBionic}
                     mapCenter={mapCenter}
