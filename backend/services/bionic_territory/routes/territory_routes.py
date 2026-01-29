@@ -96,6 +96,79 @@ class ZoneAnalysisResponse(BaseModel):
     hotspots: List[Dict[str, Any]]
     weather_impact: Optional[Dict[str, Any]]
 
+# ═══════════════════════════════════════════════════════════════
+# MODELS - Advanced Zone Analysis (WMS-based)
+# ═══════════════════════════════════════════════════════════════
+
+class BehaviorZone(BaseModel):
+    """Zone comportementale du gibier basée sur données WMS"""
+    id: str
+    behavior_type: str  # 'cover', 'feeding', 'travel', 'water', 'rest', 'hotspot'
+    coordinates: List[List[float]]  # GeoJSON polygon coordinates
+    score: float = Field(..., ge=0, le=100)
+    confidence: float = Field(..., ge=0, le=1)
+    area_sqm: float
+    dominant_cover: str  # Type de couvert dominant
+    hunting_tip: str
+
+class WMSLayerScore(BaseModel):
+    """Score d'une couche WMS pour l'analyse"""
+    layer_id: str
+    layer_name: str
+    score: float
+    raw_value: Optional[float]
+    interpretation: str
+
+class OptimalHotspot(BaseModel):
+    """Hotspot optimal identifié dans la zone d'analyse"""
+    id: str
+    position: Coordinates
+    score: float = Field(..., ge=0, le=100)
+    dominant_behavior: str
+    distance_from_center_m: int
+    approach_direction: str
+    hunting_tip: str
+    wms_scores: List[WMSLayerScore]
+
+class AdvancedZoneAnalysisRequest(BaseModel):
+    """Requête d'analyse avancée de zone"""
+    waypoint_id: Optional[str] = None
+    center: Coordinates
+    radius_km: float = Field(default=2.0, ge=0.5, le=10)
+    target_species: str = "orignal"
+    include_wms_data: bool = True
+    wms_layers: List[str] = ["ecoforestry", "lidar", "humidity"]
+
+class AdvancedZoneAnalysisResponse(BaseModel):
+    """Réponse d'analyse avancée avec données WMS réelles"""
+    waypoint_id: Optional[str]
+    center: Coordinates
+    radius_km: float
+    target_species: str
+    timestamp: datetime
+    analysis_version: str = "3.3"
+    
+    # Scores globaux
+    global_score: float
+    habitat_score: float
+    approach_score: float
+    
+    # Données WMS
+    wms_analysis: Dict[str, WMSLayerScore]
+    data_source: str  # 'wms_real' ou 'simulated'
+    
+    # Zones comportementales
+    behavior_zones: List[BehaviorZone]
+    zones_count: int
+    
+    # Hotspot optimal
+    optimal_hotspot: OptimalHotspot
+    
+    # Recommandations
+    hunting_recommendations: List[str]
+    best_time_window: str
+    approach_strategy: str
+
 class PipelineStatusResponse(BaseModel):
     enabled: bool
     version: str
