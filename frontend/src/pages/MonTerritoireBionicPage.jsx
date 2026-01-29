@@ -2179,15 +2179,20 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
-                {/* BIONIC™ ZONES FORESTIÈRES COLORÉES - Toujours actif sur tous les fonds de carte */}
+                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES WMS - Données réelles Québec/Canada */}
                 {pipelineEnabled && (
                   <BionicForestZonesLayer
                     mapCenter={mapCenter}
                     enabled={true}
-                    radius={0.025}
-                    onZoneClick={(zone, config) => {
-                      console.log('[BIONIC] Zone forestière cliquée:', zone.type, config);
-                    }}
+                    showCarteEcoforestiere={true}
+                    showPeuplements={false}
+                    showEssences={false}
+                    showPerturbations={false}
+                    showDensite={false}
+                    showHydrographie={true}
+                    showCanadaForest={false}
+                    opacity={0.75}
+                    showLegend={true}
                   />
                 )}
                 
