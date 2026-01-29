@@ -420,61 +420,19 @@ export const useEcoMapFallback = (ecoMapEnabled = false) => {
  */
 export const BASE_MAPS = {
   // ═══════════════════════════════════════════════════════════════
-  // CARTE BIONIC™ - Architecture complète optimisée chasse
+  // CARTE BIONIC™ - Architecture complète pan-canadienne optimisée chasse
+  // Pipeline: BIONIC_VECTOR_TILES_CANADA v1.0.0 intégré
   // ═══════════════════════════════════════════════════════════════
   bionic: {
     id: 'bionic',
     name: 'BIONIC™',
-    description: 'Carte optimisée analyse faunique avec scoring BIONIC™',
+    description: 'Carte pan-canadienne optimisée analyse faunique avec tuiles vectorielles',
     icon: '🎯',
     // Base map: Mapbox Terrain + Hydrography (vector tiles)
     url: 'https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-    attribution: '&copy; Mapbox &copy; OpenStreetMap | BIONIC™',
+    attribution: '&copy; BIONIC™ | RNCan | StatCan | OSM | Mapbox',
     format: 'vector_tiles',
-    layers: {
-      geology: {
-        source: 'RNCan + USGS',
-        format: 'vector_tiles',
-        style: 'semi-transparent polygons',
-        enabled: true,
-        opacity: 0.4
-      },
-      hydrology: {
-        source: 'RNCan Drainage + ZECs',
-        format: 'vector_tiles', 
-        style: 'blue lines + buffer zones',
-        enabled: true,
-        opacity: 0.7
-      },
-      ecoforest: {
-        source: 'MFFP Québec',
-        format: 'raster_tiles',
-        style: 'green gradient',
-        enabled: true,
-        opacity: 0.6
-      },
-      wildlife_score: {
-        source: 'BIONIC™ scoring engine',
-        format: 'GeoJSON',
-        style: 'heatmap + icons',
-        enabled: true,
-        opacity: 0.8
-      }
-    }
-  },
-  // ═══════════════════════════════════════════════════════════════
-  // CARTE BIONIC™ CANADA - Tuiles vectorielles pan-canadiennes
-  // Pipeline: BIONIC_VECTOR_TILES_CANADA v1.0.0
-  // ═══════════════════════════════════════════════════════════════
-  bionic_canada: {
-    id: 'bionic_canada',
-    name: 'BIONIC™ Canada',
-    description: 'Tuiles vectorielles pan-canadiennes avec multi-zoom',
-    icon: '🍁',
-    // Base map avec tuiles vectorielles Canada
-    url: 'https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-    attribution: '&copy; BIONIC™ | RNCan | StatCan | OSM',
-    format: 'vector_tiles',
+    // Pipeline BIONIC_VECTOR_TILES_CANADA intégré
     pipeline: 'BIONIC_VECTOR_TILES_CANADA',
     version: '1.0.0',
     coverage: {
