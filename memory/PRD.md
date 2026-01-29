@@ -99,6 +99,39 @@
 
 ## What's Been Implemented
 
+### Phase 52q (January 29, 2026 - Session 3) - Refactoring Architectural Majeur ✅
+
+**Migration vers architecture modulaire: TerritoryHeader intégré**
+
+#### 🏗️ Refactoring Complété
+- ✅ **Intégration de TerritoryHeader** dans `MonTerritoireBionicPage.jsx`
+  - Header inline de ~350 lignes remplacé par le composant modulaire
+  - Réduction de 3192 → 2869 lignes (-323 lignes, -10%)
+  - Props passées: tabs, LIVE mode, sync, notifications, groupes, waypoints, espèce
+- ✅ **Suppression du code dupliqué**
+  - Menu dropdown waypoint (GPS, clic carte, saisie manuelle)
+  - Sélecteur d'espèce cible
+  - Dropdown Score Global avec détails
+- ✅ **Variables d'état nettoyées**
+  - `showNotificationsPanel` supprimé (géré dans TerritoryHeader)
+- ✅ **Nouveaux callbacks créés**
+  - `handleCancelWaypointMode` - Annulation mode création
+  - `handleEnableMapClickMode` - Activation mode clic carte
+  - `handleSelectGroup` - Sélection d'un groupe
+
+#### 📊 Métriques de Réduction
+| Fichier | Avant | Après | Réduction |
+|---------|-------|-------|-----------|
+| `MonTerritoireBionicPage.jsx` | 3192 lignes | 2869 lignes | -323 (-10%) |
+
+#### ✅ Tests Visuels
+- Page charge correctement avec le nouveau header
+- Tous les éléments UI présents et fonctionnels
+- Navigation tabs: Carte BIONIC™, Waypoints actifs, Lieux enregistrés
+- Bouton "Enregistrer un Waypoint" avec dropdown
+- Sélecteur d'espèce (Orignal par défaut)
+- Mode LIVE, Sync, Groupe fonctionnels
+
 ### Phase 52p (January 29, 2026 - Session 2) - Architecture Modulaire + WMS Proxy ✅
 
 **Refactoring architectural + Proxy WMS pour données Québec**
