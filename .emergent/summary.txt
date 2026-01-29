@@ -1,110 +1,90 @@
 <analysis>**original_problem_statement:**
 The user requested the continued development of the HUNTIQ project. The initial focus was on implementing a Habitat Optimal Synthesis Module. This evolved into a series of major feature additions and UI refinements on the . The user then requested a significant visual overhaul (a 10X improvement) for the BIONIC™ map, providing a detailed specification for a new  with advanced scoring and analytics.
 
-Following this, the user asked to replace the simulated visual data with real-world data by connecting the map to official WMS (Web Map Service) and GeoJSON ecoforestry data sources from the Quebec government.
+Following this, the user asked to replace the simulated visual data with real-world data by connecting the map to official WMS (Web Map Service) and GeoJSON ecoforestry data sources from the Quebec government. A strategic shift towards a modular architecture (micro-frontends and microservices) was endorsed as the highest priority.
 
-Most recently, the user endorsed a strategic shift towards a modular architecture (micro-frontends and microservices) and requested the agent to begin this refactoring process immediately, making it the foundation for all future development. The final request was to integrate three specific high-priority data layers (ecoforestry, LiDAR dendrometry, and humidity index) from a government portal.
-
-PRODUCT REQUIREMENTS:
-1.  **Visual Overhaul**: Implement a visually distinct BIONIC™ map layer (v3.3) with a pulsating border, on-map score displays, and highly colored forest zone overlays.
-2.  **Data Integration**: Connect the application to real ecoforestry data from official Quebec/Canada government sources (WMS/GeoJSON) instead of using client-side simulated data.
-3.  **Architectural Refactoring**: Restructure the entire application from a frontend monolith into a modular architecture composed of micro-frontends and backend microservices. This is now the highest priority.
-4.  **Data Filtering**: Permanently filter the displayed analysis zones to show only high-value results (80-100% score) and remove the corresponding UI slider.
+Most recently, the user's requests have focused on enhancing the map's analytical power and visual clarity:
+1.  **Integrate high-priority data layers** (ecoforestry, LiDAR dendrometry, and humidity index) from a government portal.
+2.  **Harmonize the visual representation of animal behavior zones** by merging scattered points into large, organic polygons that follow the natural topography.
+3.  **Add a topographic overlay** with contour lines to better visualize the alignment of zones with the terrain.
+4.  **Fundamentally change the analysis trigger**: The analysis must now be activated only around a user-selected waypoint, cover a configurable area (2, 4, or 10 km²), and identify a single hotspot within that zone.
 
 **User's preferred language**: The user communicates in **French**. The next agent MUST respond in French.
 
 **what currently exists?**
-The project has undergone a significant architectural refactoring. The previously monolithic  is being broken down into a modular structure.
+The application is a full-stack project (React frontend, FastAPI backend, MongoDB) featuring an interactive map for hunters. A significant amount of work has been done to enhance the map's data and visualization capabilities.
 
--   **Frontend Architecture**: A new micro-frontend module has been created at . It contains its own context () and components for the sidebar and map controls. The main page has been updated to use this new module, but the full migration of state and logic is still in progress.
--   **Backend Architecture**: A corresponding microservice has been created at . It has its own FastAPI router and endpoints for health, configuration, and analysis. This service has been successfully integrated into the main  and tested.
--   **BIONIC™ Map v3.3**: The BIONIC™ map layer is now visually distinct, featuring a pulsating orange border, on-map score displays (Habitat, Météo, Approche), and a dynamic legend. The logic for this is handled by .
--   **Data Connection**: The  component has been rewritten to consume real WMS data. Due to CORS/IP restrictions on the Quebec government's WMS, it currently uses a working fallback to a Canada-wide (NFI) service.
--   **Filtering**: The UI has been updated to only show analysis zones with a score of 80% or higher, and the slider for adjusting this threshold has been removed.
+-   **Backend WMS Proxy**: A robust backend proxy () has been implemented in the  microservice. This successfully resolves the previous blocker of accessing official Quebec government WMS data by bypassing CORS/IP restrictions.
+-   **Quebec Data Layer Integration**: The three high-priority data layers (Ecoforestry, LiDAR, Humidity) are fully integrated via the WMS proxy. A new sidebar panel () allows users to toggle each layer and adjust its opacity, complete with real-time loading indicators.
+-   **Advanced Behavior Visualization**: A sophisticated  displays powerful, color-coded Wildlife Behavior Zones (e.g., Cover, Feeding, Travel). These zones have vibrant, high-contrast visual styles with glow effects and animations.
+-   **Organic Zone Fusion**: Using Turf.js, the system now merges scattered data points into large, organic polygons (), dramatically improving visual clarity and aligning zones with natural corridors.
+-   **Topographic Overlay**: A new  allows users to toggle contour lines and shaded relief, providing crucial context on how behavior zones align with the terrain.
+-   **Architectural Debt**: While the refactoring to a micro-frontend architecture was started, the main  component remains a massive monolith (~3000 lines) and has grown more complex by orchestrating all the new features via local  hooks, rather than migrating logic to the intended .
 
 **Last working item**:
--   **Last item agent was working**: Integrating three high-priority data sources from Données Québec: the up-to-date ecoforestry map, LiDAR dendrometry data, and the topographic humidity index. The agent successfully identified the common WMS endpoint and the specific layer names required for this task.
+-   **Last item agent was working**: Implementing the user's latest request to shift from a map-wide analysis to a focused analysis around a selected waypoint. The agent created a new placeholder component () and was about to begin its integration.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?** Frontend testing agent
+-   **Which testing method agent to use?** Frontend testing agent (due to the significance of the change to the core analysis logic).
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
 -   **Issue 1**: Massive component complexity in . (Priority: P0)
--   **Issue 2**: Quebec WMS services are inaccessible from the cloud environment. (Priority: P1)
--   **Issue 3**: GPS LIVE arrow UI is incomplete. (Priority: P3)
--   **Issue 4**: Unescaped apostrophes in JSX ( warnings). (Priority: P3)
+-   **Issue 2**: GPS LIVE arrow UI is incomplete. (Priority: P3)
+-   **Issue 3**: Unescaped apostrophes in JSX ( warnings). (Priority: P3)
 
 **Issues Detail**:
 -   **Issue 1**: Massive component complexity in .
-    -   **Attempted fixes**: The agent initiated a major refactoring, creating a modular structure on both frontend () and backend (). The foundation is laid, but the original monolithic component still contains most of the state and JSX.
+    -   **Attempted fixes**: New features (, , ) were correctly built as modular components. However, they were then integrated back into the monolithic page and are controlled by its local state. The core technical debt of the monolith was not addressed; it was compounded. The migration of state to  has not progressed.
     -   **Next debug checklist**:
-        1.  Move the remaining state management from  into the  provider.
-        2.  Migrate the entire left sidebar's JSX and logic into .
-        3.  Refactor  into a lean container component that simply orchestrates the different modules.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the mandatory core of the user-requested shift to a micro-frontend architecture. Completing it will dramatically improve maintainability, performance, and scalability.
+        1.  Complete the integration of  to wrap the entire page content.
+        2.  Systematically migrate the ~50+  hooks from  into the reducer and actions of .
+        3.  Replace the inline JSX for the header and various sidebar panels with the existing modular components.
+        4.  Refactor  into a lean container that primarily consumes the context and arranges the modules.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the user's core architectural mandate. Completing it is critical for application maintainability, scalability, and performance.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend (thorough regression testing).
+    -   **Should Test frontend/backend/both after fix?** Frontend (requires thorough regression testing).
     -   **Blocked on other issue**: None.
 
--   **Issue 2**: Quebec WMS services are inaccessible from the cloud environment.
-    -   **Attempted fixes**: The agent correctly diagnosed the issue (likely CORS or IP blocking) and implemented a functional fallback to a Canada-wide WMS service.
-    -   **Next debug checklist**:
-        1.  Create a WMS proxy endpoint in the backend (e.g., within the  service).
-        2.  This endpoint will receive WMS parameters from the frontend.
-        3.  It will then make a server-to-server request to the official Quebec WMS URL () and stream the resulting map tile/image back to the frontend.
-        4.  Update  to use this new backend proxy URL.
-    -   **Why fix this issue and what will be achieved with the fix?** To unblock the integration of the high-priority, high-detail Quebec data layers that the user specifically requested.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on other issue**: This issue blocks the completion of the Integrate high-priority data sources task.
-
 **In progress Task List**:
--   **Task 1**: Complete the architectural refactoring to a modular/micro-frontend structure. (P0)
--   **Task 2**: Integrate high-priority data sources (Ecoforestry, LiDAR, Humidity) from Données Québec. (P1)
+-   **Task 1**: Implement Waypoint-Based Analysis. (P0)
+-   **Task 2**: Complete the architectural refactoring of . (P0)
 
 **Task Detail**:
--   **Task 1**: Complete the architectural refactoring.
-    -   **Where to resume**: Continue migrating state and JSX from  into the dedicated components and context within the  directory.
+-   **Task 1**: Implement Waypoint-Based Analysis.
+    -   **Where to resume**: Integrate the newly created . This involves adding UI controls for selecting a waypoint and analysis radius (2, 4, 10 km²). Then, modify  and  to accept the waypoint and radius as parameters, restricting all calculations to this defined circular area and generating a single hotspot.
+    -   **What will be achieved with this?** A user-driven, focused, and performant analysis feature that directly matches the user's request.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Frontend.
+    -   **Blocked on something**: None.
+
+-   **Task 2**: Complete the architectural refactoring of .
+    -   **Where to resume**: Follow the Next debug checklist for Issue #1. Start by migrating state management from  hooks into the  reducer.
     -   **What will be achieved with this?** A clean, scalable, and maintainable codebase that aligns with the user's strategic vision for a micro-frontend architecture.
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Frontend.
     -   **Blocked on something**: None.
 
--   **Task 2**: Integrate high-priority data sources.
-    -   **Where to resume**: The agent has the required WMS endpoint and layer names. The next step is to build the backend WMS proxy (as described in Issue #2) and then update  to add the three new layers (, , ) via the proxy.
-    -   **What will be achieved with this?** The map will be enriched with hyper-realistic, official data on forest composition, tree height/density, and ground humidity, vastly improving its analytical value.
-    -   **Status**: BLOCKED
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on something**: Issue #2: Quebec WMS services are inaccessible. The WMS proxy must be built first.
-
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Connect the Urban Admin Panel settings to the  for real-time parameter updates.
+    -   **P1**: Connect the Urban Admin Panel settings to .
     -   **P1**: Perform full End-to-End Testing of the Backup System (GCS, Atlas, Resend).
--   **Future Tasks**:
     -   **P2**: Add an Export Styles button to the UI that utilizes .
+    -   **P2**: Implement dynamic behavior zones based on the time of day (Corridor → Alimentation → Cache).
+-   **Future Tasks**:
     -   **P2**: Implement GPX/KML Import/Export functionality for waypoints.
     -   **P3**: Add a statistics dashboard for backups in the admin panel.
     -   **P3**: Finalize the GPS LIVE arrow UI.
     -   **P3**: Fix all unescaped apostrophe warnings in JSX.
 
 **Completed work in this session**
--   **BIONIC™ Map Visual Overhaul (v3.3)**:
-    -   Implemented a distinctive visual style for the BIONIC™ map, including a pulsating orange border, on-map score displays, and a vibrant color legend ().
-    -   Upgraded  to v3.3 with detailed scoring logic based on the user's comprehensive specification.
--   **Architectural Refactoring (Initiated)**:
-    -   Began a major transition to a modular architecture.
-    -   Created a frontend micro-frontend module ().
-    -   Created a backend microservice () with a tested API.
-    -   Created an  documentation file.
--   **Data Integration & Filtering**:
-    -   Replaced simulated data with a component () that connects to real WMS data, with a working fallback to a Canada-wide service.
-    -   Hardcoded the analysis filter to show zones scoring 80-100% only and removed the corresponding UI slider.
--   **Persistent BIONIC Overlay**:
-    -   Modified the logic to keep the BIONIC™ overlays active across all base maps (Satellite, Terrain) as per user request.
+-   **Backend WMS Proxy**: Successfully created a backend proxy to bypass CORS/IP blocks, enabling the use of official Quebec government WMS data layers. (Issue #2 from previous handoff is RESOLVED).
+-   **Quebec Data Layer Integration**: Integrated Ecoforestry, LiDAR, and Humidity WMS layers with a dedicated UI control panel for toggling and adjusting opacity, including real-time loading indicators.
+-   **Advanced Behavior Visualization**: Implemented a  with powerful, high-contrast visual styles (glow, animations) to represent different animal behaviors.
+-   **Organic Zone Fusion**: Integrated Turf.js to merge scattered data points into large, meaningful, organic polygons, significantly improving map clarity.
+-   **Topographic Overlay**: Added a  component to display contour lines and shaded relief, allowing users to analyze zone placement against terrain.
+-   **Popup Positioning Fix**: Corrected Leaflet popups to ensure they do not get hidden underneath the main header by using .
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1**: GPS LIVE arrow UI is incomplete.
@@ -117,67 +97,67 @@ The project has undergone a significant architectural refactoring. The previousl
 
 
 **Key Technical Concepts**
--   **Micro-Frontends & Microservices**: This is the new core architectural strategy. A foundational structure has been implemented on both the frontend and backend. All new work should align with this pattern.
--   **Backend WMS Proxy**: This is the necessary solution to overcome CORS/IP restrictions from government data servers. It involves the backend acting as an intermediary between the frontend and the external WMS.
--   **Dynamic Leaflet Layers**: The application heavily manages dynamic map layers, including WMS, GeoJSON, and custom-rendered overlays.
--   **Client-Side Simulation**: The  service still performs complex data generation and simulation in the browser. A future goal of the microservice architecture will be to move this processing to the backend.
+-   **Micro-Frontends & Microservices**: This remains the core architectural strategy, but progress on the refactoring itself has stalled. The monolith continues to grow, increasing technical debt.
+-   **Backend WMS Proxy**: A critical piece of infrastructure that acts as an intermediary between the frontend and external WMS services to bypass access restrictions.
+-   **Client-Side Geospatial Analysis (Turf.js)**: A new key technology used to perform complex geospatial operations (merging, simplification) directly in the browser.
+-   **Dynamic Leaflet Layers**: The application is now orchestrating multiple, complex, and overlapping Leaflet layers: WMS tiles via proxy, dynamically generated GeoJSON with advanced styling, and third-party tile layers for topography.
 
 **key DB schema**
 -   No changes to the database schema in this session.
 
 **changes in tech stack**
--   No new dependencies were added, but the application's design pattern has fundamentally shifted to a modular, service-oriented architecture.
+-   **Turf.js**: The  library was added to the frontend for client-side geospatial analysis.
 
 **All files of reference**
--   : The monolithic component currently being refactored.
--   : The new home for the refactored micro-frontend.
--   : The new home for the backend microservice.
--   : The component responsible for rendering real ecoforestry data.
--   : Modified to include the new microservice router.
--   : New documentation file outlining the new system design.
--   : Updated to reflect the new architecture and completed tasks.
+-   : The monolithic component that urgently needs to be refactored.
+-   : The new component for rendering fused, styled behavior zones.
+-   : The service using Turf.js to merge zones.
+-   : The new component for displaying contour lines.
+-   : The new UI for controlling Quebec data layers.
+-   : The backend file containing the WMS proxy endpoint.
+-   : The placeholder for the next P0 task.
 
 **Areas that need refactoring**:
--   ****: This is the top priority (P0). The refactoring is in progress but must be completed. The goal is to extract all logic and UI into the new  structure, leaving the page as a simple layout container.
--   **Client-Side Processing**: The intensive calculations in  should eventually be migrated to the backend  microservice to improve frontend performance and scalability.
+-   ****: This is the absolute highest priority (P0). It has become even more bloated and complex, acting as a central orchestrator for all new features via a massive list of  hooks. The migration to the  must be completed.
+-   **Client-Side Processing**: The intensive computations in  and  are good candidates for future migration to the backend  microservice to improve frontend performance, especially once the analysis is tied to specific waypoints.
 
 **key api endpoints**
--   ****: Health check for the new microservice.
--   ****: Serves map configuration data.
--   ****: A placeholder endpoint for future backend-driven analysis.
+-   ****: The new, critical endpoint that proxies requests to external WMS map servers.
 
 **Critical Info for New Agent**
--   **Priority 1 is Architecture**: The user has explicitly prioritized the move to a modular (micro-frontend/microservice) architecture. Your immediate primary goal is to **complete the refactoring** of . All new features must be built within this new modular paradigm.
--   **Build the WMS Proxy**: To integrate the high-priority Quebec data layers, you must first build a backend WMS proxy to bypass external access restrictions. This is a direct blocker for the user's latest data integration request.
--   **Language is French**: You must communicate exclusively in French. The user is technically proficient and expects clear, accurate responses.
--   **Follow Detailed Specs**: The user provides large, well-defined specifications (e.g., the v3.3 generator YAML). Implement them faithfully.
+-   **Prioritize Waypoint Analysis**: Your immediate task is to implement the user's latest P0 request: shifting the analysis to be centered on a selected waypoint with a configurable radius. This is a fundamental change to the application's core logic. Start by fleshing out .
+-   **Tackle the Monolith Next**: As soon as the waypoint feature is complete, you must pivot to the architectural refactoring of . This is the user's other P0 task and a major source of technical debt. Do not add more features to the monolith; focus on migrating its existing state and logic to the .
+-   **Language is French**: All communication with the user must be in French.
+-   **Turf.js is Key**: Understand that Turf.js is now a core dependency for client-side geospatial processing.
 
 **documents and test reports created in this job**
--   
 -    (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **Request**: Integrate three high-priority data sources from Données Québec (Carte écoforestière, LiDAR dendrométrique, Indice d'humidité). (IN PROGRESS)
-9.  **Confirmation**: User confirms they want to proceed with integrating all three high-priority data sources (Option A).
-8.  **Clarification**: Agent asks user to choose which data sources to integrate from a prioritized list.
-7.  **Info**: User provides a link to the Quebec government's forest inventory data portal for the agent to analyze. (COMPLETED)
-6.  **Request**: Use public GeoJSON data from Données Québec, fix the analysis threshold to 80-100%, and remove the threshold slider from the UI. (COMPLETED)
-5.  **Clarification**: Agent asks user to choose between a WMS proxy (Option A) or public GeoJSON data (Option B) to solve the WMS access issue.
-4.  **Request**: The map zones must have shapes identical to the real zones and be connected immediately to Quebec/Canada WMS ecoforestry layers. (IN PROGRESS)
-3.  **Question**: User asks for an explanation of the colored zones displayed on the map.
-2.  **Request**: Start the refactoring and implement all steps of the modular architecture (micro-frontends + microservices) to be 100% ready for future development. (IN PROGRESS)
-1.  **Question**: User asks if the refactoring is helpful and necessary for a future move to a micro-frontend/microservice architecture.
+10. **User Request**: The analysis must be triggered only around a selected waypoint, for a configurable area (2, 4, 10 km²), and produce a single hotspot. (IN PROGRESS)
+9.  **Agent Confirmation**: Agent confirms it will implement the topographic overlay. (COMPLETED)
+8.  **User Confirmation**: User agrees to add the topographic overlay. (COMPLETED)
+7.  **Agent Suggestion**: Agent suggests adding a topographic overlay to visualize how the merged zones align with the real terrain. (COMPLETED)
+6.  **Agent Confirmation**: Agent confirms it will implement the zone fusion. (COMPLETED)
+5.  **User Request**: User points out that multiple zones of the same color are confusing and asks for a way to harmonize and merge them into larger, single zones that follow topographic curves. (IN PROGRESS, now COMPLETED)
+4.  **Agent Confirmation**: Agent confirms it will fix the popup positioning. (COMPLETED)
+3.  **User Request**: User reports that popups are getting hidden under the header and must be fully visible. (IN PROGRESS, now COMPLETED)
+2.  **Agent Suggestion**: Agent asks if user wants to add dynamic behavior based on time of day. (FUTURE TASK)
+1.  **User Confirmation**: User praises the powerful visuals and asks the agent to proceed with testing and optimization. (COMPLETED)
 
 **Project Health Check:**
--   **Broken**: Direct access to Quebec's WMS services is non-functional due to external restrictions. A fallback is in place.
--   **Mocked**: The  logic is still a client-side simulation. The GeoJSON layer added in this session also uses mocked data pending connection to the real API/proxy.
+-   **Broken**: No features are outright broken.
+-   **Mocked**: The base data for generating BIONIC™ scores and behavior zones is still from the client-side  simulation, not from a real analysis of the new WMS layers.
+-   **Technical Debt**: HIGH. The  monolith is a critical liability. Each new feature, while modular in its own file, increases the complexity and state management burden of this single component, making the mandated refactoring more difficult.
 
 **3rd Party Integrations**
 -   MongoDB Atlas
 -   Google Cloud Storage
 -   Resend
 -   Open-Meteo Elevation API
--   **WMS Services**:  (Quebec, currently inaccessible),  (Canada NFI, working fallback).
+-   **WMS Services**:  and  (via a custom backend proxy).
+-   **OpenTopoMap**: Used for the new topographic overlay.
+-   **Turf.js**: New frontend library for client-side geospatial analysis.
 
 **Testing status**
 -   **Testing agent used after significant changes**: NO
@@ -192,4 +172,4 @@ The project has undergone a significant architectural refactoring. The previousl
 -   **Admin Password**: 
 
 **What agent forgot to execute**
--   The agent correctly followed the user's shifting priorities. The main forgotten items are simply the incomplete state of the major tasks: the architectural refactoring is only partially done, and the WMS proxy needed for the latest data request has not yet been built.</analysis>
+-   The agent did not make progress on the P0 architectural refactoring of . Instead of migrating existing state and logic out of the monolith and into the , it continued to add more state and orchestration logic *into* the monolith to support the new features. This defers the core problem and increases technical debt.</analysis>
