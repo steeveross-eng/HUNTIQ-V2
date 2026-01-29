@@ -8,7 +8,7 @@
  * - Indicateurs visuels de scoring
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useMap } from 'react-leaflet';
 
 // ═══════════════════════════════════════════════════════════════
