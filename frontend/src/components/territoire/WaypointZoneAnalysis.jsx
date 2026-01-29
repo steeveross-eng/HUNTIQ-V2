@@ -252,28 +252,48 @@ export const ZoneAnalysisControlPanel = memo(({
             </div>
           </div>
           
-          {/* Bouton d'activation */}
-          <Button
-            onClick={onToggle}
-            disabled={!selectedWaypoint}
-            className={`w-full ${
-              enabled 
-                ? 'bg-[#ff0055] hover:bg-[#ff0055]/80 text-white' 
-                : 'bg-[#f5a623] hover:bg-[#f5a623]/80 text-black'
-            }`}
-          >
-            {enabled ? (
-              <>
-                <Crosshair className="h-4 w-4 mr-2 animate-pulse" />
-                Désactiver l'analyse
-              </>
-            ) : (
-              <>
-                <Target className="h-4 w-4 mr-2" />
-                Analyser la zone
-              </>
-            )}
-          </Button>
+          {/* Toggle Mode Temps Réel */}
+          <div className="flex items-center justify-between p-2 bg-gray-800/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Zap className={`h-4 w-4 ${autoMode ? 'text-green-400' : 'text-gray-500'}`} />
+              <div>
+                <div className="text-[10px] font-medium text-white">Mode Temps Réel</div>
+                <div className="text-[8px] text-gray-500">
+                  {autoMode ? 'Analyse auto à la sélection' : 'Cliquer pour analyser'}
+                </div>
+              </div>
+            </div>
+            <Switch 
+              checked={autoMode} 
+              onCheckedChange={onAutoModeChange}
+              className="data-[state=checked]:bg-green-500"
+            />
+          </div>
+          
+          {/* Bouton d'activation (visible seulement en mode manuel) */}
+          {!autoMode && (
+            <Button
+              onClick={onToggle}
+              disabled={!selectedWaypoint}
+              className={`w-full ${
+                enabled 
+                  ? 'bg-[#ff0055] hover:bg-[#ff0055]/80 text-white' 
+                  : 'bg-[#f5a623] hover:bg-[#f5a623]/80 text-black'
+              }`}
+            >
+              {enabled ? (
+                <>
+                  <Crosshair className="h-4 w-4 mr-2 animate-pulse" />
+                  Désactiver l'analyse
+                </>
+              ) : (
+                <>
+                  <Target className="h-4 w-4 mr-2" />
+                  Analyser la zone
+                </>
+              )}
+            </Button>
+          )}
           
           {/* Message si pas de waypoint */}
           {!selectedWaypoint && (
