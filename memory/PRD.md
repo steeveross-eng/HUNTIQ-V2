@@ -76,9 +76,9 @@
 
 ## What's Been Implemented
 
-### Phase 52n (January 29, 2026) - GENERATEUR_CARTE_BIONIC v3.1 ✅
+### Phase 52n (January 29, 2026) - GENERATEUR_CARTE_BIONIC v3.1 + Rendu Visuel ✅
 
-**Intelligence BIONIC™ Plus - Génération complète de carte avec analyse IA**
+**Intelligence BIONIC™ Plus - Génération complète de carte avec analyse IA + Visualisation**
 
 Nouvelles fonctionnalités implémentées:
 - ✅ **Service BionicMapGenerator.js** (600+ lignes) - Moteur de génération complet
@@ -92,6 +92,14 @@ Nouvelles fonctionnalités implémentées:
 - ✅ **Recommandations IA** - Affût, salines, nutrition, déplacement, saison, approche, fenêtres tir
 - ✅ **Recommandations Produits BIONIC™** - Catalogue avec suggestions basées sur carences
 - ✅ **BionicGeneratorPanel.jsx** - Interface utilisateur avec sections collapsibles
+- ✅ **BionicHotspotsLayer.jsx** - Rendu visuel sur carte Leaflet:
+  - Hotspots avec cercles colorés (haute/moyenne/basse priorité)
+  - Marqueurs animés avec score et icône
+  - Trajet d'approche avec ligne pointillée violette
+  - Point d'entrée (🚶 vert) et position d'affût (🎯 rouge)
+  - Indicateur de direction du vent
+  - Zones de concentration de la simulation IA
+  - Popups détaillés au clic sur chaque hotspot
 
 **Architecture du générateur v3.1:**
 ```
@@ -103,17 +111,19 @@ GENERATEUR_CARTE_BIONIC v3.1_BIONIC_INTELLIGENCE_PLUS
 ├── ÉTAPE 5: Module approche optimale (vent, couvert, relief)
 ├── ÉTAPE 6: Moteur simulation IA (déplacements gibier)
 ├── ÉTAPE 7: Extraction hotspots (seuil 80)
+├── ÉTAPE 8: Rendu cartographique (hotspots + trajets)
 ├── ÉTAPE 9: Recommandations IA
 ├── ÉTAPE 10: Recommandations produits
-└── ÉTAPE 11: Sortie utilisateur (carte + interactions)
+└── ÉTAPE 11: Sortie utilisateur (carte interactive)
 ```
 
 **Fichiers créés:**
-- `/app/frontend/src/services/BionicMapGenerator.js` - **NOUVEAU** - Service générateur complet
-- `/app/frontend/src/components/territoire/BionicGeneratorPanel.jsx` - **NOUVEAU** - UI panneau
+- `/app/frontend/src/services/BionicMapGenerator.js` - Service générateur complet
+- `/app/frontend/src/components/territoire/BionicGeneratorPanel.jsx` - UI panneau
+- `/app/frontend/src/components/territoire/BionicHotspotsLayer.jsx` - **NOUVEAU** - Rendu visuel carte
 
 **Fichiers modifiés:**
-- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Intégration panneau Intelligence BIONIC
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Intégration panneau + hotspots sur carte
 
 ### Phase 52m (January 29, 2026) - BIONIC™ Pan-Canadien Fusionné v1.0 ✅
 
