@@ -373,65 +373,80 @@ const BionicForestZonesLayer = ({
   const activeLayers = useMemo(() => {
     const layers = [];
     
-    if (showCarteEcoforestiere) {
-      layers.push({ 
-        id: 'carte_ecoforestiere', 
-        name: 'Carte Écoforestière', 
-        source: 'MFFP Québec',
-        active: wmsAvailable 
-      });
+    // Si WMS Québec disponible
+    if (wmsAvailable) {
+      if (showCarteEcoforestiere) {
+        layers.push({ 
+          id: 'carte_ecoforestiere', 
+          name: 'Carte Écoforestière', 
+          source: 'MFFP Québec',
+          active: true 
+        });
+      }
+      if (showPeuplements) {
+        layers.push({ 
+          id: 'peuplements', 
+          name: 'Peuplements forestiers', 
+          source: 'MFFP Québec',
+          active: true 
+        });
+      }
+      if (showEssences) {
+        layers.push({ 
+          id: 'essences', 
+          name: 'Essences principales', 
+          source: 'MFFP Québec',
+          active: true 
+        });
+      }
+      if (showPerturbations) {
+        layers.push({ 
+          id: 'perturbations', 
+          name: 'Perturbations', 
+          source: 'MFFP Québec',
+          active: true 
+        });
+      }
+      if (showDensite) {
+        layers.push({ 
+          id: 'densite', 
+          name: 'Densité du couvert', 
+          source: 'MFFP Québec',
+          active: true 
+        });
+      }
+      if (showHydrographie) {
+        layers.push({ 
+          id: 'hydrographie', 
+          name: 'Hydrographie', 
+          source: 'MERN Québec',
+          active: true 
+        });
+      }
     }
-    if (showPeuplements) {
-      layers.push({ 
-        id: 'peuplements', 
-        name: 'Peuplements forestiers', 
-        source: 'MFFP Québec',
-        active: wmsAvailable 
-      });
-    }
-    if (showEssences) {
-      layers.push({ 
-        id: 'essences', 
-        name: 'Essences principales', 
-        source: 'MFFP Québec',
-        active: wmsAvailable 
-      });
-    }
-    if (showPerturbations) {
-      layers.push({ 
-        id: 'perturbations', 
-        name: 'Perturbations', 
-        source: 'MFFP Québec',
-        active: wmsAvailable 
-      });
-    }
-    if (showDensite) {
-      layers.push({ 
-        id: 'densite', 
-        name: 'Densité du couvert', 
-        source: 'MFFP Québec',
-        active: wmsAvailable 
-      });
-    }
-    if (showHydrographie) {
-      layers.push({ 
-        id: 'hydrographie', 
-        name: 'Hydrographie', 
-        source: 'MERN Québec',
-        active: wmsAvailable 
-      });
-    }
-    if (showCanadaForest) {
+    
+    // Couches Canada (toujours disponibles ou en fallback)
+    if (showCanadaForest || useCanadaFallback) {
       layers.push({ 
         id: 'nfi_forest_cover', 
         name: 'Couverture forestière Canada', 
-        source: 'RNCan NFI',
+        source: 'RNCan - Inventaire forestier national',
         active: true 
       });
     }
     
+    // Message si en cours de vérification
+    if (wmsAvailable === null) {
+      layers.push({ 
+        id: 'checking', 
+        name: 'Vérification services WMS...', 
+        source: 'Chargement',
+        active: false 
+      });
+    }
+    
     return layers;
-  }, [showCarteEcoforestiere, showPeuplements, showEssences, showPerturbations, showDensite, showHydrographie, showCanadaForest, wmsAvailable]);
+  }, [showCarteEcoforestiere, showPeuplements, showEssences, showPerturbations, showDensite, showHydrographie, showCanadaForest, wmsAvailable, useCanadaFallback]);
   
   if (!enabled) return null;
   
