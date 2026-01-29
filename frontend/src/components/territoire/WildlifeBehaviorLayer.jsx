@@ -207,14 +207,52 @@ const injectBehaviorStyles = () => {
       text-shadow: 0 0 8px #f5a623;
     }
     
-    /* Tooltip amélioré */
+    /* Tooltip amélioré - Position en bas pour éviter le header */
     .bionic-behavior-tooltip {
-      background: rgba(0,0,0,0.9) !important;
-      border: 1px solid #f5a623 !important;
+      background: rgba(0,0,0,0.95) !important;
+      border: 2px solid #f5a623 !important;
       color: white !important;
       font-size: 12px !important;
       font-weight: bold !important;
-      box-shadow: 0 0 15px rgba(245, 166, 35, 0.5) !important;
+      box-shadow: 0 0 20px rgba(245, 166, 35, 0.6) !important;
+      padding: 8px 12px !important;
+      border-radius: 8px !important;
+      z-index: 10000 !important;
+    }
+    
+    /* Popup comportemental - Éviter le header */
+    .bionic-behavior-popup {
+      z-index: 10000 !important;
+    }
+    
+    .bionic-behavior-popup .leaflet-popup-content-wrapper {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+    }
+    
+    .bionic-behavior-popup .leaflet-popup-content {
+      margin: 0 !important;
+      width: auto !important;
+    }
+    
+    .bionic-behavior-popup .leaflet-popup-tip-container {
+      display: none !important;
+    }
+    
+    .bionic-behavior-popup .leaflet-popup-close-button {
+      color: #f5a623 !important;
+      font-size: 20px !important;
+      font-weight: bold !important;
+      top: 8px !important;
+      right: 8px !important;
+      z-index: 1 !important;
+    }
+    
+    .bionic-behavior-popup .leaflet-popup-close-button:hover {
+      color: #ff0055 !important;
     }
   `;
   document.head.appendChild(style);
