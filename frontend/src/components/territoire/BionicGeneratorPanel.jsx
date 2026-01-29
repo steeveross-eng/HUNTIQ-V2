@@ -48,6 +48,7 @@ const BionicGeneratorPanel = ({
     recommandations: false,
     produits: false
   });
+  const [shouldGenerate, setShouldGenerate] = useState(true);
 
   const generer = useCallback(async () => {
     setIsGenerating(true);
@@ -74,8 +75,20 @@ const BionicGeneratorPanel = ({
 
   // Générer la carte au montage ou changement d'espèce
   useEffect(() => {
-    generer();
-  }, [generer]);
+    if (shouldGenerate) {
+      setShouldGenerate(false);
+      // Utiliser setTimeout pour éviter le setState synchrone dans l'effet
+      const timer = setTimeout(() => {
+        generer();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldGenerate, generer]);
+  
+  // Regénérer quand l'espèce change
+  useEffect(() => {
+    setShouldGenerate(true);
+  }, [espece]);
 
   const toggleSection = (section) => {
     setSectionsOuvertes(prev => ({
