@@ -704,6 +704,13 @@ const BionicMicroZones = ({
   const [hoveredZoneId, setHoveredZoneId] = useState(null);
   const map = useMap();
   
+  // Log du pipeline actif au montage
+  useEffect(() => {
+    console.log('[BIONIC] Pipeline actif:', BIONIC_PIPELINE_TOTAL_C2A.ruleset);
+    console.log('[BIONIC] Version:', BIONIC_PIPELINE_TOTAL_C2A.version);
+    console.log('[BIONIC] Description:', BIONIC_PIPELINE_TOTAL_C2A.description);
+  }, []);
+  
   // Initialiser le zoom avec la valeur actuelle de la carte
   const [currentZoom, setCurrentZoom] = useState(() => {
     return map ? map.getZoom() : 12;
