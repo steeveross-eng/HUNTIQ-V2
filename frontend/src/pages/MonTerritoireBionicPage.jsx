@@ -827,6 +827,37 @@ const MonTerritoireBionicPage = () => {
   const [topoContourStyle, setTopoContourStyle] = useState('highContrast');
   const [topoCollapsed, setTopoCollapsed] = useState(false);
   
+  // ============================================
+  // ANALYSE PAR WAYPOINT (Zone d'analyse focalisée)
+  // ============================================
+  const [zoneAnalysisEnabled, setZoneAnalysisEnabled] = useState(false);
+  const [zoneAnalysisWaypoint, setZoneAnalysisWaypoint] = useState(null);
+  const [zoneAnalysisArea, setZoneAnalysisArea] = useState('4'); // '2', '4', '10' km²
+  const [zoneAnalysisResult, setZoneAnalysisResult] = useState(null);
+  const [zoneAnalysisCollapsed, setZoneAnalysisCollapsed] = useState(false);
+  
+  // Callback quand l'analyse est complète
+  const handleZoneAnalysisComplete = useCallback((result) => {
+    setZoneAnalysisResult(result);
+    if (result) {
+      toast.success(`Hotspot optimal identifié: ${result.score}%`, {
+        description: `${result.distanceFromCenter}m du waypoint`
+      });
+    }
+  }, []);
+  
+  // Toggle l'analyse de zone
+  const toggleZoneAnalysis = useCallback(() => {
+    if (!zoneAnalysisEnabled && !zoneAnalysisWaypoint) {
+      toast.warning('Sélectionnez un waypoint d\'abord');
+      return;
+    }
+    setZoneAnalysisEnabled(!zoneAnalysisEnabled);
+    if (zoneAnalysisEnabled) {
+      setZoneAnalysisResult(null);
+    }
+  }, [zoneAnalysisEnabled, zoneAnalysisWaypoint]);
+  
   // Hooks BIONIC
   const { 
     layersVisible, 
