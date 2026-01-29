@@ -453,12 +453,21 @@ const BionicForestZonesLayer = ({
   opacity = 0.75,
   showLegend = true,
   showCanadaWMS = true,
+  // Nouvelles options pour les couches Québec via proxy
+  showQuebecEco = false,
+  showQuebecLidar = false,
+  showQuebecTWI = false,
   onFeatureClick
 }) => {
   const map = useMap();
   const [forestData, setForestData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ count: 0 });
+  const [wmsStatus, setWmsStatus] = useState({
+    quebec_eco: 'idle',
+    quebec_lidar: 'idle',
+    quebec_twi: 'idle'
+  });
   
   // Charger les données forestières
   useEffect(() => {
