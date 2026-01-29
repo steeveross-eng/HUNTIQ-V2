@@ -1338,7 +1338,7 @@ const EcoforestryLayers = ({
 }) => {
   const baseMap = BASE_MAPS[baseMapId] || BASE_MAPS.dark;
   const isEcoMapSelected = baseMapId === 'ecoforestry';
-  const isBionicCanadaSelected = baseMapId === 'bionic_canada';
+  const isBionicSelected = baseMapId === 'bionic';
   
   // LOGIQUE DE FALLBACK SIMPLIFIÉE:
   // Si le fond écoforestier est sélectionné, toujours utiliser le fallback
@@ -1353,8 +1353,8 @@ const EcoforestryLayers = ({
   let shouldRenderWMS = false;
   let shouldRenderVectorTiles = false;
   
-  if (isBionicCanadaSelected) {
-    // Mode BIONIC Canada - Tuiles vectorielles
+  if (isBionicSelected) {
+    // Mode BIONIC™ - Tuiles vectorielles pan-canadiennes
     effectiveBaseMap = baseMap;
     shouldRenderVectorTiles = true;
   } else if (isEcoMapSelected) {
