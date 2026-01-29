@@ -415,6 +415,49 @@ export const useEcoMapFallback = (ecoMapEnabled = false) => {
  * Note: "Sombre (BIONIC)" et "OpenStreetMap" ont été retirés
  */
 export const BASE_MAPS = {
+  // ═══════════════════════════════════════════════════════════════
+  // CARTE BIONIC™ - Architecture complète optimisée chasse
+  // ═══════════════════════════════════════════════════════════════
+  bionic: {
+    id: 'bionic',
+    name: 'BIONIC™',
+    description: 'Carte optimisée analyse faunique avec scoring BIONIC™',
+    icon: '🎯',
+    // Base map: Mapbox Terrain + Hydrography (vector tiles)
+    url: 'https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+    attribution: '&copy; Mapbox &copy; OpenStreetMap | BIONIC™',
+    format: 'vector_tiles',
+    layers: {
+      geology: {
+        source: 'RNCan + USGS',
+        format: 'vector_tiles',
+        style: 'semi-transparent polygons',
+        enabled: true,
+        opacity: 0.4
+      },
+      hydrology: {
+        source: 'RNCan Drainage + ZECs',
+        format: 'vector_tiles', 
+        style: 'blue lines + buffer zones',
+        enabled: true,
+        opacity: 0.7
+      },
+      ecoforest: {
+        source: 'MFFP Québec',
+        format: 'raster_tiles',
+        style: 'green gradient',
+        enabled: true,
+        opacity: 0.6
+      },
+      wildlife_score: {
+        source: 'BIONIC™ scoring engine',
+        format: 'GeoJSON',
+        style: 'heatmap + icons',
+        enabled: true,
+        opacity: 0.8
+      }
+    }
+  },
   satellite: {
     id: 'satellite',
     name: 'Satellite',
