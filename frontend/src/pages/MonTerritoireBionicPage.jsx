@@ -2112,6 +2112,20 @@ const MonTerritoireBionicPage = () => {
                 {privacyMode && (
                   <div className="bionic-private-overlay" />
                 )}
+                
+                {/* Hotspots et trajets d'approche BIONIC */}
+                {carteBionic && (
+                  <BionicHotspotsLayer
+                    generatorResults={carteBionic}
+                    mapCenter={mapCenter}
+                    showHotspots={true}
+                    showApproach={true}
+                    showSimulation={true}
+                    onHotspotClick={(hotspot) => {
+                      console.log('[BIONIC] Hotspot cliqué:', hotspot);
+                    }}
+                  />
+                )}
               </MapContainer>
               
               {/* GPS LIVE - Composant modulaire optimisé */}
