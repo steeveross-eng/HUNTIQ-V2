@@ -653,6 +653,8 @@ export default BionicForestZonesLayer;
 export { 
   BionicGeoJSONLayer,
   BionicForestLegend,
+  QuebecWMSProxyLayer,
   MIN_SCORE_THRESHOLD,
-  CANADA_WMS_CONFIG
+  CANADA_WMS_CONFIG,
+  WMS_PROXY_CONFIG
 };
