@@ -76,58 +76,45 @@
 
 ## What's Been Implemented
 
-### Phase 52m (January 29, 2026) - BIONIC_VECTOR_TILES_CANADA Pipeline v1.0 ✅
+### Phase 52m (January 29, 2026) - BIONIC™ Pan-Canadien Fusionné v1.0 ✅
 
-**Pipeline de tuiles vectorielles pan-canadiennes implémenté**
+**Carte BIONIC™ unifiée avec pipeline BIONIC_VECTOR_TILES_CANADA intégré**
 
-Nouvelles fonctionnalités:
-- ✅ **Service BionicVectorTilesCanada.js** - Pipeline complet avec configuration multi-zoom
-- ✅ **8 couches de données** : Topographie, Géologie, Hydrologie, Écoforestier, Administratif, Routes, Urbain, Score Faunique
+Changements:
+- ✅ **Fusion complète** des cartes "BIONIC™" et "BIONIC™ Canada" en une seule option
+- ✅ **Suppression** de l'option "BIONIC™ Canada" séparée
+- ✅ **8 couches de données** intégrées dans BIONIC™ : Topographie, Géologie, Hydrologie, Écoforestier, Administratif, Routes, Urbain, Score Faunique
 - ✅ **5 niveaux de zoom adaptatifs** avec simplification géométrique progressive
-- ✅ **Intégration UI** - Nouvelle option "BIONIC™ Canada" dans le panneau de couches
-- ✅ **Sous-couches affichées** avec pourcentages d'opacité et indicateurs zoom
-- ✅ **Configuration BionicMapConfig.js** mise à jour avec exports du pipeline
-- ✅ **BionicVectorTileLayer.jsx** - Composant de rendu tuiles vectorielles avec leaflet.vectorgrid
-- ✅ **BionicCanadaVectorLayer** - Wrapper intégré au système de carte existant
+- ✅ **Tuiles vectorielles** activées automatiquement pour BIONIC™
+- ✅ **Interface simplifiée** - 3 options de fond de carte seulement (BIONIC™, Satellite, Terrain)
 
-**Architecture du pipeline:**
+**Architecture finale BIONIC™:**
 ```
-BIONIC_VECTOR_TILES_CANADA v1.0.0
+BIONIC™ (fusionné avec BIONIC_VECTOR_TILES_CANADA v1.0.0)
 ├── Couverture: Canada [-141.0, 41.7] à [-52.6, 83.1]
 ├── Projection: EPSG:3857 (Web Mercator)
 ├── Format: Vector tiles (.pbf)
-├── Source: Mapbox Vector Tiles (fallback)
-└── Zoom levels:
-    ├── [0-4] Global - Simplification aggressive (5000m tolerance)
-    ├── [5-7] Régional - Simplification moderate (1000m tolerance)
-    ├── [8-10] Local - Simplification light (200m tolerance)
-    ├── [11-14] Détaillé - Simplification minimal (50m tolerance)
-    └── [15-18] Précision - Aucune simplification
+├── Source: Mapbox Vector Tiles
+├── Zoom levels:
+│   ├── [0-4] Global - Simplification aggressive
+│   ├── [5-7] Régional - Simplification moderate
+│   ├── [8-10] Local - Simplification light
+│   ├── [11-14] Détaillé - Simplification minimal
+│   └── [15-18] Précision - Aucune simplification
+└── Couches:
+    ├── Topographie (50%) - RNCan CanVec + USGS SRTM
+    ├── Géologie (OFF) - RNCan Bedrock + Surficial
+    ├── Hydrologie (70%) - RNCan NHN + MFFP
+    ├── Écoforestier (60%) - MFFP + NRCan EOSD
+    ├── Administratif (80%) - StatCan + RNCan Atlas
+    ├── Routes (90%) - StatCan + OSM
+    ├── Urbain (40%) - StatCan Population Centres
+    └── Score Faunique (80%) - BIONIC™ Engine
 ```
 
-**Couches de données:**
-| Couche | Source | Format | Opacité |
-|--------|--------|--------|---------|
-| Topographie | RNCan CanVec + USGS SRTM | vector_tiles | 50% |
-| Géologie | RNCan Bedrock + Surficial | vector_tiles | OFF |
-| Hydrologie | RNCan NHN + MFFP | vector_tiles | 70% |
-| Écoforestier | MFFP + NRCan EOSD | vector_tiles | 60% |
-| Administratif | StatCan + RNCan Atlas | vector_tiles | 80% |
-| Routes | StatCan + OSM | vector_tiles | 90% |
-| Urbain | StatCan Population Centres | vector_tiles | 40% |
-| Score Faunique | BIONIC™ Engine | GeoJSON | 80% |
-
-**Fichiers créés/modifiés:**
-- `/app/frontend/src/services/BionicVectorTilesCanada.js` - **NOUVEAU** - Service pipeline complet (600+ lignes)
-- `/app/frontend/src/components/territoire/BionicVectorTileLayer.jsx` - **NOUVEAU** - Composant rendu tuiles vectorielles
-- `/app/frontend/src/config/BionicMapConfig.js` - Intégration pipeline + exports utilitaires
-- `/app/frontend/src/components/territoire/EcoforestryLayers.jsx` - Ajout BASE_MAP bionic_canada + intégration BionicCanadaVectorLayer
-- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Ajout bouton BIONIC Canada + sous-couches UI
-
-**Dépendances ajoutées:**
-- `leaflet.vectorgrid` - Rendu tuiles vectorielles .pbf
-- `pbf` - Parser Protocol Buffers
-- `vector-tile` - Décodage tuiles vectorielles
+**Fichiers modifiés:**
+- `/app/frontend/src/components/territoire/EcoforestryLayers.jsx` - Fusion BASE_MAPS, suppression bionic_canada
+- `/app/frontend/src/pages/MonTerritoireBionicPage.jsx` - Suppression bouton BIONIC Canada, sous-couches fusionnées
 
 ### Phase 52l (January 29, 2026) - HABITAT_OPTIMAL_SYNTHESE Visualisation Temps Réel ✅
 
