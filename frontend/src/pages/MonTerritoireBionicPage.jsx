@@ -68,8 +68,8 @@ import {
   LayersSidebar,
   MapControlButtons,
   WaypointModeIndicator,
-  BASE_MAPS,
-  PIPELINE_LAYERS
+  BASE_MAPS as MODULE_BASE_MAPS,
+  PIPELINE_LAYERS as MODULE_PIPELINE_LAYERS
 } from '@/modules/bionic-territory';
 
 import { 
