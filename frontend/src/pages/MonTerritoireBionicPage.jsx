@@ -1873,18 +1873,14 @@ const MonTerritoireBionicPage = () => {
                     onToggle={toggleZoneAnalysis}
                     selectedWaypoint={zoneAnalysisWaypoint}
                     waypoints={activeWaypoints}
-                    onSelectWaypoint={(wp) => {
-                      setZoneAnalysisWaypoint(wp);
-                      if (wp) {
-                        setMapCenter([wp.lat, wp.lng]);
-                        setMapZoom(14);
-                      }
-                    }}
+                    onSelectWaypoint={handleSelectZoneWaypoint}
                     analysisArea={zoneAnalysisArea}
-                    onAreaChange={setZoneAnalysisArea}
+                    onAreaChange={handleZoneAreaChange}
                     analysisResult={zoneAnalysisResult}
                     collapsed={zoneAnalysisCollapsed}
                     onToggleCollapse={() => setZoneAnalysisCollapsed(!zoneAnalysisCollapsed)}
+                    autoMode={zoneAnalysisAutoMode}
+                    onAutoModeChange={setZoneAnalysisAutoMode}
                   />
                   
                   {/* ═══════════════════════════════════════════════════════════
