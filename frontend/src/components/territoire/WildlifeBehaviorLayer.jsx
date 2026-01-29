@@ -348,7 +348,7 @@ const WildlifeBehaviorLayer = ({
     injectBehaviorStyles();
   }, []);
   
-  // Générer les données comportementales
+  // Générer les données comportementales avec zones FUSIONNÉES
   useEffect(() => {
     if (!enabled || !mapCenter) return;
     
@@ -356,50 +356,64 @@ const WildlifeBehaviorLayer = ({
       setLoading(true);
       
       try {
-        // Récupérer les données forestières de base
-        const forestData = generateDemoForestData(mapCenter, 0.03);
+        // NOUVELLE MÉTHODE: Générer des zones organiques fusionnées
+        // au lieu de cercles individuels
+        const organicData = generateOrganicForestZones(mapCenter, 0.035, {
+          targetSpecies,
+          gridDensity: 6  // Moins de zones, plus grandes
+        });
         
-        // Classifier chaque zone par comportement
+        // Enrichir avec les données de comportement
         const behaviorStats = {};
-        const enrichedFeatures = forestData.features
-          .map(feature => {
-            const behaviorResult = classifyZoneBehavior(
-              {
-                ...feature.properties,
-                DENSITE: 50 + Math.random() * 50,
-                HAUTEUR: 10 + Math.random() * 20,
-                PENTE: Math.random() * 20
-              },
-              { targetSpecies }
-            );
-            
-            // Compter les statistiques
-            const primaryId = behaviorResult.primary.id;
-            behaviorStats[primaryId] = (behaviorStats[primaryId] || 0) + 1;
-            
-            if (behaviorResult.isHotspot) {
-              behaviorStats['hotspot'] = (behaviorStats['hotspot'] || 0) + 1;
+        const enrichedFeatures = organicData.features.map(feature => {
+          const behaviorId = feature.properties.behaviorId || 'shelter';
+          const behaviorScore = feature.properties.behaviorScore || 70;
+          
+          // Compter les statistiques
+          behaviorStats[behaviorId] = (behaviorStats[behaviorId] || 0) + 1;
+          
+          // Créer le résultat de comportement pour le style
+          const behaviorResult = {
+            primary: {
+              id: behaviorId,
+              score: behaviorScore,
+              ...WILDLIFE_BEHAVIORS[behaviorId]
+            },
+            isHotspot: behaviorId === 'hotspot',
+            hotspotScore: behaviorId === 'hotspot' ? behaviorScore : 0
+          };
+          
+          return {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              behavior: behaviorResult,
+              behaviorId,
+              behaviorScore,
+              bionic_name: WILDLIFE_BEHAVIORS[behaviorId]?.name || 'Zone',
+              merged: feature.properties.merged || false,
+              mergedCount: feature.properties.mergedCount || 1
             }
-            
-            return {
-              ...feature,
-              properties: {
-                ...feature.properties,
-                behavior: behaviorResult,
-                behaviorId: behaviorResult.isHotspot ? 'hotspot' : primaryId,
-                behaviorScore: behaviorResult.isHotspot 
-                  ? behaviorResult.hotspotScore 
-                  : behaviorResult.primary.score
-              }
-            };
-          })
-          .filter(f => f.properties.behaviorScore >= minScore);
+          };
+        }).filter(f => f.properties.behaviorScore >= minScore);
         
-        setBehaviorData({
-          ...forestData,
+        // Fusionner les zones adjacentes du même type
+        const mergedData = mergeZonesByBehavior({
+          type: 'FeatureCollection',
           features: enrichedFeatures
         });
-        setStats(behaviorStats);
+        
+        // Recalculer les stats après fusion
+        const finalStats = {};
+        mergedData.features.forEach(f => {
+          const id = f.properties.behaviorId;
+          finalStats[id] = (finalStats[id] || 0) + 1;
+        });
+        
+        setBehaviorData(mergedData);
+        setStats(finalStats);
+        
+        console.log(`[BIONIC Behavior] ${mergedData.features.length} zones organiques générées`);
         
       } catch (error) {
         console.error('[BIONIC Behavior] Erreur:', error);
