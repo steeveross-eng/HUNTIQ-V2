@@ -2169,6 +2169,18 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
+                {/* BIONIC™ ZONES FORESTIÈRES COLORÉES - Visible quand BIONIC est actif */}
+                {activeEcoLayers.baseMap === 'bionic' && pipelineEnabled && (
+                  <BionicForestZonesLayer
+                    mapCenter={mapCenter}
+                    enabled={true}
+                    radius={0.025}
+                    onZoneClick={(zone, config) => {
+                      console.log('[BIONIC] Zone forestière cliquée:', zone.type, config);
+                    }}
+                  />
+                )}
+                
                 {/* Hotspots et trajets d'approche BIONIC - Contrôlé par pipelineEnabled */}
                 {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
