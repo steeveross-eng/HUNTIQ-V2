@@ -46,7 +46,7 @@ export const BIONIC_INPUTS = {
 };
 
 // ─────────────────────────────────────────────
-// 2. PREPROCESS — Masques hydrique + urbain
+// 2. PREPROCESS — Masques hydrique + urbain + ROUTIER
 // ─────────────────────────────────────────────
 export const BIONIC_PREPROCESS = {
   hydric: [
@@ -93,6 +93,98 @@ export const BIONIC_PREPROCESS = {
       input_layer: 'URBAIN_FULL',
       distance_meters: 2000,
       output_layer: 'URBAIN_FULL_BUFFER_2000M'
+    }
+  ],
+  // NOUVEAU: Prétraitement routier
+  road: [
+    // Autoroutes - Buffer large (50m de chaque côté)
+    {
+      id: 'AUTOROUTE_BUFFER_50M',
+      type: 'geometry_buffer',
+      input_layer: 'R_AUTOROUTE',
+      distance_meters: 50,
+      output_layer: 'R_AUTOROUTE_BUF'
+    },
+    // Routes nationales - Buffer 30m
+    {
+      id: 'NATIONALE_BUFFER_30M',
+      type: 'geometry_buffer',
+      input_layer: 'R_NATIONALE',
+      distance_meters: 30,
+      output_layer: 'R_NATIONALE_BUF'
+    },
+    // Routes régionales - Buffer 20m
+    {
+      id: 'REGIONALE_BUFFER_20M',
+      type: 'geometry_buffer',
+      input_layer: 'R_REGIONALE',
+      distance_meters: 20,
+      output_layer: 'R_REGIONALE_BUF'
+    },
+    // Routes locales - Buffer 15m
+    {
+      id: 'LOCALE_BUFFER_15M',
+      type: 'geometry_buffer',
+      input_layer: 'R_LOCALE',
+      distance_meters: 15,
+      output_layer: 'R_LOCALE_BUF'
+    },
+    // Chemins - Buffer 10m
+    {
+      id: 'CHEMIN_BUFFER_10M',
+      type: 'geometry_buffer',
+      input_layer: 'R_CHEMIN',
+      distance_meters: 10,
+      output_layer: 'R_CHEMIN_BUF'
+    },
+    // Sentiers - Buffer 5m
+    {
+      id: 'SENTIER_BUFFER_5M',
+      type: 'geometry_buffer',
+      input_layer: 'R_SENTIER',
+      distance_meters: 5,
+      output_layer: 'R_SENTIER_BUF'
+    },
+    // Voies ferrées - Buffer 30m (danger + bruit)
+    {
+      id: 'VOIE_FERREE_BUFFER_30M',
+      type: 'geometry_buffer',
+      input_layer: 'R_VOIE_FERREE',
+      distance_meters: 30,
+      output_layer: 'R_VOIE_FERREE_BUF'
+    },
+    // Pistes cyclables - Buffer 5m
+    {
+      id: 'PISTE_CYCLABLE_BUFFER_5M',
+      type: 'geometry_buffer',
+      input_layer: 'R_PISTE_CYCLABLE',
+      distance_meters: 5,
+      output_layer: 'R_PISTE_CYCLABLE_BUF'
+    },
+    // Union de toutes les routes avec buffer
+    {
+      id: 'ROAD_FULL',
+      type: 'geometry_union',
+      input_layers: [
+        'R_AUTOROUTE_BUF', 'R_NATIONALE_BUF', 'R_REGIONALE_BUF',
+        'R_LOCALE_BUF', 'R_CHEMIN_BUF', 'R_SENTIER_BUF',
+        'R_VOIE_FERREE_BUF', 'R_PISTE_CYCLABLE_BUF'
+      ],
+      output_layer: 'ROAD_FULL'
+    },
+    // Buffer de sécurité supplémentaire pour les routes principales
+    {
+      id: 'ROAD_MAJOR_BUFFER_100M',
+      type: 'geometry_union',
+      input_layers: ['R_AUTOROUTE_BUF', 'R_NATIONALE_BUF', 'R_VOIE_FERREE_BUF'],
+      output_layer: 'ROAD_MAJOR'
+    },
+    {
+      id: 'ROAD_MAJOR_BUFFER',
+      type: 'geometry_buffer',
+      input_layer: 'ROAD_MAJOR',
+      distance_meters: 100,
+      output_layer: 'ROAD_MAJOR_BUF_100M'
     }
   ]
 };
