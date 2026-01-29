@@ -109,15 +109,22 @@ const LayerControl = memo(({
       enabled 
         ? `${config.bgColor} ${config.borderColor}` 
         : 'bg-gray-800/30 border-gray-700/50'
-    }`}>
+    } ${loading ? 'animate-pulse' : ''}`}>
       {/* Header avec toggle */}
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center relative ${
             enabled ? config.bgColor : 'bg-gray-700/50'
           }`}>
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" style={{ color: config.color }} />
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" style={{ color: config.color }} />
+                {/* Cercle de progression */}
+                <div 
+                  className="absolute inset-0 rounded-lg border-2 animate-ping opacity-50"
+                  style={{ borderColor: config.color }}
+                />
+              </>
             ) : (
               <Icon className="h-4 w-4" style={{ color: enabled ? config.color : '#6b7280' }} />
             )}
@@ -127,6 +134,12 @@ const LayerControl = memo(({
               <span className={`text-xs font-medium truncate ${enabled ? 'text-white' : 'text-gray-400'}`}>
                 {config.shortName}
               </span>
+              {/* Badge de chargement */}
+              {loading && (
+                <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 animate-pulse">
+                  Chargement...
+                </span>
+              )}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
