@@ -248,7 +248,6 @@ const QuebecLayersPanel = ({
                   {loadingCount} en cours
                 </Badge>
               )}
-              )}
             </span>
             {collapsed ? (
               <ChevronDown className="h-3 w-3" />
