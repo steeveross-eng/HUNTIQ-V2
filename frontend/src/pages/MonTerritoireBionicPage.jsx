@@ -738,6 +738,29 @@ const MonTerritoireBionicPage = () => {
   const [pipelineEnabled, setPipelineEnabled] = useState(true); // Toggle ON-OFF Pipeline BIONIC
   const [pipelineCollapsed, setPipelineCollapsed] = useState(false); // Réduire/Étendre Pipeline
   
+  // ============================================
+  // COUCHES WMS QUÉBEC (via proxy backend)
+  // ============================================
+  const [quebecLayers, setQuebecLayers] = useState({
+    ecoforestry: { enabled: false, opacity: 60, loading: false },
+    lidar: { enabled: false, opacity: 50, loading: false },
+    twi: { enabled: false, opacity: 50, loading: false }
+  });
+  
+  const toggleQuebecLayer = useCallback((layerId) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      [layerId]: { ...prev[layerId], enabled: !prev[layerId].enabled }
+    }));
+  }, []);
+  
+  const setQuebecLayerOpacity = useCallback((layerId, opacity) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      [layerId]: { ...prev[layerId], opacity }
+    }));
+  }, []);
+  
   // Import du service d'exclusion permanent
   const filterWaterZonesRef = useRef(null);
   
