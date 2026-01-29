@@ -545,9 +545,71 @@ const BionicForestZonesLayer = ({
   
   if (!enabled) return null;
   
+  // Construire l'URL du proxy WMS pour les couches Québec
+  const buildProxyUrl = (source, layer) => {
+    return `${API_BASE}/api/bionic-territory/wms/tile?source=${source}&layer=${layer}`;
+  };
+  
   return (
     <>
-      {/* Couche WMS Canada comme fond (si activée) */}
+      {/* ══════════════════════════════════════════════════════════
+          COUCHES WMS QUÉBEC VIA PROXY BACKEND
+          Ces couches utilisent le proxy pour contourner CORS/IP
+      ══════════════════════════════════════════════════════════ */}
+      
+      {/* Carte Écoforestière Québec (peuplements) */}
+      {showQuebecEco && (
+        <WMSTileLayer
+          url={buildProxyUrl('quebec_eco', 'peuplements') + '&'}
+          params={{
+            // Paramètres passés au proxy
+          }}
+          opacity={0.6}
+          zIndex={400}
+          attribution={WMS_PROXY_CONFIG.quebec_eco.attribution}
+          eventHandlers={{
+            loading: () => setWmsStatus(s => ({...s, quebec_eco: 'loading'})),
+            load: () => setWmsStatus(s => ({...s, quebec_eco: 'loaded'})),
+            error: () => setWmsStatus(s => ({...s, quebec_eco: 'error'}))
+          }}
+        />
+      )}
+      
+      {/* Données LiDAR Dendrométriques */}
+      {showQuebecLidar && (
+        <WMSTileLayer
+          url={buildProxyUrl('quebec_lidar', 'lidar_dendro') + '&'}
+          params={{}}
+          opacity={0.5}
+          zIndex={410}
+          attribution={WMS_PROXY_CONFIG.quebec_lidar.attribution}
+          eventHandlers={{
+            loading: () => setWmsStatus(s => ({...s, quebec_lidar: 'loading'})),
+            load: () => setWmsStatus(s => ({...s, quebec_lidar: 'loaded'})),
+            error: () => setWmsStatus(s => ({...s, quebec_lidar: 'error'}))
+          }}
+        />
+      )}
+      
+      {/* Indice d'Humidité Topographique (TWI) */}
+      {showQuebecTWI && (
+        <WMSTileLayer
+          url={buildProxyUrl('quebec_terrain', 'twi') + '&'}
+          params={{}}
+          opacity={0.4}
+          zIndex={420}
+          attribution={WMS_PROXY_CONFIG.quebec_twi.attribution}
+          eventHandlers={{
+            loading: () => setWmsStatus(s => ({...s, quebec_twi: 'loading'})),
+            load: () => setWmsStatus(s => ({...s, quebec_twi: 'loaded'})),
+            error: () => setWmsStatus(s => ({...s, quebec_twi: 'error'}))
+          }}
+        />
+      )}
+      
+      {/* ══════════════════════════════════════════════════════════
+          COUCHE WMS CANADA (FALLBACK - PAS DE PROXY)
+      ══════════════════════════════════════════════════════════ */}
       {showCanadaWMS && (
         <WMSTileLayer
           url={CANADA_WMS_CONFIG.forest_cover.url}
@@ -575,7 +637,10 @@ const BionicForestZonesLayer = ({
       {/* Légende */}
       {showLegend && (
         <BionicForestLegend 
-          stats={stats}
+          stats={{
+            ...stats,
+            wmsStatus
+          }}
           position="bottomright"
           show={true}
         />
