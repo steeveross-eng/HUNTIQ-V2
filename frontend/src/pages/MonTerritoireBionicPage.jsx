@@ -2089,33 +2089,6 @@ const MonTerritoireBionicPage = () => {
                 </div>
               )}
             </div>
-            
-            {/* Panneau Analyse */}
-            <div className={`${showAnalysisPanel ? 'w-72' : 'w-10'} bg-gray-900/95 border-l border-gray-800 transition-all flex flex-col`}>
-              <button onClick={() => setShowAnalysisPanel(!showAnalysisPanel)} className="p-2 border-b border-gray-800 flex items-center justify-end hover:bg-gray-800/50">
-                <BarChart3 className="h-4 w-4 text-[#f5a623]" />
-              </button>
-              
-              {showAnalysisPanel && (
-                <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                  {/* MESSAGE SI AUCUN WAYPOINT ACTIF */}
-                  {(!activeWaypoints || activeWaypoints.length === 0) && (
-                    <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-500/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="h-4 w-4 text-amber-400" />
-                        <span className="text-xs font-medium text-amber-400">Analyse inactive</span>
-                      </div>
-                      <p className="text-[10px] text-gray-400 leading-relaxed">
-                        Ajoutez un ou plusieurs waypoints pour activer l'analyse BIONIC™ des zones fauniques.
-                      </p>
-                      <p className="text-[10px] text-amber-300/70 mt-2">
-                        → Cliquez sur "Waypoints actifs" pour en ajouter
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         )}
         
