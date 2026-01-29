@@ -20,6 +20,15 @@ export {
   BIONIC_ACTIONS
 } from './context/BionicTerritoryContext';
 
+// Components - Header
+export { 
+  default as TerritoryHeader,
+  NotificationsPanel,
+  WaypointCreationMenu,
+  GroupsMenu,
+  SpeciesSelector
+} from './components/header/TerritoryHeader';
+
 // Components - Sidebar
 export { 
   default as LayersSidebar,
@@ -42,7 +51,7 @@ export {
 // Module metadata for micro-frontend registration
 export const MODULE_INFO = {
   name: 'bionic-territory',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'BIONIC Territory Management Module',
   routes: [
     { path: '/mon-territoire-bionic', component: 'BionicTerritoryPage' }
