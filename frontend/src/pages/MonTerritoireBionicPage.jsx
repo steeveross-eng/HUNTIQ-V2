@@ -1906,13 +1906,13 @@ const MonTerritoireBionicPage = () => {
                       Intelligence BIONIC™
                     </div>
                     <BionicGeneratorPanel 
-                      espece={selectedSpecies}
+                      espece={selectedEspece?.toLowerCase() || 'orignal'}
                       meteo={{
-                        temperature: currentConditions?.temperature || 12,
-                        vent_direction: currentConditions?.windDirection || 'NO',
-                        vent_force: currentConditions?.windSpeed || 15,
-                        pression: currentConditions?.pressure || 1015,
-                        precipitations: currentConditions?.precipitations || 0
+                        temperature: weather?.temperature || 12,
+                        vent_direction: weather?.windDirection || 'NO',
+                        vent_force: weather?.windSpeed || 15,
+                        pression: weather?.pressure || 1015,
+                        precipitations: weather?.precipitations || 0
                       }}
                       compact={true}
                       onResultsGenerated={(results) => {
