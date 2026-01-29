@@ -49,12 +49,7 @@ const BionicGeneratorPanel = ({
     produits: false
   });
 
-  // Générer la carte au montage ou changement d'espèce
-  useEffect(() => {
-    generer();
-  }, [espece]);
-
-  const generer = async () => {
+  const generer = useCallback(async () => {
     setIsGenerating(true);
     
     // Simuler un délai pour l'UX
@@ -75,7 +70,12 @@ const BionicGeneratorPanel = ({
     setResultats(results);
     onResultsGenerated(results);
     setIsGenerating(false);
-  };
+  }, [donnees, meteo, espece, onResultsGenerated]);
+
+  // Générer la carte au montage ou changement d'espèce
+  useEffect(() => {
+    generer();
+  }, [generer]);
 
   const toggleSection = (section) => {
     setSectionsOuvertes(prev => ({
