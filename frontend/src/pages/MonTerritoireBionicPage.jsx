@@ -2123,22 +2123,6 @@ const MonTerritoireBionicPage = () => {
                     zoneDisplayMode={zoneDisplayMode}
                   />
                   
-                  {/* HABITAT_OPTIMAL_SYNTHÈSE - Panneau de synthèse par espèce */}
-                  {activeWaypoints.length > 0 && (
-                    <HabitatSynthesePanel
-                      zones={filteredMicroZones}
-                      initialEspece={selectedEspece}
-                      onEspeceChange={(espece) => {
-                        setSelectedEspece(espece);
-                        console.log('[BIONIC] Espèce cible changée:', espece);
-                      }}
-                      onCarteBionicGenerated={(carte) => {
-                        setCarteBionic(carte);
-                        console.log('[BIONIC] Carte générée:', carte?.stats);
-                      }}
-                    />
-                  )}
-                  
                   {/* Alertes conditions optimales */}
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                     <AlertsPanel
