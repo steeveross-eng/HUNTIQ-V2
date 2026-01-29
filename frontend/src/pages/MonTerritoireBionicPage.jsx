@@ -2167,20 +2167,17 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
-                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES WMS - Données réelles Québec/Canada */}
+                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES - Données réelles GeoJSON + WMS Canada */}
                 {pipelineEnabled && (
                   <BionicForestZonesLayer
                     mapCenter={mapCenter}
                     enabled={true}
-                    showCarteEcoforestiere={true}
-                    showPeuplements={false}
-                    showEssences={false}
-                    showPerturbations={false}
-                    showDensite={false}
-                    showHydrographie={true}
-                    showCanadaForest={false}
                     opacity={0.75}
                     showLegend={true}
+                    showCanadaWMS={true}
+                    onFeatureClick={(feature) => {
+                      console.log('[BIONIC] Zone forestière cliquée:', feature.properties);
+                    }}
                   />
                 )}
                 
