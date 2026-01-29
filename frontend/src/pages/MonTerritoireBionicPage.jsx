@@ -2032,6 +2032,67 @@ const MonTerritoireBionicPage = () => {
                   />
                   
                   {/* ═══════════════════════════════════════════════════════════
+                      ZONES COMPORTEMENTALES DU GIBIER
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-b border-gray-700 pb-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[10px] text-[#f5a623] uppercase flex items-center gap-1.5">
+                        <span className="text-base">🦌</span>
+                        <span>Zones Comportementales</span>
+                      </div>
+                      <Switch
+                        checked={showBehaviorZones}
+                        onCheckedChange={setShowBehaviorZones}
+                        className="data-[state=checked]:bg-[#f5a623]"
+                      />
+                    </div>
+                    {showBehaviorZones && (
+                      <div className="space-y-1.5">
+                        <div className="text-[9px] text-gray-400">
+                          Visualisation des comportements du gibier basée sur l'habitat
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 mt-2">
+                          {[
+                            { id: 'corridor', icon: '🦌', label: 'Circulation', color: '#ff6b35' },
+                            { id: 'shelter', icon: '🌲', label: 'Cache/Abri', color: '#00ff88' },
+                            { id: 'feeding', icon: '🍂', label: 'Alimentation', color: '#ffd93d' },
+                            { id: 'bedding', icon: '🛏️', label: 'Repos/Dortoir', color: '#c084fc' },
+                            { id: 'water', icon: '💧', label: 'Point d\'eau', color: '#00d4ff' },
+                            { id: 'hotspot', icon: '🔥', label: 'Hotspot', color: '#ff0066' }
+                          ].map(behavior => (
+                            <button
+                              key={behavior.id}
+                              onClick={() => toggleBehaviorFilter(behavior.id)}
+                              className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-[10px] transition-all ${
+                                activeBehaviors === null || activeBehaviors.includes(behavior.id)
+                                  ? 'bg-gray-800 text-white border border-gray-600'
+                                  : 'bg-gray-900/50 text-gray-500 border border-gray-800'
+                              }`}
+                            >
+                              <span 
+                                className="w-2 h-2 rounded-full"
+                                style={{ 
+                                  backgroundColor: activeBehaviors === null || activeBehaviors.includes(behavior.id) 
+                                    ? behavior.color 
+                                    : '#4b5563'
+                                }}
+                              />
+                              <span>{behavior.icon}</span>
+                              <span className="truncate">{behavior.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setActiveBehaviors(null)}
+                          className="w-full mt-2 py-1 text-[9px] text-gray-400 hover:text-[#f5a623] transition-colors"
+                        >
+                          Afficher tous les comportements
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* ═══════════════════════════════════════════════════════════
                       GÉNÉRATEUR CARTE BIONIC™ v3.1
                   ═══════════════════════════════════════════════════════════ */}
                   <div className="border-t border-gray-700 pt-2 mt-2">
