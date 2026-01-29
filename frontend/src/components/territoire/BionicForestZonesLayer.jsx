@@ -459,6 +459,8 @@ const BionicForestZonesLayer = ({
   showQuebecTWI = false,
   // Opacités dynamiques pour les couches Québec
   quebecOpacities = { eco: 0.6, lidar: 0.5, twi: 0.5 },
+  // Callback pour remonter le statut de chargement
+  onLoadingStatusChange,
   onFeatureClick
 }) => {
   const map = useMap();
@@ -470,6 +472,13 @@ const BionicForestZonesLayer = ({
     quebec_lidar: 'idle',
     quebec_twi: 'idle'
   });
+  
+  // Remonter le statut de chargement au parent
+  useEffect(() => {
+    if (onLoadingStatusChange) {
+      onLoadingStatusChange(wmsStatus);
+    }
+  }, [wmsStatus, onLoadingStatusChange]);
   
   // Charger les données forestières
   useEffect(() => {
