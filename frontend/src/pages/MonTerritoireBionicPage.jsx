@@ -2114,15 +2114,6 @@ const MonTerritoireBionicPage = () => {
                     </div>
                   )}
                   
-                  {/* EXCLUSION PERMANENTE DES ZONES AQUATIQUES - Composant modulaire */}
-                  <WaterMaskStats
-                    activeWaypoints={activeWaypoints}
-                    isFilteringWater={isFilteringWater}
-                    waterExclusionStats={waterExclusionStats}
-                    visibleZonesCount={filteredMicroZones?.length}
-                    zoneDisplayMode={zoneDisplayMode}
-                  />
-                  
                   {/* Alertes conditions optimales */}
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                     <AlertsPanel
