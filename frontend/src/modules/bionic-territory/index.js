@@ -41,6 +41,15 @@ export {
   PIPELINE_LAYERS
 } from './components/sidebar/LayersSidebar';
 
+export {
+  default as LayersPanelContent,
+  BaseMapSection,
+  PipelineSection,
+  BionicLayersSection,
+  BASE_MAP_OPTIONS,
+  PIPELINE_LAYERS_CONFIG
+} from './components/sidebar/LayersPanelContent';
+
 // Components - Controls
 export { 
   default as MapControlButtons,
