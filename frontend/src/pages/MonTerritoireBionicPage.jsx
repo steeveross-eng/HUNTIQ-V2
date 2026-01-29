@@ -2104,6 +2104,24 @@ const MonTerritoireBionicPage = () => {
                   </div>
                   
                   {/* ═══════════════════════════════════════════════════════════
+                      OVERLAY TOPOGRAPHIQUE
+                  ═══════════════════════════════════════════════════════════ */}
+                  <TopographicControlPanel
+                    enabled={topoEnabled}
+                    onToggle={setTopoEnabled}
+                    showHillshade={topoHillshade}
+                    onHillshadeToggle={setTopoHillshade}
+                    hillshadeOpacity={topoHillshadeOpacity}
+                    onHillshadeOpacityChange={setTopoHillshadeOpacity}
+                    showContours={topoContours}
+                    onContoursToggle={setTopoContours}
+                    contourStyle={topoContourStyle}
+                    onContourStyleChange={setTopoContourStyle}
+                    collapsed={topoCollapsed}
+                    onToggleCollapse={() => setTopoCollapsed(!topoCollapsed)}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
                       GÉNÉRATEUR CARTE BIONIC™ v3.1
                   ═══════════════════════════════════════════════════════════ */}
                   <div className="border-t border-gray-700 pt-2 mt-2">
