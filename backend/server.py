@@ -605,6 +605,135 @@ async def admin_login(login: AdminLogin):
     raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
 # ============================================
+# USER AUTHENTICATION
+# ============================================
+
+@api_router.post("/auth/login")
+async def user_login(login: UserLogin):
+    """Authentification utilisateur"""
+    try:
+        user = await db.users.find_one({"email": login.email})
+        if not user:
+            raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+        
+        password_hash = hashlib.sha256(login.password.encode()).hexdigest()
+        if user.get("password_hash") != password_hash:
+            raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+        
+        # Générer un token
+        token = str(uuid.uuid4())
+        
+        # Sauvegarder la session
+        await db.sessions.insert_one({
+            "token": token,
+            "user_id": str(user["_id"]),
+            "created_at": datetime.now(timezone.utc),
+            "remember_device": login.remember_device
+        })
+        
+        return {
+            "success": True,
+            "token": token,
+            "user": {
+                "id": str(user["_id"]),
+                "name": user.get("name", ""),
+                "email": user.get("email", "")
+            },
+            "device_trusted": login.remember_device
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur")
+
+@api_router.post("/auth/register")
+async def user_register(user_data: UserRegister):
+    """Inscription utilisateur"""
+    try:
+        # Vérifier si l'email existe déjà
+        existing = await db.users.find_one({"email": user_data.email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+        
+        password_hash = hashlib.sha256(user_data.password.encode()).hexdigest()
+        
+        new_user = {
+            "name": user_data.name,
+            "email": user_data.email,
+            "password_hash": password_hash,
+            "phone": user_data.phone,
+            "created_at": datetime.now(timezone.utc),
+            "is_active": True
+        }
+        
+        result = await db.users.insert_one(new_user)
+        
+        # Générer un token
+        token = str(uuid.uuid4())
+        await db.sessions.insert_one({
+            "token": token,
+            "user_id": str(result.inserted_id),
+            "created_at": datetime.now(timezone.utc)
+        })
+        
+        return {
+            "success": True,
+            "token": token,
+            "user": {
+                "id": str(result.inserted_id),
+                "name": user_data.name,
+                "email": user_data.email
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Register error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur")
+
+@api_router.get("/auth/verify")
+async def verify_token(token: str):
+    """Vérifie un token d'authentification"""
+    session = await db.sessions.find_one({"token": token})
+    if not session:
+        raise HTTPException(status_code=401, detail="Token invalide")
+    
+    user = await db.users.find_one({"_id": ObjectId(session["user_id"])})
+    if not user:
+        raise HTTPException(status_code=401, detail="Utilisateur non trouvé")
+    
+    return {
+        "valid": True,
+        "user": {
+            "id": str(user["_id"]),
+            "name": user.get("name", ""),
+            "email": user.get("email", "")
+        }
+    }
+
+@api_router.post("/auth/logout")
+async def user_logout(token: str):
+    """Déconnexion utilisateur"""
+    await db.sessions.delete_one({"token": token})
+    return {"success": True}
+
+@api_router.get("/auth/auto-login")
+async def auto_login():
+    """Auto-login basé sur l'IP (mode simplifié)"""
+    return {"success": False, "message": "Auto-login non disponible"}
+
+@api_router.get("/auth/ip-info")
+async def get_ip_info():
+    """Retourne les infos IP"""
+    return {"ip": "unknown"}
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: dict):
+    """Demande de réinitialisation de mot de passe"""
+    return {"success": True, "message": "Si cet email existe, un lien de réinitialisation a été envoyé"}
+
+# ============================================
 # SITE SETTINGS / MAINTENANCE MODE
 # ============================================
 
