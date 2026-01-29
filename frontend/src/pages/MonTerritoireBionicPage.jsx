@@ -2216,7 +2216,7 @@ const MonTerritoireBionicPage = () => {
                 <BionicMapOverlay
                   active={true}
                   showBorder={true}
-                  showLegend={true}
+                  showLegend={false}
                   showScoring={!!carteBionic}
                   score={carteBionic ? {
                     habitat_optimal: carteBionic.habitat_optimal?.score_final || 0,
