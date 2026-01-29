@@ -2183,6 +2183,23 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
+              {/* BIONIC™ MAP OVERLAY - Effet visuel 10X distinctif */}
+              {activeEcoLayers.baseMap === 'bionic' && pipelineEnabled && (
+                <BionicMapOverlay
+                  active={true}
+                  showBorder={true}
+                  showLegend={true}
+                  showScoring={!!carteBionic}
+                  score={carteBionic ? {
+                    habitat_optimal: carteBionic.habitat_optimal?.score_final || 0,
+                    meteo: carteBionic.analyse_meteo?.score_meteo || 0,
+                    approche: carteBionic.approche_optimale?.score_approche || 0
+                  } : null}
+                  intensity="high"
+                  version="3.3"
+                />
+              )}
+              
               {/* GPS LIVE - Composant modulaire optimisé */}
               {gpsLiveEnabled && (
                 <GPSLiveDisplay 
