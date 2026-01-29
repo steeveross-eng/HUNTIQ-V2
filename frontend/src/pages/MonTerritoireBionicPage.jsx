@@ -60,6 +60,7 @@ import HabitatSynthesePanel from '@/components/territoire/HabitatSynthesePanel';
 import BionicGeneratorPanel from '@/components/territoire/BionicGeneratorPanel';
 import BionicHotspotsLayer from '@/components/territoire/BionicHotspotsLayer';
 import BionicMapOverlay from '@/components/territoire/BionicMapOverlay';
+import BionicForestZonesLayer from '@/components/territoire/BionicForestZonesLayer';
 
 import { 
   BIONIC_LAYERS, 
