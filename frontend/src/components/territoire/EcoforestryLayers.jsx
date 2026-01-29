@@ -1077,6 +1077,164 @@ export const EcoforestryLayerControl = ({
                   </div>
                 </div>
               )}
+              
+              {/* Sous-couches BIONIC CANADA si carte BIONIC Canada sélectionnée */}
+              {activeLayers.baseMap === 'bionic_canada' && (
+                <div className="mt-4 border-t border-gray-700 pt-3">
+                  <div className="text-[10px] text-red-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span>🍁</span> Couches BIONIC™ Canada
+                  </div>
+                  <div className="bg-red-900/20 rounded-lg p-2 mb-2 border border-red-700/30">
+                    <p className="text-[9px] text-red-300">
+                      Pipeline <strong>BIONIC_VECTOR_TILES_CANADA v1.0</strong>
+                    </p>
+                    <p className="text-[8px] text-gray-400 mt-1">
+                      Tuiles vectorielles pan-canadiennes avec simplification multi-zoom
+                    </p>
+                  </div>
+                  
+                  {/* Couche Topographie */}
+                  <div className="flex items-center justify-between p-2 rounded bg-amber-900/20 border border-amber-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>⛰️</span>
+                      <div>
+                        <span className="text-xs text-white">Topographie</span>
+                        <p className="text-[8px] text-amber-400">RNCan CanVec + USGS SRTM</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-amber-600/30 text-amber-400 text-[8px]">50%</Badge>
+                  </div>
+                  
+                  {/* Couche Géologie */}
+                  <div className="flex items-center justify-between p-2 rounded hover:bg-gray-800/30">
+                    <div className="flex items-center gap-2">
+                      <span>🪨</span>
+                      <div>
+                        <span className="text-xs text-white">Géologie</span>
+                        <p className="text-[8px] text-gray-500">RNCan Bedrock + Surficial</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-gray-600/30 text-gray-400 text-[8px]">OFF</Badge>
+                  </div>
+                  
+                  {/* Couche Hydrologie */}
+                  <div className="flex items-center justify-between p-2 rounded bg-blue-900/20 border border-blue-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>💧</span>
+                      <div>
+                        <span className="text-xs text-white">Hydrologie</span>
+                        <p className="text-[8px] text-blue-400">RNCan NHN + MFFP</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-600/30 text-blue-400 text-[8px]">70%</Badge>
+                  </div>
+                  
+                  {/* Couche Écoforestier */}
+                  <div className="flex items-center justify-between p-2 rounded bg-green-900/20 border border-green-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>🌲</span>
+                      <div>
+                        <span className="text-xs text-white">Écoforestier</span>
+                        <p className="text-[8px] text-green-400">MFFP + NRCan EOSD</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-600/30 text-green-400 text-[8px]">60%</Badge>
+                  </div>
+                  
+                  {/* Couche Administrative */}
+                  <div className="flex items-center justify-between p-2 rounded bg-purple-900/20 border border-purple-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>🏛️</span>
+                      <div>
+                        <span className="text-xs text-white">Administratif</span>
+                        <p className="text-[8px] text-purple-400">StatCan + RNCan Atlas</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-purple-600/30 text-purple-400 text-[8px]">80%</Badge>
+                  </div>
+                  
+                  {/* Couche Routes */}
+                  <div className="flex items-center justify-between p-2 rounded bg-gray-800/50 border border-gray-600/30">
+                    <div className="flex items-center gap-2">
+                      <span>🛣️</span>
+                      <div>
+                        <span className="text-xs text-white">Réseau routier</span>
+                        <p className="text-[8px] text-gray-400">StatCan + OSM</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-gray-600/30 text-gray-300 text-[8px]">90%</Badge>
+                  </div>
+                  
+                  {/* Couche Urbain */}
+                  <div className="flex items-center justify-between p-2 rounded bg-red-900/20 border border-red-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>🏙️</span>
+                      <div>
+                        <span className="text-xs text-white">Zones urbaines</span>
+                        <p className="text-[8px] text-red-400">StatCan Population Centres</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-red-600/30 text-red-400 text-[8px]">40%</Badge>
+                  </div>
+                  
+                  {/* Couche Score Faunique */}
+                  <div className="flex items-center justify-between p-2 rounded bg-[#f5a623]/20 border border-[#f5a623]/40">
+                    <div className="flex items-center gap-2">
+                      <span>🎯</span>
+                      <div>
+                        <span className="text-xs text-white">Score Faunique</span>
+                        <p className="text-[8px] text-[#f5a623]">BIONIC™ Engine</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-[#f5a623]/30 text-[#f5a623] text-[8px]">80%</Badge>
+                  </div>
+                  
+                  {/* Info architecture Canada */}
+                  <div className="mt-3 p-2 bg-gray-900/50 rounded border border-red-700/30">
+                    <div className="text-[9px] text-gray-400 space-y-1">
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-400">▸</span> Couverture: Canada complet
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-400">▸</span> Format: Vector tiles (.pbf)
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-400">▸</span> Zoom: 0-18 (simplification auto)
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-400">▸</span> Sources: RNCan, StatCan, OSM
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Niveaux de zoom */}
+                  <div className="mt-2 p-2 bg-gray-800/30 rounded">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Niveaux de zoom</div>
+                    <div className="grid grid-cols-5 gap-1 text-[8px]">
+                      <div className="text-center p-1 rounded bg-gray-700/50">
+                        <div className="text-gray-300">0-4</div>
+                        <div className="text-gray-500">Global</div>
+                      </div>
+                      <div className="text-center p-1 rounded bg-gray-700/50">
+                        <div className="text-gray-300">5-7</div>
+                        <div className="text-gray-500">Région</div>
+                      </div>
+                      <div className="text-center p-1 rounded bg-gray-700/50">
+                        <div className="text-gray-300">8-10</div>
+                        <div className="text-gray-500">Local</div>
+                      </div>
+                      <div className="text-center p-1 rounded bg-blue-700/50">
+                        <div className="text-blue-300">11-14</div>
+                        <div className="text-blue-400">Détail</div>
+                      </div>
+                      <div className="text-center p-1 rounded bg-green-700/50">
+                        <div className="text-green-300">15-18</div>
+                        <div className="text-green-400">Précis</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
