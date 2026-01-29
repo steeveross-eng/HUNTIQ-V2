@@ -389,14 +389,13 @@ const BionicForestZonesLayer = ({
   onZoneClick
 }) => {
   const map = useMap();
-  const [zones, setZones] = useState([]);
   
-  // Générer les zones quand le centre change
-  useEffect(() => {
+  // Générer les zones quand le centre change - utiliser useMemo
+  const zones = useMemo(() => {
     if (mapCenter && enabled) {
-      const generatedZones = generateForestZones(mapCenter, radius);
-      setZones(generatedZones);
+      return generateForestZones(mapCenter, radius);
     }
+    return [];
   }, [mapCenter, enabled, radius]);
   
   // Injecter les styles CSS
