@@ -180,10 +180,15 @@ const BionicGeoJSONLayer = ({
         </div>
       </div>
     `, {
-      className: 'bionic-forest-popup'
+      className: 'bionic-forest-popup',
+      autoPan: true,
+      autoPanPadding: [50, 180], // Éviter le header
+      autoPanPaddingTopLeft: [50, 180],
+      autoPanPaddingBottomRight: [50, 50],
+      keepInView: true
     });
     
-    // Tooltip au survol
+    // Tooltip au survol - direction bottom pour éviter le header
     layer.bindTooltip(`
       <div style="
         background: rgba(26, 26, 46, 0.95);
@@ -198,7 +203,9 @@ const BionicGeoJSONLayer = ({
       </div>
     `, {
       sticky: true,
-      className: 'bionic-forest-tooltip'
+      className: 'bionic-forest-tooltip',
+      direction: 'bottom',
+      offset: [0, 10]
     });
     
     // Événements de survol
