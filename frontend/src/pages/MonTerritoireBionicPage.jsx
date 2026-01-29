@@ -1453,6 +1453,7 @@ const MonTerritoireBionicPage = () => {
         selectedEspece={selectedEspece}
         onSelectEspece={setSelectedEspece}
       />
+      
       {/* Contenu des onglets */}
       <div className="h-[calc(100vh-180px)]">
         {/* Onglet Carte BIONIC */}
