@@ -3,7 +3,7 @@
 ## Project Overview
 **Application**: HUNTIQ / Chasse Bionic™  
 **Type**: Full-stack hunting platform with AI-powered analysis, marketplace, territory mapping, and e-commerce  
-**Last Updated**: January 28, 2026
+**Last Updated**: January 29, 2026
 
 ---
 
@@ -27,18 +27,21 @@
 │   ├── App.js                 # Main React app
 │   ├── pages/
 │   │   ├── AdminPage.jsx      # Admin panel (1000+ lines)
-│   │   ├── MonTerritoireBionicPage.jsx  # Territory BIONIC page (2500+ lines)
+│   │   ├── MonTerritoireBionicPage.jsx  # Territory BIONIC page (2700+ lines)
 │   │   ├── ShopPage.jsx       # E-commerce shop
 │   │   └── ...
-│   ├── styles/                # NEW: Styles cartographiques BIONIC
+│   ├── styles/                # Styles cartographiques BIONIC
 │   │   ├── BionicZoneStyles.js    # Système de styles multi-moteur
 │   │   ├── BionicStyleExporter.js # Export QGIS/ArcGIS/Mapbox
 │   │   └── bionic-zones.css       # CSS pour les zones
 │   ├── services/
-│   │   └── WaterExclusionService.js  # BIONIC water mask v5 - RELOCATION
-│   └── components/
-│       ├── CloudBackupManager.jsx  # Cloud backup UI
-│       ├── TerritoryMap.jsx        # Interactive Quebec map
+│   │   ├── WaterExclusionService.js  # BIONIC water mask v5
+│   │   └── BionicMapGenerator.js     # BIONIC Intelligence v3.3 ⭐ UPDATED
+│   └── components/territoire/
+│       ├── BionicMapOverlay.jsx      # NEW - Overlay visuel 10X distinctif
+│       ├── BionicForestZonesLayer.jsx # NEW - Zones peuplements colorés
+│       ├── BionicHotspotsLayer.jsx   # Hotspots et trajets d'approche
+│       ├── BionicGeneratorPanel.jsx  # Panneau générateur IA
 │       └── ...
 └── memory/PRD.md
 ```
