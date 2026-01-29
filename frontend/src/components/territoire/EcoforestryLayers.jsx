@@ -903,13 +903,95 @@ export const EcoforestryLayerControl = ({
                 >
                   <div className="flex items-center gap-2">
                     <span>{baseMap.icon}</span>
-                    <span className="text-sm text-white">{baseMap.name}</span>
+                    <div>
+                      <span className="text-sm text-white">{baseMap.name}</span>
+                      {baseMap.description && (
+                        <p className="text-[9px] text-gray-500">{baseMap.description}</p>
+                      )}
+                    </div>
                   </div>
                   {activeLayers.baseMap === baseMap.id && (
                     <Badge className="bg-[#f5a623] text-black text-[9px]">Actif</Badge>
                   )}
                 </div>
               ))}
+              
+              {/* Sous-couches BIONIC si carte BIONIC sélectionnée */}
+              {activeLayers.baseMap === 'bionic' && (
+                <div className="mt-4 border-t border-gray-700 pt-3">
+                  <div className="text-[10px] text-[#f5a623] uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span>🎯</span> Couches BIONIC™
+                  </div>
+                  <div className="bg-gray-800/50 rounded-lg p-2 mb-2">
+                    <p className="text-[9px] text-gray-400">
+                      Architecture multi-couches optimisée pour l&apos;analyse faunique
+                    </p>
+                  </div>
+                  
+                  {/* Couche Géologie */}
+                  <div className="flex items-center justify-between p-2 rounded hover:bg-gray-800/30">
+                    <div className="flex items-center gap-2">
+                      <span>🪨</span>
+                      <div>
+                        <span className="text-xs text-white">Géologie</span>
+                        <p className="text-[8px] text-gray-500">RNCan + USGS • Vector tiles</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-gray-600/30 text-gray-400 text-[8px]">35%</Badge>
+                  </div>
+                  
+                  {/* Couche Hydrologie */}
+                  <div className="flex items-center justify-between p-2 rounded bg-blue-900/20 border border-blue-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>💧</span>
+                      <div>
+                        <span className="text-xs text-white">Hydrologie</span>
+                        <p className="text-[8px] text-blue-400">RNCan Drainage + ZECs • Vector</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-600/30 text-blue-400 text-[8px]">70%</Badge>
+                  </div>
+                  
+                  {/* Couche Écoforestier */}
+                  <div className="flex items-center justify-between p-2 rounded bg-green-900/20 border border-green-700/30">
+                    <div className="flex items-center gap-2">
+                      <span>🌲</span>
+                      <div>
+                        <span className="text-xs text-white">Écoforestier</span>
+                        <p className="text-[8px] text-green-400">MFFP Québec • Raster tiles</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-600/30 text-green-400 text-[8px]">60%</Badge>
+                  </div>
+                  
+                  {/* Couche Score Faunique */}
+                  <div className="flex items-center justify-between p-2 rounded bg-[#f5a623]/20 border border-[#f5a623]/40">
+                    <div className="flex items-center gap-2">
+                      <span>🎯</span>
+                      <div>
+                        <span className="text-xs text-white">Score Faunique</span>
+                        <p className="text-[8px] text-[#f5a623]">BIONIC™ Engine • GeoJSON</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-[#f5a623]/30 text-[#f5a623] text-[8px]">80%</Badge>
+                  </div>
+                  
+                  {/* Info architecture */}
+                  <div className="mt-3 p-2 bg-gray-900/50 rounded border border-gray-700/50">
+                    <div className="text-[9px] text-gray-400 space-y-1">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#f5a623]">▸</span> Base: Mapbox Terrain + Hydro
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#f5a623]">▸</span> Format: Vector tiles (.pbf)
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#f5a623]">▸</span> Scoring: Heatmap + Icons
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
