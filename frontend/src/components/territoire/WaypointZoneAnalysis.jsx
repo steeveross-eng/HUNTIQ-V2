@@ -15,10 +15,11 @@ import { Circle, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Target, MapPin, Maximize2, Crosshair, Flame,
-  ChevronDown, ChevronUp, AlertCircle
+  ChevronDown, ChevronUp, AlertCircle, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { 
   Select,
   SelectContent,
