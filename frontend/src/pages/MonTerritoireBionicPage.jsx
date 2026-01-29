@@ -62,6 +62,7 @@ import BionicHotspotsLayer from '@/components/territoire/BionicHotspotsLayer';
 import BionicMapOverlay from '@/components/territoire/BionicMapOverlay';
 import BionicForestZonesLayer from '@/components/territoire/BionicForestZonesLayer';
 import WildlifeBehaviorLayer from '@/components/territoire/WildlifeBehaviorLayer';
+import TopographicOverlay, { TopographicControlPanel } from '@/components/territoire/TopographicOverlay';
 
 // Module Architecture - BIONIC Territory
 import { 
