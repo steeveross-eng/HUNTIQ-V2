@@ -707,14 +707,17 @@ Fonctionnalités implémentées:
 - [x] **WMS Proxy Backend** - Contournement CORS/IP pour données Québec ✅
 - [x] **Composants modulaires créés** - TerritoryHeader, LayersPanelContent ✅
 - [x] **Panneau Couches Données Québec** - UI complète avec toggles et sliders ✅
+- [x] **Intégration TerritoryHeader** - Header modulaire intégré (Phase 52q) ✅
 
 ### P1 - High Priority (EN COURS)
-- [~] **Refactoring de MonTerritoireBionicPage.jsx** (~2985 lignes) - EN COURS
-  - ✅ TerritoryHeader.jsx créé
+- [~] **Refactoring de MonTerritoireBionicPage.jsx** (2869 lignes restantes) - EN COURS
+  - ✅ TerritoryHeader.jsx créé et intégré
   - ✅ LayersPanelContent.jsx créé
   - ✅ QuebecLayersPanel.jsx créé et intégré
-  - [ ] Remplacer le header inline par TerritoryHeader
+  - ✅ Remplacer le header inline par TerritoryHeader ✅ (fait dans Phase 52q)
   - [ ] Migrer les useState vers BionicTerritoryContext
+  - [ ] Intégrer LayersPanelContent dans le sidebar
+  - [ ] Réduire sous 2000 lignes (cible: 1500)
 - [x] **Couches Québec activables via UI** ✅
   - ✅ Carte Écoforestière (peuplements)
   - ✅ LiDAR Dendrométrique (hauteur arbres)  
@@ -739,21 +742,22 @@ Fonctionnalités implémentées:
 
 ## Next Tasks List
 
-1. **Compléter le refactoring** (Session suivante)
-   - Intégrer TerritoryHeader dans MonTerritoireBionicPage
+1. **Poursuivre le refactoring** (Prochaine session)
    - Intégrer LayersPanelContent dans le panneau latéral
-   - Réduire la taille de MonTerritoireBionicPage sous 1500 lignes
+   - Migrer les 50+ useState vers BionicTerritoryContext
+   - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes
 
-2. **Activer les données Québec** 
-   - Ajouter UI pour toggle les couches WMS Québec
-   - Tester avec les 3 couches (peuplements, LiDAR, TWI)
+2. **Implémenter l'analyse par Waypoint** (P0)
+   - Compléter WaypointZoneAnalysis.jsx
+   - UI pour sélection waypoint et rayon (2, 4, 10 km²)
+   - Générer un seul "hotspot" dans la zone
 
-3. **Configuration Backup Cloud** (User action required)
+3. **Configuration Backup Cloud** (Action utilisateur requise)
    - Créer compte MongoDB Atlas
    - Créer bucket Google Cloud Storage
    - Entrer credentials dans Admin > BACKUP
 
-2. **Activer Auto Backup**
+4. **Activer Auto Backup**
    - Aller dans Admin > BACKUP > Auto Backup
    - Activer le switch
    - Vérifier les mises à jour automatiques
