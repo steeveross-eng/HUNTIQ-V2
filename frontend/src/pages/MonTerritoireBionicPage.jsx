@@ -1918,6 +1918,7 @@ const MonTerritoireBionicPage = () => {
                       compact={true}
                       onResultsGenerated={(results) => {
                         console.log('[BIONIC Generator] Résultats générés:', results);
+                        setCarteBionic(results);
                       }}
                     />
                   </div>
