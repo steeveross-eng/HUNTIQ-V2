@@ -817,6 +817,16 @@ const MonTerritoireBionicPage = () => {
     });
   }, []);
   
+  // ============================================
+  // OVERLAY TOPOGRAPHIQUE
+  // ============================================
+  const [topoEnabled, setTopoEnabled] = useState(false);
+  const [topoHillshade, setTopoHillshade] = useState(true);
+  const [topoHillshadeOpacity, setTopoHillshadeOpacity] = useState(40);
+  const [topoContours, setTopoContours] = useState(true);
+  const [topoContourStyle, setTopoContourStyle] = useState('highContrast');
+  const [topoCollapsed, setTopoCollapsed] = useState(false);
+  
   // Hooks BIONIC
   const { 
     layersVisible, 
