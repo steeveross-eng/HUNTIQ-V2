@@ -30,83 +30,122 @@ const injectBehaviorStyles = () => {
   style.textContent = `
     /* ═══════════════════════════════════════════════════════════
        ANIMATIONS BIONIC - ZONES COMPORTEMENTALES
+       VERSION PUISSANTE - EFFETS GLOW MAXIMAUX
     ═══════════════════════════════════════════════════════════ */
     
-    /* Pulsation pour les hotspots */
+    /* Pulsation INTENSE pour les hotspots */
     @keyframes bionic-hotspot-pulse {
       0%, 100% { 
-        filter: drop-shadow(0 0 8px #ff0066) brightness(1);
+        filter: drop-shadow(0 0 15px #ff0055) drop-shadow(0 0 30px #ff0055) brightness(1.1);
         transform: scale(1);
       }
       50% { 
-        filter: drop-shadow(0 0 20px #ff3385) brightness(1.2);
-        transform: scale(1.02);
+        filter: drop-shadow(0 0 25px #ff4488) drop-shadow(0 0 50px #ff0055) brightness(1.4);
+        transform: scale(1.03);
       }
     }
     
     /* Glow animé pour les corridors */
     @keyframes bionic-corridor-flow {
-      0% { stroke-dashoffset: 0; }
-      100% { stroke-dashoffset: 30; }
+      0% { stroke-dashoffset: 0; filter: drop-shadow(0 0 8px #ff5500); }
+      50% { filter: drop-shadow(0 0 15px #ff7733); }
+      100% { stroke-dashoffset: 30; filter: drop-shadow(0 0 8px #ff5500); }
+    }
+    
+    /* Respiration pour cache/abri */
+    @keyframes bionic-shelter-glow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 10px #00ff44) brightness(1); 
+      }
+      50% { 
+        filter: drop-shadow(0 0 20px #44ff77) brightness(1.2); 
+      }
     }
     
     /* Scintillement pour alimentation */
     @keyframes bionic-feeding-shimmer {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 0.85; }
+      0%, 100% { 
+        opacity: 0.7; 
+        filter: drop-shadow(0 0 8px #ffcc00);
+      }
+      50% { 
+        opacity: 0.95; 
+        filter: drop-shadow(0 0 18px #ffdd44);
+      }
     }
     
-    /* Respiration pour zones de repos */
+    /* Respiration lente pour zones de repos */
     @keyframes bionic-bedding-breathe {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.15); }
+      0%, 100% { 
+        filter: drop-shadow(0 0 8px #aa44ff) brightness(1); 
+      }
+      50% { 
+        filter: drop-shadow(0 0 16px #cc77ff) brightness(1.15); 
+      }
     }
     
     /* Ondulation pour points d'eau */
     @keyframes bionic-water-ripple {
-      0% { stroke-width: 1px; }
-      50% { stroke-width: 3px; }
-      100% { stroke-width: 1px; }
+      0% { 
+        stroke-width: 2px; 
+        filter: drop-shadow(0 0 8px #00ccff);
+      }
+      50% { 
+        stroke-width: 4px; 
+        filter: drop-shadow(0 0 20px #44ddff);
+      }
+      100% { 
+        stroke-width: 2px; 
+        filter: drop-shadow(0 0 8px #00ccff);
+      }
     }
     
     /* ═══════════════════════════════════════════════════════════
-       CLASSES DE ZONES
+       CLASSES DE ZONES - STYLES PUISSANTS
     ═══════════════════════════════════════════════════════════ */
     
     .bionic-hotspot-zone {
-      animation: bionic-hotspot-pulse 2s ease-in-out infinite;
-      filter: drop-shadow(0 0 12px #ff0066);
+      animation: bionic-hotspot-pulse 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px #ff0055);
+      stroke-width: 4px !important;
     }
     
     .bionic-corridor-zone {
-      stroke-dasharray: 10 5;
+      stroke-dasharray: 15 8;
       animation: bionic-corridor-flow 2s linear infinite;
-      filter: drop-shadow(0 0 6px #ff6b35);
+      filter: drop-shadow(0 0 12px #ff5500);
+      stroke-width: 3px !important;
     }
     
     .bionic-shelter-zone {
-      filter: drop-shadow(0 0 8px #00ff88);
+      animation: bionic-shelter-glow 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px #00ff44);
+      stroke-width: 2px !important;
     }
     
     .bionic-feeding-zone {
-      animation: bionic-feeding-shimmer 3s ease-in-out infinite;
-      filter: drop-shadow(0 0 6px #ffd93d);
+      animation: bionic-feeding-shimmer 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px #ffcc00);
+      stroke-width: 2px !important;
     }
     
     .bionic-bedding-zone {
       animation: bionic-bedding-breathe 4s ease-in-out infinite;
-      filter: drop-shadow(0 0 6px #c084fc);
+      filter: drop-shadow(0 0 12px #aa44ff);
+      stroke-width: 2px !important;
     }
     
     .bionic-water-zone {
-      animation: bionic-water-ripple 3s ease-in-out infinite;
-      filter: drop-shadow(0 0 8px #00d4ff);
+      animation: bionic-water-ripple 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px #00ccff);
+      stroke-width: 3px !important;
     }
     
-    /* Hover effects */
+    /* Hover effects PUISSANTS */
     .bionic-behavior-zone:hover {
-      filter: brightness(1.3) !important;
+      filter: brightness(1.5) saturate(1.3) !important;
       cursor: pointer;
+      stroke-width: 5px !important;
     }
     
     /* Légende comportementale */
@@ -115,13 +154,13 @@ const injectBehaviorStyles = () => {
       bottom: 20px;
       left: 20px;
       z-index: 1000;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(12px);
       border: 2px solid #f5a623;
       border-radius: 12px;
       padding: 12px;
       max-width: 280px;
-      box-shadow: 0 4px 20px rgba(245, 166, 35, 0.3);
+      box-shadow: 0 4px 30px rgba(245, 166, 35, 0.4), 0 0 60px rgba(245, 166, 35, 0.2);
     }
     
     .bionic-behavior-legend-item {
@@ -136,20 +175,22 @@ const injectBehaviorStyles = () => {
     }
     
     .bionic-behavior-legend-item:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
       transform: translateX(4px);
+      box-shadow: 0 0 10px rgba(245, 166, 35, 0.3);
     }
     
     .bionic-behavior-legend-dot {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       flex-shrink: 0;
-      box-shadow: 0 0 8px currentColor;
+      box-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
+      border: 2px solid rgba(255,255,255,0.3);
     }
     
     .bionic-behavior-legend-icon {
-      font-size: 16px;
+      font-size: 18px;
       flex-shrink: 0;
     }
     
@@ -160,9 +201,20 @@ const injectBehaviorStyles = () => {
     }
     
     .bionic-behavior-legend-score {
-      font-size: 10px;
+      font-size: 11px;
       color: #f5a623;
       font-weight: bold;
+      text-shadow: 0 0 8px #f5a623;
+    }
+    
+    /* Tooltip amélioré */
+    .bionic-behavior-tooltip {
+      background: rgba(0,0,0,0.9) !important;
+      border: 1px solid #f5a623 !important;
+      color: white !important;
+      font-size: 12px !important;
+      font-weight: bold !important;
+      box-shadow: 0 0 15px rgba(245, 166, 35, 0.5) !important;
     }
   `;
   document.head.appendChild(style);
