@@ -657,7 +657,7 @@ const MonTerritoireBionicPage = () => {
   const [zoneDisplayMode, setZoneDisplayMode] = useState('micro'); // 'micro' ou 'classic'
   const [showConcentricCircles, setShowConcentricCircles] = useState(true);
   const [showCorridors, setShowCorridors] = useState(true);
-  const [minPercentageFilter, setMinPercentageFilter] = useState(50);
+  const [minPercentageFilter, setMinPercentageFilter] = useState(80); // Fixé à 80-100% uniquement
   
   // ============================================
   // FOND DE CARTE ACTIF (BIONIC / Satellite / Terrain)
