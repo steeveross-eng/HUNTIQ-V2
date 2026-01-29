@@ -4553,6 +4553,17 @@ try:
 except ImportError as e:
     print(f"Hunting Groups API not available: {e}")
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# MICROSERVICE MODULE: BIONIC Territory Service v1.0
+# Architecture: Micro-Frontend + Microservice Ready
+# ═══════════════════════════════════════════════════════════════════════════════
+try:
+    from services.bionic_territory import territory_router as bionic_territory_service
+    app.include_router(bionic_territory_service, prefix="/api")
+    print("✅ BIONIC Territory Service v1.0 loaded (Microservice-Ready)")
+except ImportError as e:
+    print(f"⚠️ BIONIC Territory Service not available: {e}")
+
 # Include Live Tracking API
 try:
     from live_tracking import router as tracking_router
