@@ -941,8 +941,9 @@ export const generateMicroZones = (centerLat, centerLng, zoom, layersVisible, ex
  * @param {Object} bounds - Limites de la carte { north, south, east, west }
  * @param {number} zoom - Niveau de zoom actuel
  * @param {Object} layersVisible - Couches actives
+ * @param {string} espece - Espèce cible pour les pondérations (ORIGNAL, CHEVREUIL, OURS_NOIR, DINDON)
  */
-export const generateMicroZonesForBounds = (bounds, zoom, layersVisible) => {
+export const generateMicroZonesForBounds = (bounds, zoom, layersVisible, espece = 'ORIGNAL') => {
   const microZones = [];
   const corridors = [];
   const bufferZones = [];
@@ -989,6 +990,9 @@ export const generateMicroZonesForBounds = (bounds, zoom, layersVisible) => {
   // Générer les zones pour chaque module visible sur TOUTE la carte
   Object.entries(layersVisible).forEach(([moduleId, isVisible]) => {
     if (!isVisible || !BIONIC_MODULES[moduleId]) return;
+    
+    // Obtenir le poids du module pour l'espèce sélectionnée
+    const moduleWeight = getModuleWeight(moduleId, espece);
     
     for (let row = 0; row < effectiveRows; row++) {
       for (let col = 0; col < effectiveCols; col++) {
