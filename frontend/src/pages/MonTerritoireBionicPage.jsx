@@ -782,6 +782,29 @@ const MonTerritoireBionicPage = () => {
     }));
   }, []);
   
+  // ============================================
+  // ZONES COMPORTEMENTALES DU GIBIER
+  // ============================================
+  const [showBehaviorZones, setShowBehaviorZones] = useState(true);
+  const [activeBehaviors, setActiveBehaviors] = useState(null); // null = tous actifs
+  
+  const toggleBehaviorFilter = useCallback((behaviorId) => {
+    setActiveBehaviors(prev => {
+      if (prev === null) {
+        // Premier clic: activer seulement ce comportement
+        return [behaviorId];
+      }
+      if (prev.includes(behaviorId)) {
+        // Désactiver ce comportement
+        const newBehaviors = prev.filter(b => b !== behaviorId);
+        return newBehaviors.length === 0 ? null : newBehaviors;
+      } else {
+        // Activer ce comportement
+        return [...prev, behaviorId];
+      }
+    });
+  }, []);
+  
   // Import du service d'exclusion permanent
   const filterWaterZonesRef = useRef(null);
   
