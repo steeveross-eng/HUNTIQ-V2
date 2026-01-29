@@ -340,33 +340,34 @@ export const generateOrganicForestZones = (center, radius = 0.03, options = {}) 
       behaviorClusters[dominantBehavior].push(secondaryPolygon);
     }
     
-    // Hotspot si cluster important
-    if (Math.random() > 0.7) {
+    // Hotspot - zone PLUS GRANDE au centre du cluster (probabilité réduite)
+    if (Math.random() > 0.8) {  // Seulement 20% des clusters ont un hotspot
       const hotspotPolygon = generateOrganicPolygon(
         clusterCenter, 
-        radius * 0.08, 
+        radius * 0.12,  // Plus grand (était 0.08)
         seed + cluster + 200
       );
       hotspotPolygon.properties = {
         behaviorId: 'hotspot',
         clusterId: cluster,
-        behaviorScore: 88 + Math.floor(Math.random() * 12),
-        merged: false,
+        behaviorScore: 90 + Math.floor(Math.random() * 10),  // Score plus élevé
+        merged: true,
         mergedCount: 1
       };
       behaviorClusters.hotspot.push(hotspotPolygon);
     }
   }
   
-  // Fusionner les zones adjacentes du même comportement
+  // Fusionner AGRESSIVEMENT toutes les zones adjacentes du même comportement
   Object.entries(behaviorClusters).forEach(([behaviorId, polygons]) => {
     if (polygons.length === 0) return;
     
-    if (polygons.length >= 2) {
-      // Grouper par proximité et fusionner agressivement
-      const groups = groupByProximity(polygons, MERGE_CONFIG.adjacencyThreshold);
-      
-      groups.forEach(group => {
+    // Toujours tenter de fusionner, même avec 1 seul polygone (pour simplifier)
+    const groups = groupByProximity(polygons, MERGE_CONFIG.adjacencyThreshold);
+    
+    groups.forEach(group => {
+      if (group.length >= 2) {
+        // Fusionner le groupe
         const merged = mergePolygonGroup(group, MERGE_CONFIG.bufferDistance);
         if (merged) {
           merged.properties = {
