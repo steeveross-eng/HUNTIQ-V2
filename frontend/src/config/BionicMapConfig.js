@@ -404,4 +404,226 @@ export const getSpeciesScoringProfile = (speciesId) => {
          BIONIC_LAYER_WILDLIFE_SCORE.species_profiles.ORIGNAL;
 };
 
+// ═══════════════════════════════════════════════════════════════
+// INTÉGRATION BIONIC_VECTOR_TILES_CANADA
+// Pipeline de tuiles vectorielles pour le Canada
+// ═══════════════════════════════════════════════════════════════
+
+import BIONIC_VECTOR_TILES_CANADA, {
+  getZoomConfig,
+  getVisibleLayersForZoom,
+  getSimplificationParams,
+  getTileUrl,
+  isLayerVisibleAtZoom,
+  getLayerStyle,
+  isWithinCanadaCoverage,
+  estimateProcessingStats,
+  ZOOM_LEVELS_CONFIG,
+  OUTPUT_CONFIG
+} from '../services/BionicVectorTilesCanada';
+
+/**
+ * Configuration des tuiles vectorielles Canada pour la carte BIONIC™
+ */
+export const BIONIC_CANADA_TILES_CONFIG = {
+  // Référence au pipeline complet
+  pipeline: BIONIC_VECTOR_TILES_CANADA,
+  
+  // URL de base pour les tuiles vectorielles
+  tileUrl: OUTPUT_CONFIG.cdn_distribution.base_url,
+  fallbackUrl: OUTPUT_CONFIG.cdn_distribution.fallback_url,
+  
+  // Format des tuiles
+  format: OUTPUT_CONFIG.format,
+  tileSize: OUTPUT_CONFIG.tile_size,
+  
+  // Configuration de zoom
+  zoomLevels: ZOOM_LEVELS_CONFIG,
+  minZoom: 0,
+  maxZoom: 18,
+  
+  // Couverture géographique
+  coverage: BIONIC_VECTOR_TILES_CANADA.coverage,
+  
+  // Couches de données disponibles
+  dataLayers: Object.keys(BIONIC_VECTOR_TILES_CANADA.data_layers),
+  
+  // Méthodes utilitaires exposées
+  utils: {
+    getZoomConfig,
+    getVisibleLayersForZoom,
+    getSimplificationParams,
+    getTileUrl,
+    isLayerVisibleAtZoom,
+    getLayerStyle,
+    isWithinCanadaCoverage,
+    estimateProcessingStats
+  }
+};
+
+/**
+ * Source de tuiles vectorielles pour Leaflet/Mapbox GL
+ * Configuration prête à l'emploi pour l'intégration carte
+ */
+export const BIONIC_VECTOR_TILE_SOURCE = {
+  type: 'vector',
+  tiles: [OUTPUT_CONFIG.cdn_distribution.base_url],
+  minzoom: 0,
+  maxzoom: 18,
+  bounds: BIONIC_VECTOR_TILES_CANADA.coverage.bounds,
+  attribution: '&copy; BIONIC™ | RNCan | StatCan | OSM'
+};
+
+/**
+ * Styles de rendu pour les couches vectorielles
+ * Compatible avec Mapbox GL Style Specification
+ */
+export const BIONIC_VECTOR_LAYER_STYLES = {
+  // Style pour les routes
+  roads: {
+    'road-autoroute': {
+      type: 'line',
+      source: 'bionic-canada',
+      'source-layer': 'roads',
+      filter: ['==', 'class', 1],
+      paint: {
+        'line-color': '#E74C3C',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 4, 1, 14, 4]
+      }
+    },
+    'road-nationale': {
+      type: 'line',
+      source: 'bionic-canada',
+      'source-layer': 'roads',
+      filter: ['==', 'class', 2],
+      paint: {
+        'line-color': '#E67E22',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 14, 3]
+      }
+    }
+  },
+  
+  // Style pour l'hydrologie
+  hydrology: {
+    'water-rivers': {
+      type: 'line',
+      source: 'bionic-canada',
+      'source-layer': 'hydrology',
+      filter: ['==', 'type', 'river'],
+      paint: {
+        'line-color': '#1E90FF',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 14, 3]
+      }
+    },
+    'water-lakes': {
+      type: 'fill',
+      source: 'bionic-canada',
+      'source-layer': 'hydrology',
+      filter: ['==', 'type', 'lake'],
+      paint: {
+        'fill-color': 'rgba(30, 144, 255, 0.5)',
+        'fill-outline-color': '#0066CC'
+      }
+    }
+  },
+  
+  // Style pour les zones administratives
+  administrative: {
+    'admin-provinces': {
+      type: 'line',
+      source: 'bionic-canada',
+      'source-layer': 'administrative',
+      filter: ['==', 'type', 'province'],
+      paint: {
+        'line-color': '#333333',
+        'line-width': 2
+      }
+    },
+    'admin-zecs': {
+      type: 'fill',
+      source: 'bionic-canada',
+      'source-layer': 'administrative',
+      filter: ['==', 'type', 'zec'],
+      paint: {
+        'fill-color': 'rgba(255, 102, 0, 0.1)',
+        'fill-outline-color': '#FF6600'
+      }
+    }
+  },
+  
+  // Style pour le score faunique BIONIC™
+  wildlife: {
+    'bionic-heatmap': {
+      type: 'heatmap',
+      source: 'bionic-canada',
+      'source-layer': 'wildlife_score',
+      paint: {
+        'heatmap-weight': ['get', 'score'],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 14, 3],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 14, 25],
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(0, 0, 255, 0)',
+          0.2, 'rgba(0, 255, 255, 0.5)',
+          0.4, 'rgba(0, 255, 0, 0.6)',
+          0.6, 'rgba(255, 255, 0, 0.7)',
+          0.8, 'rgba(255, 165, 0, 0.8)',
+          1, 'rgba(255, 0, 0, 0.9)'
+        ]
+      }
+    }
+  }
+};
+
+/**
+ * Génère un style complet pour MapboxGL basé sur le pipeline BIONIC
+ * @param {Object} options - Options de style
+ * @returns {Object} Style MapboxGL complet
+ */
+export const generateBionicMapStyle = (options = {}) => {
+  const {
+    showRoads = true,
+    showHydrology = true,
+    showAdministrative = true,
+    showWildlife = true,
+    baseStyle = 'outdoors-v12'
+  } = options;
+  
+  const layers = [];
+  
+  if (showRoads) {
+    layers.push(...Object.values(BIONIC_VECTOR_LAYER_STYLES.roads));
+  }
+  if (showHydrology) {
+    layers.push(...Object.values(BIONIC_VECTOR_LAYER_STYLES.hydrology));
+  }
+  if (showAdministrative) {
+    layers.push(...Object.values(BIONIC_VECTOR_LAYER_STYLES.administrative));
+  }
+  if (showWildlife) {
+    layers.push(...Object.values(BIONIC_VECTOR_LAYER_STYLES.wildlife));
+  }
+  
+  return {
+    version: 8,
+    name: 'BIONIC Canada Vector Tiles',
+    sources: {
+      'bionic-canada': BIONIC_VECTOR_TILE_SOURCE
+    },
+    layers
+  };
+};
+
+// Re-export des utilitaires du pipeline
+export {
+  getZoomConfig,
+  getVisibleLayersForZoom,
+  getSimplificationParams,
+  getTileUrl,
+  isLayerVisibleAtZoom,
+  isWithinCanadaCoverage,
+  estimateProcessingStats,
+  BIONIC_VECTOR_TILES_CANADA
+};
+
 export default BIONIC_MAP_CONFIG;
