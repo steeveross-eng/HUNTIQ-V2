@@ -235,11 +235,13 @@ export const mergeZonesByBehavior = (geojsonData) => {
 /**
  * Génère des données forestières avec zones organiques fusionnées
  * au lieu de cercles individuels
+ * 
+ * VERSION 2.0 - Zones LARGES et ORGANIQUES
  */
 export const generateOrganicForestZones = (center, radius = 0.03, options = {}) => {
   const {
     targetSpecies = 'ORIGNAL',
-    gridDensity = 8,  // Réduit pour moins de zones
+    gridDensity = 5,  // Réduit pour moins de zones
     seed = Date.now()
   } = options;
   
@@ -253,71 +255,109 @@ export const generateOrganicForestZones = (center, radius = 0.03, options = {}) 
     hotspot: []
   };
   
-  // Générer des clusters de comportement basés sur des patterns naturels
-  const numClusters = 3 + Math.floor(Math.random() * 4); // 3-6 clusters
+  // Générer des clusters de comportement plus grands et moins nombreux
+  const numClusters = 4 + Math.floor(Math.random() * 3); // 4-6 clusters
   
   for (let cluster = 0; cluster < numClusters; cluster++) {
-    // Position aléatoire du centre du cluster
-    const clusterAngle = (cluster / numClusters) * Math.PI * 2 + Math.random() * 0.5;
-    const clusterDist = radius * (0.3 + Math.random() * 0.5);
+    // Position aléatoire du centre du cluster - plus espacés
+    const clusterAngle = (cluster / numClusters) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+    const clusterDist = radius * (0.4 + Math.random() * 0.4);
     const clusterCenter = [
       center[0] + Math.cos(clusterAngle) * clusterDist,
       center[1] + Math.sin(clusterAngle) * clusterDist
     ];
     
     // Déterminer le comportement dominant pour ce cluster
-    const behaviors = ['shelter', 'feeding', 'bedding', 'corridor', 'water'];
-    const dominantBehavior = behaviors[Math.floor(Math.random() * behaviors.length)];
+    // Distribution plus réaliste
+    const behaviorWeights = {
+      shelter: 0.35,
+      feeding: 0.25,
+      bedding: 0.15,
+      corridor: 0.15,
+      water: 0.10
+    };
     
-    // Générer 2-5 zones organiques dans ce cluster
-    const numZonesInCluster = 2 + Math.floor(Math.random() * 4);
-    
-    for (let z = 0; z < numZonesInCluster; z++) {
-      const zoneAngle = Math.random() * Math.PI * 2;
-      const zoneDist = radius * 0.1 * (1 + Math.random());
-      const zoneCenter = [
-        clusterCenter[0] + Math.cos(zoneAngle) * zoneDist,
-        clusterCenter[1] + Math.sin(zoneAngle) * zoneDist
-      ];
-      
-      // Taille variable de la zone
-      const zoneRadius = radius * (0.08 + Math.random() * 0.12);
-      
-      const polygon = generateOrganicPolygon(zoneCenter, zoneRadius, seed + cluster + z);
-      polygon.properties = {
-        behaviorId: dominantBehavior,
-        clusterId: cluster,
-        behaviorScore: 60 + Math.floor(Math.random() * 35)
-      };
-      
-      behaviorClusters[dominantBehavior].push(polygon);
+    const rand = Math.random();
+    let cumulative = 0;
+    let dominantBehavior = 'shelter';
+    for (const [behavior, weight] of Object.entries(behaviorWeights)) {
+      cumulative += weight;
+      if (rand < cumulative) {
+        dominantBehavior = behavior;
+        break;
+      }
     }
     
-    // Probabilité de hotspot si 3+ comportements dans le cluster
-    if (numZonesInCluster >= 3 && Math.random() > 0.6) {
-      const hotspotPolygon = generateOrganicPolygon(clusterCenter, radius * 0.06, seed + cluster);
+    // Générer UNE SEULE grande zone organique par cluster
+    // au lieu de plusieurs petites
+    const zoneRadius = radius * (0.15 + Math.random() * 0.15); // Plus grandes zones
+    
+    const polygon = generateOrganicPolygon(clusterCenter, zoneRadius, seed + cluster);
+    polygon.properties = {
+      behaviorId: dominantBehavior,
+      clusterId: cluster,
+      behaviorScore: 65 + Math.floor(Math.random() * 30),
+      merged: true,
+      mergedCount: 1
+    };
+    
+    behaviorClusters[dominantBehavior].push(polygon);
+    
+    // Ajouter des zones secondaires adjacentes pour créer des formes complexes
+    if (Math.random() > 0.4) {
+      const secondaryAngle = Math.random() * Math.PI * 2;
+      const secondaryDist = zoneRadius * 0.6;
+      const secondaryCenter = [
+        clusterCenter[0] + Math.cos(secondaryAngle) * secondaryDist,
+        clusterCenter[1] + Math.sin(secondaryAngle) * secondaryDist
+      ];
+      
+      const secondaryPolygon = generateOrganicPolygon(
+        secondaryCenter, 
+        zoneRadius * 0.7, 
+        seed + cluster + 100
+      );
+      secondaryPolygon.properties = {
+        behaviorId: dominantBehavior,
+        clusterId: cluster,
+        behaviorScore: polygon.properties.behaviorScore - 5,
+        merged: true,
+        mergedCount: 1
+      };
+      behaviorClusters[dominantBehavior].push(secondaryPolygon);
+    }
+    
+    // Hotspot si cluster important
+    if (Math.random() > 0.7) {
+      const hotspotPolygon = generateOrganicPolygon(
+        clusterCenter, 
+        radius * 0.08, 
+        seed + cluster + 200
+      );
       hotspotPolygon.properties = {
         behaviorId: 'hotspot',
         clusterId: cluster,
-        behaviorScore: 85 + Math.floor(Math.random() * 15)
+        behaviorScore: 88 + Math.floor(Math.random() * 12),
+        merged: false,
+        mergedCount: 1
       };
       behaviorClusters.hotspot.push(hotspotPolygon);
     }
   }
   
-  // Fusionner les clusters par comportement
+  // Fusionner les zones adjacentes du même comportement
   Object.entries(behaviorClusters).forEach(([behaviorId, polygons]) => {
     if (polygons.length === 0) return;
     
-    // Grouper par proximité et fusionner
-    const groups = groupByProximity(polygons, MERGE_CONFIG.adjacencyThreshold);
-    
-    groups.forEach(group => {
-      if (group.length >= 2) {
-        const merged = mergePolygonGroup(group);
+    if (polygons.length >= 2) {
+      // Grouper par proximité et fusionner agressivement
+      const groups = groupByProximity(polygons, MERGE_CONFIG.adjacencyThreshold);
+      
+      groups.forEach(group => {
+        const merged = mergePolygonGroup(group, MERGE_CONFIG.bufferDistance);
         if (merged) {
           merged.properties = {
-            ...group[0].properties,
+            behaviorId,
             merged: true,
             mergedCount: group.length,
             behaviorScore: Math.round(
@@ -325,11 +365,15 @@ export const generateOrganicForestZones = (center, radius = 0.03, options = {}) 
             )
           };
           features.push(merged);
+        } else {
+          // Fallback: ajouter individuellement
+          features.push(...group);
         }
-      } else {
-        features.push(...group);
-      }
-    });
+      });
+    } else {
+      // Une seule zone, ajouter directement
+      features.push(...polygons);
+    }
   });
   
   return {
