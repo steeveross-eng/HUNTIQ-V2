@@ -284,7 +284,7 @@ const BionicForestZonesLayer = ({
   showPerturbations = false,
   showDensite = false,
   showHydrographie = true,
-  showCanadaForest = false,
+  showCanadaForest = true,  // Activé par défaut comme fallback
   opacity = 0.75,
   showLegend = true,
   onLayerLoad,
@@ -292,18 +292,29 @@ const BionicForestZonesLayer = ({
 }) => {
   const map = useMap();
   const [layersStatus, setLayersStatus] = useState({});
-  const [wmsAvailable, setWmsAvailable] = useState(true);
+  const [wmsAvailable, setWmsAvailable] = useState(null); // null = en vérification
+  const [useCanadaFallback, setUseCanadaFallback] = useState(false);
   
   // Vérifier la disponibilité des services WMS
   useEffect(() => {
     const checkWMSAvailability = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/wms-proxy/check?url=${encodeURIComponent(QUEBEC_WMS_CONFIG.carte_ecoforestiere.url)}`);
+        const response = await fetch(`${API_BASE}/api/wms-proxy/check?url=${encodeURIComponent(QUEBEC_WMS_CONFIG.carte_ecoforestiere.url)}`, {
+          timeout: 5000
+        });
         const data = await response.json();
-        setWmsAvailable(data.available !== false);
+        const available = data.available !== false;
+        setWmsAvailable(available);
+        
+        // Si WMS Québec non disponible, activer le fallback Canada
+        if (!available) {
+          console.log('[BIONIC WMS] WMS Québec non disponible, activation fallback Canada NFI');
+          setUseCanadaFallback(true);
+        }
       } catch (error) {
-        console.warn('[BIONIC WMS] Erreur vérification WMS:', error);
+        console.warn('[BIONIC WMS] Erreur vérification WMS, activation fallback:', error);
         setWmsAvailable(false);
+        setUseCanadaFallback(true);
       }
     };
     
