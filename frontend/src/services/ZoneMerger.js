@@ -38,18 +38,31 @@ const MERGE_CONFIG = {
 /**
  * Génère un polygone organique au lieu d'un cercle parfait
  * Simule une forme naturelle basée sur la topographie
+ * VERSION 2.0 - Formes ALLONGÉES suivant les corridors naturels
  */
 const generateOrganicPolygon = (center, baseRadius, seed = 0) => {
   const points = [];
-  const numPoints = 12 + Math.floor(Math.random() * 8); // 12-20 points
+  const numPoints = 16 + Math.floor(Math.random() * 12); // 16-28 points pour plus de détail
+  
+  // Facteur d'élongation - crée des formes plus allongées (corridors)
+  const elongation = 1.2 + Math.random() * 0.8; // 1.2 à 2.0
+  const elongationAngle = Math.random() * Math.PI; // Direction de l'élongation
   
   for (let i = 0; i < numPoints; i++) {
     const angle = (i / numPoints) * Math.PI * 2;
-    // Variation organique du rayon (±30%)
-    const variation = 0.7 + Math.random() * 0.6;
-    // Ajouter une ondulation basée sur l'angle
-    const waveVariation = Math.sin(angle * 3 + seed) * 0.15;
-    const radius = baseRadius * (variation + waveVariation);
+    
+    // Variation organique du rayon (±25%)
+    const variation = 0.75 + Math.random() * 0.5;
+    
+    // Ondulation naturelle basée sur l'angle
+    const waveVariation = Math.sin(angle * 2 + seed) * 0.12 + 
+                          Math.sin(angle * 5 + seed * 2) * 0.06;
+    
+    // Appliquer l'élongation dans une direction
+    const angleDiff = Math.abs(Math.cos(angle - elongationAngle));
+    const elongationFactor = 1 + (elongation - 1) * angleDiff;
+    
+    const radius = baseRadius * (variation + waveVariation) * elongationFactor;
     
     const x = center[0] + Math.cos(angle) * radius;
     const y = center[1] + Math.sin(angle) * radius;
