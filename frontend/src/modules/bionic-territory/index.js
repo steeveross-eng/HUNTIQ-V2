@@ -50,6 +50,12 @@ export {
   PIPELINE_LAYERS_CONFIG
 } from './components/sidebar/LayersPanelContent';
 
+export {
+  default as QuebecLayersPanel,
+  QUEBEC_LAYERS_CONFIG,
+  LayerControl
+} from './components/sidebar/QuebecLayersPanel';
+
 // Components - Controls
 export { 
   default as MapControlButtons,
