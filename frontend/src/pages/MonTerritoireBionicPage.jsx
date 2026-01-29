@@ -624,7 +624,6 @@ const MonTerritoireBionicPage = () => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [waypointToShare, setWaypointToShare] = useState(null);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
-  const [showNotificationsPanel, setShowNotificationsPanel] = useState(false);
   
   // Tableau de bord de groupe (tracking live + chat)
   const [showGroupDashboard, setShowGroupDashboard] = useState(false);
