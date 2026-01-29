@@ -646,6 +646,16 @@ const MonTerritoireBionicPage = () => {
   const [minPercentageFilter, setMinPercentageFilter] = useState(50);
   
   // ============================================
+  // FOND DE CARTE ACTIF (BIONIC / Satellite / Terrain)
+  // ============================================
+  const [activeBaseMap, setActiveBaseMap] = useState('bionic'); // 'bionic', 'satellite', 'terrain'
+  
+  const handleBaseMapChange = useCallback((mapId) => {
+    setActiveBaseMap(mapId);
+    console.log('[BIONIC] Fond de carte changé:', mapId);
+  }, []);
+  
+  // ============================================
   // CARTE ÉCOFORESTIÈRE - État des couches
   // ============================================
   const [showEcoforestryPanel, setShowEcoforestryPanel] = useState(false);
