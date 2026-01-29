@@ -1,101 +1,87 @@
 <analysis>**original_problem_statement:**
-The user requested to continue the development of an existing project, HUNTIQ, from a GitHub repository link. The initial environment was a blank template, so the user provided the project as a ZIP file. The agent's first task was to set up this project, which involved extensive debugging of corrupted files due to merge conflicts.
+The user requested the continued development of the HUNTIQ project. The initial focus was on implementing a Habitat Optimal Synthesis Module and connecting it to the map visualization. This was followed by a series of significant, iterative UI/UX changes to the  to improve layout and usability. The user then requested the integration of complex data processing pipelines, defined in YAML-like specifications, to handle geospatial analysis for water, urban, and road exclusions. The most recent requests involve adding a custom BIONIC base map with multiple thematic layers and implementing a new pipeline for generating vector tiles for all of Canada.
 
-Once the application was running, the user requested the implementation of a comprehensive automated backup system with the following requirements:
-1.  **External DB Backup**: Replicate the local MongoDB to a user-provided MongoDB Atlas instance.
-2.  **Cloud Storage Backup**: Back up the application's code and AI prompts to Google Cloud Storage (GCS).
-3.  **Local ZIP Backup**: Automatically create and update a ZIP archive of the project every minute.
-4.  **Admin UI**: Create an interface in the admin panel to manage and monitor these backups.
-5.  **Notifications**: Implement a daily email summary of backup statuses using Resend.
-
-After the backup system, the user requested a major feature enhancement for the Mon Territoire BIONIC™ page, including:
-1.  **Waypoint & Saved Places**: New UI to list waypoints, show the user's GPS location, and manage custom points of interest.
-2.  **Live GPS on Map**: Display the cursor's real-time GPS coordinates and altitude on the map. This feature should be on-demand.
-3.  **Waypoint Coverage Area**: Display a circular area around waypoints, with the size specified by the user (clarified to be 2000 ft diameter).
-4.  **Water Exclusion for BIONIC Zones**: A critical requirement to prevent BIONIC analysis zones from appearing on water bodies. The latest directive is to **relocate** zones that fall in water to be **5 meters from the water's edge**, rather than simply excluding them.
-5.  **Bug Fixes**: Resolve issues with UI elements like dropdowns and map zoom behavior.
+PRODUCT REQUIREMENTS:
+1.  **Habitat Synthesis Module**: Implement real-time map updates based on species selection.
+2.  **UI/UX Refinement ()**:
+    *   Relocate Score Global and Espèce Cible controls to the main header as dropdowns.
+    *   Continuously simplify the UI by removing side panels (, , , , etc.).
+    *   Ultimately remove the entire right sidebar to maximize map space.
+3.  **Advanced Geospatial Pipelines**:
+    *   Integrate  for water and urban exclusion.
+    *   Enhance the pipeline to include comprehensive road network exclusions.
+4.  **Custom Base Maps**:
+    *   Add a new BIONIC base map option with toggleable sub-layers (Geology, Hydrology, Ecoforest, Wildlife Score).
+    *   Implement a new  pipeline for generating master vector tiles.
 
 **User's preferred language**: The user communicates in **French**. The next agent MUST respond in French.
 
 **what currently exists?**
-The HUNTIQ application is partially functional. The cloud backup system and its admin UI are complete. The Mon Territoire BIONIC™ page has been significantly enhanced with new features, including a fixed waypoint creation dropdown, on-demand live GPS tracking (with coordinates and altitude), and waypoint coverage circles. The map zoom logic has also been fixed to maintain focus when using zoom controls.
-
-A sophisticated but currently broken water masking system () exists in . It attempts to prevent analysis zones from appearing on water by using hardcoded polygons on the frontend as a workaround for an unreliable backend API. The agent was in the process of refactoring this service to implement zone **relocation** instead of exclusion when the environment crashed due to memory limits.
+The application is functional. A user authentication flow (register/login) was implemented in the backend () to enable testing. The main  has been significantly redesigned based on user feedback. The right-hand sidebar has been completely removed, and its key controls (Espèce Cible selector and Score Global display) have been moved into the main header bar as compact dropdown menus. The core Habitat Synthesis feature is complete, allowing users to select a species and see the BIONIC zone scores update accordingly. A new, complex client-side geospatial pipeline () has been integrated, which processes BIONIC zones to exclude them from water, urban areas, and a detailed list of road types. A new BIONIC™ base map option has also been added to the layers panel, allowing users to toggle specific thematic vector layers.
 
 **Last working item**:
--   **Last item agent was working**: Implementing a critical user request to **relocate** BIONIC analysis zones that appear on water to a position 5 meters from the water's edge, instead of just excluding them. This involved a major refactor of .
--   **Status**: BLOCKED
+-   **Last item agent was working**: The user provided a detailed YAML specification for a new pipeline, , intended to generate master vector tiles for Canada with multi-zoom-level simplification for various data layers (topography, geology, hydrology, etc.). The agent was about to begin implementation.
+-   **Status**: NOT STARTED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?** Frontend testing agent. However, the immediate priority is to fix the syntax error causing the app to crash.
+-   **Which testing method agent to use?** Frontend testing agent (to verify the new vector tile map style is applied and renders correctly across different zoom levels).
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1**: Application is crashing due to a corrupted file. (P0)
--   **Issue 2**: BIONIC analysis zones appear on water and are not relocated. (P0)
--   **Issue 3**: The GPS LIVE cursor display is a square, not an arrow as requested. (P2)
+-   **Issue 1**: GPS LIVE arrow UI is incomplete. (Priority: P2)
+-   **Issue 2**: Unescaped apostrophes in JSX ( warnings). (Priority: P3)
 
 **Issues Detail**:
--   **Issue 1**: Application is crashing due to a corrupted file.
-    -   **Attempted fixes**: The agent tried to refactor  to add the relocation logic, but this resulted in memory-related environment crashes and a corrupted file. The last action was to completely overwrite the file, which introduced a syntax error.
-    -   **Next debug checklist**:
-        1.  Examine  to confirm the syntax error.
-        2.  View  to find and fix the syntax error (the previous agent noted it was likely around line 275).
-        3.  Ensure the application starts successfully before proceeding to the next issue.
-    -   **Why fix this issue and what will be achieved with the fix?** The application is currently unusable. Fixing this will restore basic functionality and unblock further development.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?** Y (The environment has been unstable)
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue**: None. This is the primary blocker.
-
--   **Issue 2**: BIONIC analysis zones appear on water and are not relocated.
-    -   **Attempted fixes**: The agent implemented multiple versions of a water exclusion ruleset (, , ), switching to a frontend-only approach with static polygons in  after discovering the backend API was unreliable. These polygons were repeatedly adjusted but failed to solve the problem.
-    -   **Next debug checklist**:
-        1.  Once Issue 1 is resolved, re-implement the **relocation logic** in .
-        2.  The goal is to modify the  function. For each zone, check if it intersects with a water polygon.
-        3.  If it intersects, calculate the nearest point on the water polygon's boundary.
-        4.  Create a new coordinate for the zone's center, positioned 5 meters away from that boundary point (on the land side). The agent had started creating helper functions like  and  which should be reviewed and completed.
-        5.  Update the UI panel to show statistics about relocated zones ().
-    -   **Why fix this issue and what will be achieved with the fix?** This is a core feature for the BIONIC analysis and a persistent, high-priority request from the user.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue**: Issue 1
-
--   **Issue 3**: The GPS LIVE cursor display is a square, not an arrow as requested.
-    -   **Attempted fixes**: The agent tried to implement an arrow shape using CSS but was unsuccessful and reverted to a simple box display to complete the main functionality.
-    -   **Next debug checklist**:
-        1.  In , locate the JSX for the GPS Live display (around line 1830).
-        2.  Modify the CSS to create a triangle shape pointing down, which will serve as the arrow's tip. This can be done using borders or clip-path. Position this shape relative to the main box containing the coordinate text.
-    -   **Why fix this issue and what will be achieved with the fix?** Fulfills a specific UI refinement request from the user.
+-   **Issue 1**: GPS LIVE arrow is incomplete.
+    -   **Attempted fixes**: A downward-pointing triangle was integrated into the info bubble, but a separate stem was not successfully created.
+    -   **Next debug checklist**: Review CSS in  to create a more distinct arrow, possibly using borders or an  pseudo-element.
+    -   **Why fix this issue and what will be achieved with the fix?** Minor UI refinement.
     -   **Status**: NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on other issue**: None
+-   **Issue 2**: Unescaped apostrophes in JSX.
+    -   **Attempted fixes**: None in this session.
+    -   **Next debug checklist**: Use a global search-and-replace to change  to  in JSX text content across frontend files.
+    -   **Why fix this issue and what will be achieved with the fix?** Improves code quality and adheres to React best practices.
+    -   **Status**: NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   None
+-   **Task 1**: Continue refactoring . (P1)
+
+**Task Detail**:
+-   **Task 1**: Continue refactoring .
+    -   **Where to resume**: The file is still extremely large. Although many UI elements were removed, their state and logic might still be in the file. The primary task is to move distinct blocks of functionality (e.g., Waypoint logic, Layers Panel logic) into the existing but unused placeholder components (, , , , ) and integrate them back into the main page.
+    -   **What will be achieved with this?** Improve performance, maintainability, and reduce component complexity, addressing a recurring user concern.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on something**: None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1: Full End-to-End Testing of Backup System**: The agent performed unit checks, but a full test with user credentials is required.
-    -   **P2: Implement GPX/KML Import/Export**: The user expressed interest in importing/exporting waypoints.
+    -   **P0**: Implement the  pipeline. Create a new service file based on the user's specification for preprocessing data layers with multi-zoom-level simplification and structuring them for a vector tile export.
+    -   **P1**: Connect the Urban Admin Panel settings () to the  so parameter changes are applied in real-time.
+    -   **P1**: Full End-to-End Testing of the Backup System (GCS, Atlas, Resend).
 -   **Future Tasks**:
-    -   Add a statistics dashboard for backups.
-    -   Refactor  and  into smaller, reusable components to improve maintainability and performance.
+    -   **P2**: Add an Export Styles button to the UI that uses .
+    -   **P2**: Implement GPX/KML Import/Export for waypoints.
+    -   **P3**: Add a statistics dashboard for backups in the admin panel.
 
 **Completed work in this session**
--   Fixed the non-opening dropdown menu for + Enregistrer un Waypoint by increasing its .
--   Implemented a GPS LIVE feature that displays real-time cursor coordinates and altitude, activated by a new  button.
--   Added circular coverage areas around waypoints and adjusted their radius to ~305m (2000 ft diameter).
--   Implemented a click-to-center feature for waypoints in the list.
--   Fixed a bug where using the map's +/- zoom buttons would incorrectly recenter the map.
+-   **Implemented Full User Authentication**: Created backend endpoints (, , ) in  and debugged a database connection issue to enable frontend testing.
+-   **Completed Habitat Synthesis Visualization**: The map now dynamically updates zone colors and scores based on the species selected in the new Espèce Cible header dropdown.
+-   **Major UI Overhaul of **:
+    -   Moved Score Global and Espèce Cible selectors into the main header as dropdowns.
+    -   Removed the entire right sidebar, including panels for , , , and , to maximize map space.
+-   **Integrated Advanced Geospatial Pipeline (C2-A.1)**: Created and integrated , which applies client-side exclusions for water, urban areas, and a comprehensive set of road/path types.
+-   **Added BIONIC Base Map**: Implemented a new BIONIC base map option in the layers panel, which includes toggleable sub-layers for Geology, Hydrology, Ecoforest, and Wildlife Score, configured in .
+-   **Updated PRD**: The  file was updated to reflect the completed tasks.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1**: The codebase has several ESLint warnings for unescaped apostrophes in JSX text ().
-    -   **Debug checklist**: Replace occurrences of  with  in JSX strings across files like  and .
-    -   **Why to solve this issue and what will be achieved with this?** Improves code quality and adheres to React best practices.
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Is recurring issue?** Y
+-   **Issue 1**: GPS LIVE arrow UI is incomplete.
+-   **Issue 2**: Unescaped apostrophes in JSX ( warnings).
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -104,69 +90,80 @@ A sophisticated but currently broken water masking system () exists in . It atte
 
 
 **Key Technical Concepts**
--   **Frontend**: React, Tailwind CSS, Shadcn UI, .
--   **Geospatial Logic**: Heavy client-side geospatial calculations (point-in-polygon, distance, boundary detection) are performed in JavaScript within . The system relies on hardcoded static polygons to identify water bodies.
--   **API Integration**: Client-side fetch to the public Open-Meteo API for elevation data.
+-   **Complex Client-Side Geospatial Processing**: The app performs heavy geospatial analysis (exclusions for water, urban, roads) in the browser via configuration-driven JavaScript services ().
+-   **Dynamic UI Composition**: The  layout is highly dynamic, with primary controls now consolidated in the header bar as dropdown components.
+-   **Configuration-Driven Features**: Complex features like the BIONIC pipeline and the BIONIC base map are defined in large, structured JavaScript objects, allowing for modularity and easier updates based on user specifications.
+-   **Backend Auth**: A basic JWT authentication system (register, login, verify) was added to the FastAPI backend to support user sessions for testing.
 
 **key DB schema**
--   No changes made to the database schema in this session.
+-   **users**: {, , , } (used for the new authentication flow).
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : The central component for the Mon Territoire feature. It was heavily modified to add new features and fix bugs.
--   : **This file is currently broken**. It contains the complex, custom-built logic for water masking and zone relocation.
--   : Modified with a  class to fix a rendering issue.
+-   : The central component, heavily modified to remove the right panel and add controls to the header. Still requires major refactoring.
+-   : Modified to include , , and  endpoints.
+-   : **New file**. Contains the ruleset for the C2-A.1 pipeline with water, urban, and road exclusions.
+-   : **New file**. Defines the new BIONIC base map and its sub-layers.
+-   : Modified to integrate and use the  service.
+-   : Modified to render the new BIONIC base map option.
+-   : Updated with progress.
 
 **Areas that need refactoring**:
--   ****: This component is now over 2,500 lines long and is becoming unmanageable. The map logic, state management ( hooks for everything), and UI sections should be broken down into smaller, self-contained components.
--   ****: The use of large, hardcoded polygons is brittle and difficult to maintain. This would be better handled by loading external GeoJSON files. The entire service needs to be cleaned up after the relocation logic is correctly implemented.
+-   ****: This remains the highest priority for refactoring. The file is still a monolith of state and logic. The unused placeholder components (, , , etc.) should be populated with logic from the main file to break it down.
+-   ** Authentication**: The newly added authentication endpoints are functional but are placed directly in . They should be moved to a separate router file (e.g., ) to improve code organization.
 
 **key api endpoints**
--   : A new external API call was added on the frontend to fetch altitude data for the GPS LIVE feature.
+-   : Creates a new user.
+-   : Authenticates a user and returns a JWT.
+-   : Verifies an existing JWT.
 
 **Critical Info for New Agent**
--   **The environment is unstable.** It crashed twice due to Memory Limit exceeded during the last session while working on . The machine has been upgraded, but be mindful of client-side performance, especially with complex geospatial calculations.
--   **The immediate task is to fix the crashing application.** The file  is corrupted and contains syntax errors. You must fix this file before you can do anything else.
--   The main goal is to implement **zone relocation**, not just exclusion. The user is very clear that zones on water must be moved 5m to the nearest land border.
--   The current approach for water detection is a **frontend-only mask** using hardcoded polygons. You must continue with this pattern for now, as the backend API was proven unreliable for the St. Lawrence River.
+-   **UI is Iterative**: The user makes frequent, precise, and step-by-step changes to the UI. Expect to receive feedback on screenshots and make small adjustments. The current layout (no right panel, controls in the header) is the result of this iterative process.
+-   **Pipelines as Code**: The core analysis logic is defined in large JavaScript objects () that act as configuration files. Your main task when receiving a new pipeline is to create the file and integrate it into the processing flow, not to design the logic itself.
+-   **Auth is Working**: User authentication was a blocker and has been fixed. Use the credentials provided below to test any frontend feature requiring a login. The backend now uses the  MongoDB database.
 
 **documents and test reports created in this job**
 -    (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Zones are still in the water, fix it. Move zones 5m from the water's edge if they are on it. (Status: IN PROGRESS, BLOCKED BY CRASH)
-2.  **User**: When I zoom in/out on a selected waypoint, the map jumps back to Île d'Orléans. (Status: COMPLETED)
-3.  **User**: Zones are still in the water, please fix. (Status: IN PROGRESS)
-4.  **User**: Provided an image showing BIONIC zones on the St. Lawrence River again. (Status: IN PROGRESS)
-5.  **User**: Provided a new ruleset () for water exclusion. (Status: Implemented, but failed)
-6.  **User**: Provided another image of zones on the water. (Status: IN PROGRESS)
-7.  **User**: Only activate the GPS LIVE pointer on demand. (Status: COMPLETED)
-8.  **User**: The waypoint coverage circles should be 2000 square feet. (Status: COMPLETED, clarified as 2000 ft diameter)
-9.  **User**: Change the square GPS LIVE display to an arrow shape. (Status: Attempted, not completed)
-10. **User**: Yes (agreed to add altitude to the live GPS display). (Status: COMPLETED)
+10. Remove the entire right-hand panel from the UI. (COMPLETED)
+9.  Add the  ruleset for processing zones. (COMPLETED)
+8.  Add comprehensive road/path/highway exclusion to the BIONIC pipeline. (COMPLETED)
+7.  Add a new custom BIONIC base map option to the layers panel. (COMPLETED)
+6.  **Add and optimize a new map pipeline: . (PENDING - This is the highest priority task).**
+5.  Remove the panel showing Alertes conditions, Zones favorites, and the detailed Score Global. (COMPLETED)
+4.  Remove the Module BIONIC™ v7 stats panel. (COMPLETED)
+3.  Re-confirm removal of the HABITAT_OPTIMAL_SYNTHÈSE panel. (COMPLETED)
+2.  Remove the Pondérations Inter-Modules panel. (COMPLETED)
+1.  Move the Espèce cible selector to the header bar. (COMPLETED)
 
 **Project Health Check:**
--   **Broken**: The entire frontend application is non-functional due to a fatal syntax error in . The core BIONIC water masking feature does not meet user requirements.
--   **Mocked**: None.
+-   **Broken**: Nothing is currently broken. The previously non-functional user authentication has been fixed.
+-   **Mocked**:
+    -   The Auto-Optimization module in the admin panel still provides hardcoded suggestions.
+    -   The complex BIONIC pipelines (, vector tiles) are client-side JavaScript configurations. The rules are not stored in a database or processed on the backend.
 
 **3rd Party Integrations**
--   **MongoDB Atlas** (Database Replication) — requires User Connection String.
--   **Google Cloud Storage** (File Backup) — requires User Service Account JSON.
--   **Resend** (Email Notifications) — requires User API Key.
--   **Open-Meteo Elevation API** (Altitude Data) — Public, no key required.
+-   MongoDB Atlas (Database Replication)
+-   Google Cloud Storage (File Backup)
+-   Resend (Email Notifications)
+-   Open-Meteo Elevation API (Altitude Data)
 
 **Testing status**
--   **Testing agent used after significant changes**: NO (Agent relied on manual screenshot tool)
+-   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None
--   **Known regressions**: The water exclusion logic is broken.
+-   **Known regressions**: None
 
 **Credentials to test flow:**
+-   **User Email**: 
+-   **User Password**: 
 -   **Admin URL**: 
 -   **Admin Password**: 
 
 **What agent forgot to execute**
--   The agent did not successfully change the GPS LIVE display to an arrow shape as requested.
--   The agent did not address the outstanding ESLint warnings for unescaped characters in JSX.</analysis>
+-   The primary refactoring of  into the existing smaller components (, , etc.) has not been performed.
+-   The low-priority UI tweak for the GPS LIVE display arrow was not addressed.
+-   The ESLint warnings for unescaped apostrophes were not fixed.</analysis>
