@@ -59,6 +59,7 @@ import MapToolbar from '@/components/territoire/MapToolbar';
 import HabitatSynthesePanel from '@/components/territoire/HabitatSynthesePanel';
 import BionicGeneratorPanel from '@/components/territoire/BionicGeneratorPanel';
 import BionicHotspotsLayer from '@/components/territoire/BionicHotspotsLayer';
+import BionicMapOverlay from '@/components/territoire/BionicMapOverlay';
 
 import { 
   BIONIC_LAYERS, 
