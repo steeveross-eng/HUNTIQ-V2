@@ -543,6 +543,17 @@ class CartItemUpdate(BaseModel):
 class AdminLogin(BaseModel):
     password: str
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+    remember_device: bool = False
+
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+    phone: Optional[str] = None
+
 # ============================================
 # MODELS - Alerts
 # ============================================
