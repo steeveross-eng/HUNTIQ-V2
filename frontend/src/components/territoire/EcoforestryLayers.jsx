@@ -459,6 +459,91 @@ export const BASE_MAPS = {
       }
     }
   },
+  // ═══════════════════════════════════════════════════════════════
+  // CARTE BIONIC™ CANADA - Tuiles vectorielles pan-canadiennes
+  // Pipeline: BIONIC_VECTOR_TILES_CANADA v1.0.0
+  // ═══════════════════════════════════════════════════════════════
+  bionic_canada: {
+    id: 'bionic_canada',
+    name: 'BIONIC™ Canada',
+    description: 'Tuiles vectorielles pan-canadiennes avec multi-zoom',
+    icon: '🍁',
+    // Base map avec tuiles vectorielles Canada
+    url: 'https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+    attribution: '&copy; BIONIC™ | RNCan | StatCan | OSM',
+    format: 'vector_tiles',
+    pipeline: 'BIONIC_VECTOR_TILES_CANADA',
+    version: '1.0.0',
+    coverage: {
+      name: 'Canada',
+      bounds: [-141.0, 41.7, -52.6, 83.1]
+    },
+    zoomLevels: {
+      global: { range: [0, 4], simplification: 'aggressive' },
+      regional: { range: [5, 7], simplification: 'moderate' },
+      local: { range: [8, 10], simplification: 'light' },
+      detailed: { range: [11, 14], simplification: 'minimal' },
+      precision: { range: [15, 18], simplification: 'none' }
+    },
+    layers: {
+      topography: {
+        source: 'RNCan CanVec + USGS SRTM',
+        format: 'vector_tiles',
+        style: 'contours + hillshade',
+        enabled: true,
+        opacity: 0.5
+      },
+      geology: {
+        source: 'RNCan Bedrock + Surficial',
+        format: 'vector_tiles',
+        style: 'semi-transparent polygons',
+        enabled: false,
+        opacity: 0.35
+      },
+      hydrology: {
+        source: 'RNCan NHN + MFFP',
+        format: 'vector_tiles',
+        style: 'blue lines + lakes',
+        enabled: true,
+        opacity: 0.7
+      },
+      ecoforest: {
+        source: 'MFFP + NRCan EOSD',
+        format: 'vector_tiles',
+        style: 'green gradient',
+        enabled: true,
+        opacity: 0.6
+      },
+      administrative: {
+        source: 'StatCan + RNCan Atlas',
+        format: 'vector_tiles',
+        style: 'boundaries + labels',
+        enabled: true,
+        opacity: 0.8
+      },
+      roads: {
+        source: 'StatCan + OSM',
+        format: 'vector_tiles',
+        style: 'classified roads',
+        enabled: true,
+        opacity: 0.9
+      },
+      urban: {
+        source: 'StatCan Population Centres',
+        format: 'vector_tiles',
+        style: 'urban zones',
+        enabled: true,
+        opacity: 0.4
+      },
+      wildlife_score: {
+        source: 'BIONIC™ Engine',
+        format: 'GeoJSON',
+        style: 'heatmap + icons',
+        enabled: true,
+        opacity: 0.8
+      }
+    }
+  },
   satellite: {
     id: 'satellite',
     name: 'Satellite',
