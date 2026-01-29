@@ -721,6 +721,7 @@ const MonTerritoireBionicPage = () => {
   // ============================================
   const [selectedEspece, setSelectedEspece] = useState('ORIGNAL');
   const [carteBionic, setCarteBionic] = useState(null);
+  const [pipelineEnabled, setPipelineEnabled] = useState(true); // Toggle ON-OFF Pipeline BIONIC
   
   // Import du service d'exclusion permanent
   const filterWaterZonesRef = useRef(null);
