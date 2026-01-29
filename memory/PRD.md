@@ -3,7 +3,8 @@
 ## Project Overview
 **Application**: HUNTIQ / Chasse Bionic™  
 **Type**: Full-stack hunting platform with AI-powered analysis, marketplace, territory mapping, and e-commerce  
-**Last Updated**: January 29, 2026
+**Last Updated**: January 29, 2026  
+**Architecture Version**: 2.0 - Modular (Micro-Frontends + Microservices Ready)
 
 ---
 
@@ -13,36 +14,52 @@
 - **Frontend**: React 18 + Tailwind CSS + Shadcn UI + Leaflet Maps
 - **Backend**: FastAPI (Python) + MongoDB
 - **APIs**: 50+ modules including AI analysis, geospatial, e-commerce
+- **Architecture**: Modular (Micro-Frontends + Microservices Ready) ⭐ NEW
+
+### Modular Architecture v2.0
+```
+┌───────────────────────────────────────────────────────────┐
+│                    SHELL APPLICATION                       │
+│                  (Routing + Auth + Layout)                 │
+├─────────────┬─────────────┬─────────────┬─────────────────┤
+│ MF-BIONIC   │  MF-SHOP    │  MF-ADMIN   │  MF-NETWORK     │
+│ Territory   │  E-commerce │  Dashboard  │  Social Hub     │
+└─────────────┴─────────────┴─────────────┴─────────────────┘
+                            │
+                            ▼
+┌───────────────────────────────────────────────────────────┐
+│                      API GATEWAY                           │
+├─────────────┬─────────────┬─────────────┬─────────────────┤
+│ MS-BIONIC   │ MS-COMMERCE │  MS-AUTH    │ MS-ANALYTICS    │
+│ Territory   │ Orders/Pay  │  Users/JWT  │ Stats/Reports   │
+└─────────────┴─────────────┴─────────────┴─────────────────┘
+```
 
 ### Key Components
 ```
 /app/
 ├── backend/
-│   ├── server.py              # Main FastAPI application (4500+ lines)
-│   ├── backup_cloud.py        # Cloud backup system (Atlas + GCS)
-│   ├── backup_manager.py      # Local backup versioning
-│   ├── bionic_territory.py    # Territory analysis engine
+│   ├── server.py                    # Main FastAPI (4500+ lines)
+│   ├── services/                    # ⭐ NEW: Microservice modules
+│   │   └── bionic_territory/        # BIONIC Territory Service v1.0
+│   │       ├── routes/
+│   │       │   └── territory_routes.py
+│   │       └── __init__.py
 │   └── ...
 ├── frontend/src/
-│   ├── App.js                 # Main React app
+│   ├── modules/                     # ⭐ NEW: Micro-Frontend modules
+│   │   └── bionic-territory/        # BIONIC Territory Module v1.0
+│   │       ├── context/
+│   │       │   └── BionicTerritoryContext.jsx
+│   │       ├── components/
+│   │       │   ├── sidebar/LayersSidebar.jsx
+│   │       │   └── controls/MapControlButtons.jsx
+│   │       └── index.js
 │   ├── pages/
-│   │   ├── AdminPage.jsx      # Admin panel (1000+ lines)
-│   │   ├── MonTerritoireBionicPage.jsx  # Territory BIONIC page (2700+ lines)
-│   │   ├── ShopPage.jsx       # E-commerce shop
-│   │   └── ...
-│   ├── styles/                # Styles cartographiques BIONIC
-│   │   ├── BionicZoneStyles.js    # Système de styles multi-moteur
-│   │   ├── BionicStyleExporter.js # Export QGIS/ArcGIS/Mapbox
-│   │   └── bionic-zones.css       # CSS pour les zones
-│   ├── services/
-│   │   ├── WaterExclusionService.js  # BIONIC water mask v5
-│   │   └── BionicMapGenerator.js     # BIONIC Intelligence v3.3 ⭐ UPDATED
-│   └── components/territoire/
-│       ├── BionicMapOverlay.jsx      # NEW - Overlay visuel 10X distinctif
-│       ├── BionicForestZonesLayer.jsx # NEW - Zones peuplements colorés
-│       ├── BionicHotspotsLayer.jsx   # Hotspots et trajets d'approche
-│       ├── BionicGeneratorPanel.jsx  # Panneau générateur IA
-│       └── ...
+│   │   └── MonTerritoireBionicPage.jsx  # (En cours de refactoring)
+│   └── ...
+├── docs/
+│   └── ARCHITECTURE.md              # ⭐ NEW: Documentation architecture
 └── memory/PRD.md
 ```
 
