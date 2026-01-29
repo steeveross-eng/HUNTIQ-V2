@@ -457,6 +457,8 @@ const BionicForestZonesLayer = ({
   showQuebecEco = false,
   showQuebecLidar = false,
   showQuebecTWI = false,
+  // Opacités dynamiques pour les couches Québec
+  quebecOpacities = { eco: 0.6, lidar: 0.5, twi: 0.5 },
   onFeatureClick
 }) => {
   const map = useMap();
