@@ -44,6 +44,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// Import du composant de tuiles vectorielles BIONIC Canada
+import { BionicCanadaVectorLayer } from './BionicVectorTileLayer';
+
 // ============================================
 // SYSTÈME DE FALLBACK - CONFIGURATION
 // ============================================
