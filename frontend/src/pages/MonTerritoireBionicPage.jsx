@@ -1578,7 +1578,128 @@ const MonTerritoireBionicPage = () => {
       </div>
       
       {/* Contenu des onglets */}
-      <div className="h-[calc(100vh-180px)]">
+      <div className="h-[calc(100vh-180px)] relative">
+        
+        {/* ═══════════════════════════════════════════════════════════════════
+            SCORE GLOBAL - Panneau Sticky Droite (Optimisé BIONIC™)
+            Position: Fixed droite, visible en permanence
+            Design: Compact en hauteur, large en largeur, point focal visuel
+        ═══════════════════════════════════════════════════════════════════ */}
+        <div 
+          className="fixed right-4 top-[180px] z-[1000] transition-all duration-300"
+          data-testid="score-global-panel"
+        >
+          <div 
+            className="relative bg-gradient-to-br from-gray-900/98 via-gray-900/95 to-black/98 backdrop-blur-xl rounded-xl border border-[#f5a623]/30 overflow-hidden"
+            style={{
+              boxShadow: '0 0 30px rgba(245, 166, 35, 0.15), 0 0 60px rgba(245, 166, 35, 0.05), inset 0 1px 0 rgba(255,255,255,0.05)',
+              minWidth: '320px',
+              maxWidth: '360px'
+            }}
+          >
+            {/* Effet glow subtil en haut */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f5a623] to-transparent opacity-60" />
+            
+            {/* Header compact avec score principal */}
+            <div className="px-4 py-3 border-b border-gray-800/50">
+              <div className="flex items-center justify-between">
+                {/* Titre et indicateur */}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#f5a623] animate-pulse" />
+                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Score Global BIONIC™</span>
+                </div>
+                {/* Badge performance */}
+                <Badge 
+                  className={`text-[10px] px-2 py-0.5 ${
+                    displayScore >= 80 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                    displayScore >= 60 ? 'bg-[#f5a623]/20 text-[#f5a623] border border-[#f5a623]/30' :
+                    'bg-red-500/20 text-red-400 border border-red-500/30'
+                  }`}
+                >
+                  {displayScore >= 80 ? 'EXCELLENT' : displayScore >= 60 ? 'BON' : 'À AMÉLIORER'}
+                </Badge>
+              </div>
+              
+              {/* Score principal - Grand et visible */}
+              <div className="flex items-end justify-between mt-2">
+                <div className="flex items-baseline gap-1">
+                  <span 
+                    className="text-[42px] font-black leading-none"
+                    style={{
+                      background: displayScore >= 80 
+                        ? 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)' 
+                        : displayScore >= 60 
+                          ? 'linear-gradient(135deg, #f5a623 0%, #fbbf24 100%)'
+                          : 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      textShadow: '0 0 40px rgba(245, 166, 35, 0.3)'
+                    }}
+                  >
+                    {displayScore}
+                  </span>
+                  <span className="text-gray-500 text-xl font-light">/100</span>
+                </div>
+                
+                {/* Mini jauge circulaire */}
+                <div className="relative w-12 h-12">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="#374151" strokeWidth="3" />
+                    <circle 
+                      cx="18" cy="18" r="15" fill="none" 
+                      stroke={displayScore >= 80 ? '#22c55e' : displayScore >= 60 ? '#f5a623' : '#ef4444'}
+                      strokeWidth="3" 
+                      strokeLinecap="round"
+                      strokeDasharray={`${displayScore * 0.94} 100`}
+                      className="transition-all duration-700"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-white">{displayScore}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Grille des métriques - Layout horizontal compact */}
+            <div className="px-3 py-3">
+              <div className="grid grid-cols-3 gap-2">
+                {SCORE_CATEGORIES.map((cat) => {
+                  const score = categoryScores[cat.id] || 0;
+                  const colorClass = score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-[#f5a623]' : 'text-red-400';
+                  const bgClass = score >= 80 ? 'bg-emerald-500/10' : score >= 60 ? 'bg-[#f5a623]/10' : 'bg-red-500/10';
+                  const borderClass = score >= 80 ? 'border-emerald-500/20' : score >= 60 ? 'border-[#f5a623]/20' : 'border-red-500/20';
+                  
+                  return (
+                    <div 
+                      key={cat.id} 
+                      className={`${bgClass} ${borderClass} border rounded-lg p-2 text-center hover:scale-105 transition-transform cursor-default`}
+                      title={`${cat.name}: ${score}%`}
+                    >
+                      <div className="text-base mb-0.5">{cat.icon}</div>
+                      <div className={`text-sm font-bold ${colorClass}`}>{score}%</div>
+                      <div className="text-[9px] text-gray-500 truncate">{cat.name}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Footer avec position */}
+            <div className="px-3 py-2 bg-gray-950/50 border-t border-gray-800/30">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="text-gray-500 flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  Position
+                </span>
+                <span className="font-mono text-gray-400">
+                  {currentMapCenter.lat.toFixed(4)}°, {currentMapCenter.lng.toFixed(4)}°
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Onglet Carte BIONIC */}
         {activeTab === 'carte' && (
           <div className="flex h-full">
