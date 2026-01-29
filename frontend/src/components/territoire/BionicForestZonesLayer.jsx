@@ -345,6 +345,105 @@ const BionicForestLegend = ({
 };
 
 // ═══════════════════════════════════════════════════════════════
+// COMPOSANT COUCHES WMS VIA PROXY
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Composant pour les couches WMS Québec via le proxy backend
+ * Contourne les restrictions CORS/IP des serveurs gouvernementaux
+ */
+const QuebecWMSProxyLayer = ({
+  source,
+  layer,
+  opacity = 0.6,
+  zIndex = 400,
+  visible = true
+}) => {
+  const map = useMap();
+  const [imageOverlay, setImageOverlay] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Récupérer une tuile WMS via le proxy
+  const fetchWMSTile = useCallback(async () => {
+    if (!visible || !map) return;
+    
+    const bounds = map.getBounds();
+    const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+    const size = map.getSize();
+    
+    const url = new URL(`${API_BASE}/api/bionic-territory/wms/tile`);
+    url.searchParams.set('source', source);
+    url.searchParams.set('layer', layer);
+    url.searchParams.set('bbox', bbox);
+    url.searchParams.set('width', Math.min(size.x, 1024).toString());
+    url.searchParams.set('height', Math.min(size.y, 1024).toString());
+    url.searchParams.set('srs', 'EPSG:4326');
+    url.searchParams.set('format', 'image/png');
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        throw new Error(`Erreur WMS: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      
+      // Nettoyer l'ancien overlay
+      if (imageOverlay) {
+        URL.revokeObjectURL(imageOverlay.url);
+      }
+      
+      setImageOverlay({
+        url: imageUrl,
+        bounds: [[bounds.getSouth(), bounds.getWest()], [bounds.getNorth(), bounds.getEast()]]
+      });
+      
+    } catch (err) {
+      console.error(`[WMS Proxy] Erreur pour ${source}/${layer}:`, err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [visible, map, source, layer, imageOverlay]);
+  
+  // Recharger quand la carte bouge
+  useEffect(() => {
+    if (!visible || !map) return;
+    
+    // Charger initialement
+    fetchWMSTile();
+    
+    // Recharger après mouvement de carte
+    const handleMoveEnd = () => {
+      // Debounce pour éviter trop de requêtes
+      const timeoutId = setTimeout(fetchWMSTile, 300);
+      return () => clearTimeout(timeoutId);
+    };
+    
+    map.on('moveend', handleMoveEnd);
+    
+    return () => {
+      map.off('moveend', handleMoveEnd);
+      if (imageOverlay?.url) {
+        URL.revokeObjectURL(imageOverlay.url);
+      }
+    };
+  }, [visible, map, source, layer]);
+  
+  if (!visible || !imageOverlay) return null;
+  
+  // Note: Utiliser ImageOverlay de react-leaflet
+  // Importé dynamiquement pour éviter les dépendances circulaires
+  return null; // Pour l'instant, les couches WMS proxy sont désactivées jusqu'à l'intégration complète
+};
+
+// ═══════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ═══════════════════════════════════════════════════════════════
 
