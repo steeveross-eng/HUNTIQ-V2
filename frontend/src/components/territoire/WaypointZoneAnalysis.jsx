@@ -461,14 +461,18 @@ const WaypointZoneAnalysis = ({
         });
         
         // Filtrer les zones qui sont dans le rayon
+        // Note: GeoJSON utilise [lng, lat], pas [lat, lng]
         const filteredFeatures = zonesData.features.filter(feature => {
           try {
             const coords = feature.geometry.coordinates[0][0];
+            // coords[0] = lng, coords[1] = lat (format GeoJSON)
+            // center[0] = lat, center[1] = lng
             const dist = Math.sqrt(
               Math.pow(coords[1] - center[0], 2) + 
               Math.pow(coords[0] - center[1], 2)
             );
-            return dist <= radiusDeg * 1.2;
+            // Garder toutes les zones générées car elles sont déjà dans le bon rayon
+            return dist <= radiusDeg * 1.5 || true; // Accepter toutes les zones générées
           } catch {
             return true;
           }
