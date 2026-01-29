@@ -425,21 +425,33 @@ const WildlifeBehaviorLayer = ({
     generateBehaviorZones();
   }, [enabled, mapCenter, targetSpecies, minScore]);
   
-  // Style GeoJSON dynamique
+  // Style GeoJSON dynamique - Adapté pour zones fusionnées
   const getFeatureStyle = useMemo(() => (feature) => {
-    const { behavior, behaviorId } = feature.properties;
+    const { behavior, behaviorId, merged, mergedCount } = feature.properties;
     
     // Filtrer si comportement non actif
     if (activeBehaviors && !activeBehaviors.includes(behaviorId)) {
       return { fillOpacity: 0, opacity: 0 };
     }
     
-    return getBehaviorStyle(behavior);
+    // Obtenir le style de base
+    const baseStyle = getBehaviorStyle(behavior);
+    
+    // Bonus visuel pour les zones fusionnées (plus grandes = plus importantes)
+    if (merged && mergedCount > 1) {
+      return {
+        ...baseStyle,
+        weight: Math.min(baseStyle.weight + 1, 5),
+        fillOpacity: Math.min(baseStyle.fillOpacity + 0.1, 0.9)
+      };
+    }
+    
+    return baseStyle;
   }, [activeBehaviors]);
   
   // Gestionnaire de clic sur zone
   const onEachFeature = useMemo(() => (feature, layer) => {
-    const { behavior, bionic_name, behaviorScore } = feature.properties;
+    const { behavior, bionic_name, behaviorScore, merged, mergedCount } = feature.properties;
     const primary = behavior.primary;
     const behaviorInfo = WILDLIFE_BEHAVIORS[primary.id];
     
