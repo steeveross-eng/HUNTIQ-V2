@@ -1979,6 +1979,16 @@ const MonTerritoireBionicPage = () => {
                   </div>
                   
                   {/* ═══════════════════════════════════════════════════════════
+                      COUCHES DONNÉES QUÉBEC (WMS via Proxy)
+                  ═══════════════════════════════════════════════════════════ */}
+                  <QuebecLayersPanel
+                    layers={quebecLayers}
+                    onToggleLayer={toggleQuebecLayer}
+                    onSetOpacity={setQuebecLayerOpacity}
+                    collapsed={false}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
                       GÉNÉRATEUR CARTE BIONIC™ v3.1
                   ═══════════════════════════════════════════════════════════ */}
                   <div className="border-t border-gray-700 pt-2 mt-2">
