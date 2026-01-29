@@ -1387,7 +1387,7 @@ const EcoforestryLayers = ({
   
   return (
     <>
-      {/* BIONIC Canada Vector Tiles Layer */}
+      {/* BIONIC™ Vector Tiles Layer - Tuiles vectorielles pan-canadiennes */}
       {shouldRenderVectorTiles && (
         <BionicCanadaVectorLayer
           enabled={true}
@@ -1417,7 +1417,7 @@ const EcoforestryLayers = ({
         />
       ) : null}
       
-      {/* Fond de base pour BIONIC Canada (sous les tuiles vectorielles) */}
+      {/* Fond de base pour BIONIC™ (sous les tuiles vectorielles) */}
       {shouldRenderVectorTiles && (
         <TileLayer
           url="https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw"
