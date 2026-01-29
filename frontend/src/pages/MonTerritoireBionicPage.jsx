@@ -1582,118 +1582,128 @@ const MonTerritoireBionicPage = () => {
         
         {/* ═══════════════════════════════════════════════════════════════════
             SCORE GLOBAL - Panneau Sticky Droite (Optimisé BIONIC™)
-            Position: Fixed droite, visible en permanence
+            Position: Fixed droite haut, visible en permanence
             Design: Compact en hauteur, large en largeur, point focal visuel
         ═══════════════════════════════════════════════════════════════════ */}
         <div 
-          className="fixed right-4 top-[180px] z-[1000] transition-all duration-300"
+          className="fixed right-[340px] top-[135px] z-[1000] transition-all duration-300"
           data-testid="score-global-panel"
         >
           <div 
-            className="relative bg-gradient-to-br from-gray-900/98 via-gray-900/95 to-black/98 backdrop-blur-xl rounded-xl border border-[#f5a623]/30 overflow-hidden"
+            className="relative bg-gradient-to-br from-gray-900/98 via-gray-900/95 to-black/98 backdrop-blur-xl rounded-xl border border-[#f5a623]/40 overflow-hidden"
             style={{
-              boxShadow: '0 0 30px rgba(245, 166, 35, 0.15), 0 0 60px rgba(245, 166, 35, 0.05), inset 0 1px 0 rgba(255,255,255,0.05)',
-              minWidth: '320px',
-              maxWidth: '360px'
+              boxShadow: '0 0 25px rgba(245, 166, 35, 0.2), 0 0 50px rgba(245, 166, 35, 0.08), inset 0 1px 0 rgba(255,255,255,0.08)',
+              width: '380px'
             }}
           >
-            {/* Effet glow subtil en haut */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f5a623] to-transparent opacity-60" />
+            {/* Effet glow animé en haut */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f5a623] to-transparent opacity-80" />
             
-            {/* Header compact avec score principal */}
-            <div className="px-4 py-3 border-b border-gray-800/50">
-              <div className="flex items-center justify-between">
-                {/* Titre et indicateur */}
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#f5a623] animate-pulse" />
-                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Score Global BIONIC™</span>
+            {/* Header ultra-compact avec score principal */}
+            <div className="px-4 py-2.5 flex items-center justify-between">
+              {/* Partie gauche: Titre + Score */}
+              <div className="flex items-center gap-4">
+                {/* Indicateur lumineux */}
+                <div className="flex flex-col items-center">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#f5a623] animate-pulse shadow-lg shadow-[#f5a623]/50" />
+                  <span className="text-[8px] text-gray-500 mt-0.5">LIVE</span>
                 </div>
-                {/* Badge performance */}
-                <Badge 
-                  className={`text-[10px] px-2 py-0.5 ${
-                    displayScore >= 80 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                    displayScore >= 60 ? 'bg-[#f5a623]/20 text-[#f5a623] border border-[#f5a623]/30' :
-                    'bg-red-500/20 text-red-400 border border-red-500/30'
-                  }`}
-                >
-                  {displayScore >= 80 ? 'EXCELLENT' : displayScore >= 60 ? 'BON' : 'À AMÉLIORER'}
-                </Badge>
-              </div>
-              
-              {/* Score principal - Grand et visible */}
-              <div className="flex items-end justify-between mt-2">
-                <div className="flex items-baseline gap-1">
+                
+                {/* Score principal */}
+                <div className="flex items-baseline gap-1.5">
                   <span 
-                    className="text-[42px] font-black leading-none"
+                    className="text-[38px] font-black leading-none tracking-tight"
                     style={{
                       background: displayScore >= 80 
-                        ? 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)' 
+                        ? 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)' 
                         : displayScore >= 60 
-                          ? 'linear-gradient(135deg, #f5a623 0%, #fbbf24 100%)'
+                          ? 'linear-gradient(135deg, #f5a623 0%, #fbbf24 50%, #fcd34d 100%)'
                           : 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
-                      textShadow: '0 0 40px rgba(245, 166, 35, 0.3)'
+                      filter: 'drop-shadow(0 0 20px rgba(245, 166, 35, 0.4))'
                     }}
                   >
                     {displayScore}
                   </span>
-                  <span className="text-gray-500 text-xl font-light">/100</span>
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 text-sm font-light leading-none">/100</span>
+                    <span className="text-[9px] text-gray-600 uppercase tracking-wider">Score</span>
+                  </div>
                 </div>
+              </div>
+              
+              {/* Partie droite: Badge + Jauge */}
+              <div className="flex items-center gap-3">
+                {/* Badge performance */}
+                <Badge 
+                  className={`text-[9px] px-2 py-1 font-semibold ${
+                    displayScore >= 80 ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/40' :
+                    displayScore >= 60 ? 'bg-[#f5a623]/25 text-[#f5a623] border border-[#f5a623]/40' :
+                    'bg-red-500/25 text-red-300 border border-red-400/40'
+                  }`}
+                >
+                  {displayScore >= 80 ? '★ EXCELLENT' : displayScore >= 60 ? '● BON' : '○ MOYEN'}
+                </Badge>
                 
                 {/* Mini jauge circulaire */}
-                <div className="relative w-12 h-12">
+                <div className="relative w-11 h-11">
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#374151" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="14" fill="none" stroke="#1f2937" strokeWidth="3" />
                     <circle 
-                      cx="18" cy="18" r="15" fill="none" 
+                      cx="18" cy="18" r="14" fill="none" 
                       stroke={displayScore >= 80 ? '#22c55e' : displayScore >= 60 ? '#f5a623' : '#ef4444'}
                       strokeWidth="3" 
                       strokeLinecap="round"
-                      strokeDasharray={`${displayScore * 0.94} 100`}
+                      strokeDasharray={`${displayScore * 0.88} 100`}
                       className="transition-all duration-700"
+                      style={{ filter: `drop-shadow(0 0 6px ${displayScore >= 80 ? '#22c55e' : displayScore >= 60 ? '#f5a623' : '#ef4444'})` }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-white">{displayScore}%</span>
+                    <span className="text-[9px] font-bold text-white">{displayScore}%</span>
                   </div>
                 </div>
               </div>
             </div>
             
-            {/* Grille des métriques - Layout horizontal compact */}
-            <div className="px-3 py-3">
-              <div className="grid grid-cols-3 gap-2">
+            {/* Séparateur subtil */}
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
+            
+            {/* Grille des métriques - Layout horizontal ultra-compact */}
+            <div className="px-3 py-2.5">
+              <div className="grid grid-cols-6 gap-1.5">
                 {SCORE_CATEGORIES.map((cat) => {
                   const score = categoryScores[cat.id] || 0;
                   const colorClass = score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-[#f5a623]' : 'text-red-400';
-                  const bgClass = score >= 80 ? 'bg-emerald-500/10' : score >= 60 ? 'bg-[#f5a623]/10' : 'bg-red-500/10';
-                  const borderClass = score >= 80 ? 'border-emerald-500/20' : score >= 60 ? 'border-[#f5a623]/20' : 'border-red-500/20';
+                  const bgClass = score >= 80 ? 'bg-emerald-500/15' : score >= 60 ? 'bg-[#f5a623]/15' : 'bg-red-500/15';
+                  const glowColor = score >= 80 ? 'rgba(34,197,94,0.3)' : score >= 60 ? 'rgba(245,166,35,0.3)' : 'rgba(239,68,68,0.3)';
                   
                   return (
                     <div 
                       key={cat.id} 
-                      className={`${bgClass} ${borderClass} border rounded-lg p-2 text-center hover:scale-105 transition-transform cursor-default`}
+                      className={`${bgClass} rounded-lg p-1.5 text-center hover:scale-110 transition-all duration-200 cursor-default group`}
                       title={`${cat.name}: ${score}%`}
+                      style={{ boxShadow: `0 0 10px ${glowColor}` }}
                     >
-                      <div className="text-base mb-0.5">{cat.icon}</div>
-                      <div className={`text-sm font-bold ${colorClass}`}>{score}%</div>
-                      <div className="text-[9px] text-gray-500 truncate">{cat.name}</div>
+                      <div className="text-sm mb-0.5 group-hover:scale-110 transition-transform">{cat.icon}</div>
+                      <div className={`text-xs font-bold ${colorClass}`}>{score}%</div>
+                      <div className="text-[7px] text-gray-500 truncate leading-tight">{cat.name}</div>
                     </div>
                   );
                 })}
               </div>
             </div>
             
-            {/* Footer avec position */}
-            <div className="px-3 py-2 bg-gray-950/50 border-t border-gray-800/30">
-              <div className="flex items-center justify-between text-[10px]">
+            {/* Footer minimal avec position */}
+            <div className="px-3 py-1.5 bg-black/30 border-t border-gray-800/30">
+              <div className="flex items-center justify-between text-[9px]">
                 <span className="text-gray-500 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  Position
+                  <MapPin className="h-2.5 w-2.5" />
+                  <span className="uppercase tracking-wide">Position</span>
                 </span>
-                <span className="font-mono text-gray-400">
-                  {currentMapCenter.lat.toFixed(4)}°, {currentMapCenter.lng.toFixed(4)}°
+                <span className="font-mono text-gray-400 tabular-nums">
+                  {currentMapCenter.lat.toFixed(4)}° N, {currentMapCenter.lng.toFixed(4)}° W
                 </span>
               </div>
             </div>
