@@ -450,17 +450,12 @@ const BionicForestZonesLayer = ({
   
   if (!enabled) return null;
   
-  // Message si WMS non disponible
-  if (!wmsAvailable && !showCanadaForest) {
+  // Affichage pendant la vérification
+  if (wmsAvailable === null) {
     return (
       <>
         <WMSLegend 
-          activeLayers={[{ 
-            id: 'unavailable', 
-            name: 'Service WMS temporairement indisponible', 
-            source: 'Réessayer plus tard',
-            active: false 
-          }]} 
+          activeLayers={activeLayers} 
           position="bottomright" 
         />
       </>
