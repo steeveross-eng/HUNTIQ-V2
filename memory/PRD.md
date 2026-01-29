@@ -3,8 +3,8 @@
 ## Project Overview
 **Application**: HUNTIQ / Chasse Bionic™  
 **Type**: Full-stack hunting platform with AI-powered analysis, marketplace, territory mapping, and e-commerce  
-**Last Updated**: January 29, 2026  
-**Architecture Version**: 2.0 - Modular (Micro-Frontends + Microservices Ready)
+**Last Updated**: January 29, 2026 (Session 2)  
+**Architecture Version**: 2.1 - Modular (Micro-Frontends + Microservices + WMS Proxy)
 
 ---
 
@@ -12,11 +12,11 @@
 
 ### Tech Stack
 - **Frontend**: React 18 + Tailwind CSS + Shadcn UI + Leaflet Maps
-- **Backend**: FastAPI (Python) + MongoDB
+- **Backend**: FastAPI (Python) + MongoDB + httpx (WMS Proxy)
 - **APIs**: 50+ modules including AI analysis, geospatial, e-commerce
-- **Architecture**: Modular (Micro-Frontends + Microservices Ready) ⭐ NEW
+- **Architecture**: Modular (Micro-Frontends + Microservices Ready) ⭐ v2.1
 
-### Modular Architecture v2.0
+### Modular Architecture v2.1
 ```
 ┌───────────────────────────────────────────────────────────┐
 │                    SHELL APPLICATION                       │
@@ -32,6 +32,7 @@
 ├─────────────┬─────────────┬─────────────┬─────────────────┤
 │ MS-BIONIC   │ MS-COMMERCE │  MS-AUTH    │ MS-ANALYTICS    │
 │ Territory   │ Orders/Pay  │  Users/JWT  │ Stats/Reports   │
+│ + WMS Proxy │             │             │                 │
 └─────────────┴─────────────┴─────────────┴─────────────────┘
 ```
 
@@ -40,26 +41,28 @@
 /app/
 ├── backend/
 │   ├── server.py                    # Main FastAPI (4500+ lines)
-│   ├── services/                    # ⭐ NEW: Microservice modules
-│   │   └── bionic_territory/        # BIONIC Territory Service v1.0
+│   ├── services/                    # ⭐ Microservice modules
+│   │   └── bionic_territory/        # BIONIC Territory Service v1.1
 │   │       ├── routes/
-│   │       │   └── territory_routes.py
+│   │       │   └── territory_routes.py  # + WMS Proxy endpoints
 │   │       └── __init__.py
 │   └── ...
 ├── frontend/src/
-│   ├── modules/                     # ⭐ NEW: Micro-Frontend modules
-│   │   └── bionic-territory/        # BIONIC Territory Module v1.0
+│   ├── modules/                     # ⭐ Micro-Frontend modules
+│   │   └── bionic-territory/        # BIONIC Territory Module v1.1
 │   │       ├── context/
 │   │       │   └── BionicTerritoryContext.jsx
 │   │       ├── components/
+│   │       │   ├── header/TerritoryHeader.jsx  # NEW
 │   │       │   ├── sidebar/LayersSidebar.jsx
+│   │       │   ├── sidebar/LayersPanelContent.jsx  # NEW
 │   │       │   └── controls/MapControlButtons.jsx
 │   │       └── index.js
 │   ├── pages/
 │   │   └── MonTerritoireBionicPage.jsx  # (En cours de refactoring)
 │   └── ...
 ├── docs/
-│   └── ARCHITECTURE.md              # ⭐ NEW: Documentation architecture
+│   └── ARCHITECTURE.md              # Documentation architecture
 └── memory/PRD.md
 ```
 
