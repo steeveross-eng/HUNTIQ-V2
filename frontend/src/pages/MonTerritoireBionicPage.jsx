@@ -1755,55 +1755,88 @@ const MonTerritoireBionicPage = () => {
                     
                     {/* Sous-couches BIONIC™ - Architecture pan-canadienne fusionnée */}
                     {activeBaseMap === 'bionic' && (
-                      <div className="mt-2 p-2 bg-[#f5a623]/10 rounded border border-[#f5a623]/30">
-                        <div className="text-[9px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
-                          🎯 Pipeline BIONIC_VECTOR_TILES_CANADA v1.0
+                      <div className={`mt-2 p-2 rounded border transition-all ${
+                        pipelineEnabled 
+                          ? 'bg-[#f5a623]/10 border-[#f5a623]/30' 
+                          : 'bg-gray-800/30 border-gray-700/30 opacity-60'
+                      }`}>
+                        {/* Header avec toggle ON-OFF */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1">
+                            <span className={pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}>🎯</span>
+                            <span className={`text-[9px] uppercase ${pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}`}>
+                              Pipeline v1.0
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setPipelineEnabled(!pipelineEnabled)}
+                            className={`px-2 py-0.5 rounded text-[8px] font-bold transition-all ${
+                              pipelineEnabled 
+                                ? 'bg-[#f5a623] text-black shadow-lg shadow-[#f5a623]/30' 
+                                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                            }`}
+                          >
+                            {pipelineEnabled ? 'ON' : 'OFF'}
+                          </button>
                         </div>
-                        <div className="space-y-1 text-[9px]">
-                          <div className="flex items-center justify-between">
-                            <span className="text-amber-400">⛰️ Topographie</span>
-                            <span className="text-amber-400">50%</span>
+                        
+                        {/* Sous-couches - affichées seulement si pipeline activé */}
+                        {pipelineEnabled && (
+                          <>
+                            <div className="space-y-1 text-[9px]">
+                              <div className="flex items-center justify-between">
+                                <span className="text-amber-400">⛰️ Topographie</span>
+                                <span className="text-amber-400">50%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400">🪨 Géologie</span>
+                                <span className="text-gray-500">OFF</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-blue-400">💧 Hydrologie</span>
+                                <span className="text-blue-400">70%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-green-400">🌲 Écoforestier</span>
+                                <span className="text-green-400">60%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-purple-400">🏛️ Administratif</span>
+                                <span className="text-purple-400">80%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-300">🛣️ Routes</span>
+                                <span className="text-gray-300">90%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-red-400">🏙️ Urbain</span>
+                                <span className="text-red-400">40%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[#f5a623]">🎯 Score Faunique</span>
+                                <span className="text-[#f5a623]">80%</span>
+                              </div>
+                            </div>
+                            {/* Info niveaux de zoom */}
+                            <div className="mt-2 pt-2 border-t border-[#f5a623]/30">
+                              <div className="text-[8px] text-gray-500 mb-1">Niveaux de zoom adaptatifs</div>
+                              <div className="grid grid-cols-5 gap-0.5 text-[7px]">
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">0-4</div>
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">5-7</div>
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">8-10</div>
+                                <div className="text-center p-0.5 rounded bg-blue-700/50 text-blue-300">11-14</div>
+                                <div className="text-center p-0.5 rounded bg-green-700/50 text-green-300">15-18</div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        
+                        {/* Message si désactivé */}
+                        {!pipelineEnabled && (
+                          <div className="text-[9px] text-gray-500 text-center py-2">
+                            Pipeline désactivé - Hotspots et simulation masqués
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400">🪨 Géologie</span>
-                            <span className="text-gray-500">OFF</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-blue-400">💧 Hydrologie</span>
-                            <span className="text-blue-400">70%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-green-400">🌲 Écoforestier</span>
-                            <span className="text-green-400">60%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-purple-400">🏛️ Administratif</span>
-                            <span className="text-purple-400">80%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-300">🛣️ Routes</span>
-                            <span className="text-gray-300">90%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-red-400">🏙️ Urbain</span>
-                            <span className="text-red-400">40%</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#f5a623]">🎯 Score Faunique</span>
-                            <span className="text-[#f5a623]">80%</span>
-                          </div>
-                        </div>
-                        {/* Info niveaux de zoom */}
-                        <div className="mt-2 pt-2 border-t border-[#f5a623]/30">
-                          <div className="text-[8px] text-gray-500 mb-1">Niveaux de zoom adaptatifs</div>
-                          <div className="grid grid-cols-5 gap-0.5 text-[7px]">
-                            <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">0-4</div>
-                            <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">5-7</div>
-                            <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">8-10</div>
-                            <div className="text-center p-0.5 rounded bg-blue-700/50 text-blue-300">11-14</div>
-                            <div className="text-center p-0.5 rounded bg-green-700/50 text-green-300">15-18</div>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
