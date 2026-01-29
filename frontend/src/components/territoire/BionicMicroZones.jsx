@@ -444,7 +444,7 @@ const MicroZone = ({ zone, isHovered, onHover, onLeave, showConcentric, isFavori
           offset={[0, -10]}
           className="bionic-zone-tooltip"
         >
-          <div className="bg-gray-900/95 border border-gray-700 rounded-lg p-3 min-w-[220px] shadow-xl">
+          <div className="bg-gray-900/95 border border-gray-700 rounded-lg p-3 min-w-[240px] shadow-xl">
             {/* En-tête avec icône et label */}
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">{module.icon}</span>
@@ -464,6 +464,46 @@ const MicroZone = ({ zone, isHovered, onHover, onLeave, showConcentric, isFavori
                 {displayPercentage}%
               </span>
             </div>
+            
+            {/* HABITAT_OPTIMAL_SYNTHESE : Score ajusté par espèce */}
+            {habitatScore !== undefined && (
+              <div className="mb-2 p-2 rounded bg-gray-800/80 border border-gray-600">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400 flex items-center gap-1">
+                    <span>🎯</span> Habitat Optimal
+                  </span>
+                  <span 
+                    className="font-bold text-sm"
+                    style={{ color: habitatColor }}
+                  >
+                    {Math.round(habitatScore)}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-gray-500">
+                    {selectedEspece === 'ORIGNAL' ? '🦌 Orignal' : 
+                     selectedEspece === 'CHEVREUIL' ? '🦌 Chevreuil' :
+                     selectedEspece === 'OURS_NOIR' ? '🐻 Ours Noir' :
+                     selectedEspece === 'DINDON' ? '🦃 Dindon' : selectedEspece}
+                  </span>
+                  <span 
+                    className="text-[10px] px-1.5 py-0.5 rounded"
+                    style={{ 
+                      backgroundColor: `${habitatColor}20`,
+                      color: habitatColor,
+                      border: `1px solid ${habitatColor}40`
+                    }}
+                  >
+                    {habitatLevel}
+                  </span>
+                </div>
+                {moduleWeight !== undefined && (
+                  <div className="text-[9px] text-gray-600 mt-1">
+                    Poids module: {Math.round(moduleWeight * 100)}%
+                  </div>
+                )}
+              </div>
+            )}
             
             {/* Interprétation */}
             <div 
