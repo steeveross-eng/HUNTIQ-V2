@@ -66,8 +66,10 @@ import BionicForestZonesLayer from '@/components/territoire/BionicForestZonesLay
 import { 
   BionicTerritoryProvider,
   LayersSidebar,
+  LayersPanelContent,
   MapControlButtons,
   WaypointModeIndicator,
+  TerritoryHeader,
   BASE_MAPS as MODULE_BASE_MAPS,
   PIPELINE_LAYERS as MODULE_PIPELINE_LAYERS
 } from '@/modules/bionic-territory';
