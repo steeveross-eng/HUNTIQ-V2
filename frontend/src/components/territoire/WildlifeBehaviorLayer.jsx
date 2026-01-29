@@ -464,16 +464,22 @@ const WildlifeBehaviorLayer = ({
     
     layer.bindPopup(popupContent, {
       maxWidth: 300,
-      className: 'bionic-behavior-popup'
+      className: 'bionic-behavior-popup',
+      autoPan: true,
+      autoPanPadding: [50, 180], // [horizontal, vertical] - 180px pour éviter le header
+      autoPanPaddingTopLeft: [50, 180], // Padding spécifique en haut à gauche
+      autoPanPaddingBottomRight: [50, 50],
+      keepInView: true
     });
     
-    // Tooltip rapide
+    // Tooltip rapide - direction 'bottom' pour éviter le header
     layer.bindTooltip(
       `${behaviorInfo.icon} ${behaviorInfo.name} (${behaviorScore}%)`,
       { 
         sticky: true, 
         className: 'bionic-behavior-tooltip',
-        direction: 'top'
+        direction: 'bottom',
+        offset: [0, 10]
       }
     );
     
