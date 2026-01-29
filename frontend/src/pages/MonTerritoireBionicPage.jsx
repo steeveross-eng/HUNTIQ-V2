@@ -2113,54 +2113,6 @@ const MonTerritoireBionicPage = () => {
                       </p>
                     </div>
                   )}
-                  
-                  {/* Alertes conditions optimales */}
-                  <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                    <AlertsPanel
-                      alerts={alerts}
-                      unreadCount={unreadAlertCount}
-                      onMarkRead={markAlertRead}
-                      onMarkAllRead={markAllAlertsRead}
-                      onRefresh={checkOptimalConditions}
-                      loading={favoritesLoading}
-                    />
-                  </div>
-                  
-                  {/* Zones favorites */}
-                  <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                    <FavoritesList
-                      favorites={favorites}
-                      onRemove={removeFavorite}
-                      onUpdateAlerts={updateAlertSettings}
-                      onViewConditions={getZoneConditions}
-                    />
-                  </div>
-                  
-                  {/* Séparateur */}
-                  <div className="border-t border-gray-700 my-2" />
-                  
-                  <div className="bg-[#f5a623]/10 rounded-lg p-3 border border-[#f5a623]/30">
-                    <div className="text-[10px] text-gray-400 uppercase">Score Global</div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-white">{displayScore}</span>
-                      <span className="text-gray-500">/100</span>
-                    </div>
-                  </div>
-                  
-                  {SCORE_CATEGORIES.map((cat) => {
-                    const score = categoryScores[cat.id] || 0;
-                    return (
-                      <div key={cat.id} className="bg-gray-800/50 rounded p-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-gray-300">{cat.icon} {cat.name}</span>
-                          <span className="text-xs font-bold text-white">{score}%</span>
-                        </div>
-                        <div className="h-1 bg-gray-700 rounded-full">
-                          <div className="h-full bg-[#f5a623] rounded-full" style={{ width: `${score}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
               )}
             </div>
