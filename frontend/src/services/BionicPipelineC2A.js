@@ -678,14 +678,43 @@ export const applyBionicPipelineC2A = (zones, layers = {}, options = {}) => {
         return {
           ...zone,
           relocated: true,
-          relocation_source: 'RELOCATE_FROM_URBAN_2000M'
+          relocation_source: 'RELOCATE_FROM_URBAN_AND_ROAD'
         };
       }
       return zone;
     });
   }
   
-  // Étape 4: Autocorrection hydrique (simulation)
+  // Étape 4: Filtrage routier (NOUVEAU)
+  if (layers.ROAD_FULL || options.enableRoadFilter !== false) {
+    const beforeCount = processedZones.length;
+    processedZones = processedZones.filter(zone => {
+      // Vérification intersection route
+      const isOnRoad = zone.flags?.includes('EXCL_INTERSECTS_ROAD') || 
+                       zone.flags?.includes('EXCL_CENTROID_ON_ROAD') ||
+                       zone.intersectsRoad;
+      if (isOnRoad) {
+        qaReports.road.failed++;
+        qaReports.road.issues.push({ zoneId: zone.id, issue: 'INTERSECTS_ROAD' });
+        return false;
+      }
+      
+      // Vérification buffer routes principales (100m)
+      const nearMajorRoad = zone.flags?.includes('EXCL_INTERSECTS_MAJOR_ROAD_BUFFER') ||
+                           zone.nearMajorRoad;
+      if (nearMajorRoad) {
+        qaReports.road.failed++;
+        qaReports.road.issues.push({ zoneId: zone.id, issue: 'NEAR_MAJOR_ROAD_100M' });
+        return false;
+      }
+      
+      qaReports.road.passed++;
+      return true;
+    });
+    stats.road_excluded = beforeCount - processedZones.length;
+  }
+  
+  // Étape 5: Autocorrection hydrique
   if (options.enableAutocorrect) {
     processedZones = processedZones.map(zone => {
       if (zone.needsHydricCorrection) {
@@ -707,11 +736,12 @@ export const applyBionicPipelineC2A = (zones, layers = {}, options = {}) => {
   return {
     Z_AFFICHAGE_FINAL: processedZones,
     pipeline: 'BIONIC_PIPELINE_TOTAL_C2A',
-    version: 'C2-A',
+    version: 'C2-A.1',
     stats,
     qa_reports: {
       QA_WATER_REPORT: qaReports.hydric,
-      QA_URBAN_REPORT: qaReports.urban
+      QA_URBAN_REPORT: qaReports.urban,
+      QA_ROAD_REPORT: qaReports.road
     },
     processing_time_ms: Math.round(endTime - startTime),
     timestamp: new Date().toISOString()
@@ -730,7 +760,10 @@ export const validateZoneC2A = (zone, layers = {}) => {
     QA_WATER_BUFFER_INTERSECT: true,
     QA_URBAN_INTERSECT: true,
     QA_URBAN_BUFFER_INTERSECT: true,
-    QA_URBAN_DISTANCE: true
+    QA_URBAN_DISTANCE: true,
+    QA_ROAD_INTERSECT: true,
+    QA_ROAD_MAJOR_BUFFER: true,
+    QA_ROAD_CENTROID: true
   };
   
   const issues = [];
@@ -743,6 +776,20 @@ export const validateZoneC2A = (zone, layers = {}) => {
   if (zone.intersectsWaterBuffer) {
     checks.QA_WATER_BUFFER_INTERSECT = false;
     issues.push('Intersecte WATER_BUF_5M');
+  }
+  
+  // Vérifications routières (NOUVEAU)
+  if (zone.intersectsRoad) {
+    checks.QA_ROAD_INTERSECT = false;
+    issues.push('Intersecte ROAD_FULL (route/chemin/autoroute)');
+  }
+  if (zone.nearMajorRoad) {
+    checks.QA_ROAD_MAJOR_BUFFER = false;
+    issues.push('Dans buffer 100m ROAD_MAJOR (autoroute/nationale/voie ferrée)');
+  }
+  if (zone.centroidOnRoad) {
+    checks.QA_ROAD_CENTROID = false;
+    issues.push('Centre de zone sur une route');
   }
   
   // Vérifications urbaines
