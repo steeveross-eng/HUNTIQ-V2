@@ -613,11 +613,14 @@ async def admin_login(login: AdminLogin):
 async def user_login(login: UserLogin):
     """Authentification utilisateur"""
     try:
+        logger.info(f"Login attempt for email: {login.email}")
         user = await db.users.find_one({"email": login.email})
+        logger.info(f"User found: {user is not None}")
         if not user:
             raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
         
         password_hash = hashlib.sha256(login.password.encode()).hexdigest()
+        logger.info(f"Password hash match: {user.get('password_hash') == password_hash}")
         if user.get("password_hash") != password_hash:
             raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
         
