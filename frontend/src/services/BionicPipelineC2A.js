@@ -278,6 +278,53 @@ export const BIONIC_EXCLUSION_FILTERS = {
       },
       action: 'flag'
     }
+  ],
+  // NOUVEAU: Exclusions routières
+  road: [
+    {
+      id: 'EXCL_INTERSECTS_ROAD',
+      target_layer: 'Z',
+      condition: {
+        type: 'spatial',
+        operator: 'intersects',
+        with_layer: 'ROAD_FULL'
+      },
+      action: 'flag',
+      description: 'Zone intersecte une route/chemin/autoroute'
+    },
+    {
+      id: 'EXCL_CENTROID_ON_ROAD',
+      target_layer: 'Z',
+      condition: {
+        type: 'spatial',
+        operator: 'within',
+        geometry_source: 'centroid',
+        with_layer: 'ROAD_FULL'
+      },
+      action: 'flag',
+      description: 'Centre de zone sur une route'
+    },
+    {
+      id: 'EXCL_INTERSECTS_MAJOR_ROAD_BUFFER',
+      target_layer: 'Z',
+      condition: {
+        type: 'spatial',
+        operator: 'intersects',
+        with_layer: 'ROAD_MAJOR_BUF_100M'
+      },
+      action: 'flag',
+      description: 'Zone trop proche autoroute/nationale/voie ferrée (100m)'
+    },
+    {
+      id: 'EXCL_OVERLAP_ROAD_GT_5_PERCENT',
+      target_layer: 'Z',
+      condition: {
+        type: 'expression',
+        expression: '( area(intersection($geometry, ROAD_FULL)) / area($geometry) ) > 0.05'
+      },
+      action: 'flag',
+      description: 'Zone chevauche >5% de surface routière'
+    }
   ]
 };
 
