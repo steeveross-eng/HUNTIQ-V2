@@ -495,6 +495,20 @@ const WildlifeBehaviorLayer = ({
           </div>
         </div>
         
+        ${merged && mergedCount > 1 ? `
+          <div style="
+            background: rgba(100, 200, 255, 0.1);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-bottom: 12px;
+            font-size: 10px;
+            color: #88ccff;
+          ">
+            🔗 Zone fusionnée (${mergedCount} micro-zones)
+          </div>
+        ` : ''}
+        
         <div style="margin-bottom: 12px;">
           <div style="font-size: 10px; color: #f5a623; text-transform: uppercase; margin-bottom: 4px;">
             Description
