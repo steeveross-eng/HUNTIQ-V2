@@ -1571,6 +1571,46 @@ const MonTerritoireBionicPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
+                {/* Score Global - Style harmonisé avec bouton Waypoint */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="bg-gray-900/80 hover:bg-gray-800 border border-gray-700 hover:border-[#f5a623]/50 rounded-md px-4 h-10"
+                      data-testid="score-global-dropdown"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">Score Global</span>
+                        <span className="text-xl font-bold text-[#f5a623]">{displayScore}</span>
+                        <span className="text-xs text-gray-500">/100</span>
+                        <ChevronDown className="h-4 w-4 text-gray-400 ml-1" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-gray-900 border border-gray-700 w-64 p-3 z-[9999]" align="end">
+                    <div className="text-xs text-gray-500 uppercase mb-3 tracking-wide">Détail des scores</div>
+                    <div className="space-y-2">
+                      {SCORE_CATEGORIES.map((cat) => {
+                        const score = categoryScores[cat.id] || 0;
+                        return (
+                          <div key={cat.id} className="flex items-center justify-between py-1.5 px-2 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{cat.icon}</span>
+                              <span className="text-sm text-gray-300">{cat.name}</span>
+                            </div>
+                            <span className="text-sm font-semibold text-[#f5a623]">{score}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-700">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Position</span>
+                        <span className="font-mono">{currentMapCenter.lat.toFixed(4)}, {currentMapCenter.lng.toFixed(4)}</span>
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </Tabs>
           </div>
