@@ -7,7 +7,7 @@ Architecture: Microservice-Ready
 - Services découplés
 - Prêt pour extraction vers microservice indépendant
 
-Version: 1.0.0
+Version: 1.1.0
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -16,6 +16,9 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 import logging
+import httpx
+import math
+import random
 
 logger = logging.getLogger(__name__)
 
