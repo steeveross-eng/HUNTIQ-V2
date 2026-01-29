@@ -671,16 +671,23 @@ Fonctionnalités implémentées:
 - [x] GPS LIVE avec flèche pointant vers le bas
 - [x] MODULE_HABITAT_OPTIMAL_SYNTHESE intégré
 - [x] Visualisation temps réel des scores habitat par espèce
+- [x] **WMS Proxy Backend** - Contournement CORS/IP pour données Québec ✅ NEW
+- [x] **Composants modulaires créés** - TerritoryHeader, LayersPanelContent ✅ NEW
 
-### P1 - High Priority
-- [ ] **Refactoring de MonTerritoireBionicPage.jsx** (~2700 lignes) - URGENT
-  - Intégrer `ZoneControlPanel.jsx`, `MapToolbar.jsx`, `LayersPanel.jsx`
-  - Intégrer `WaypointCreationMenu.jsx`, `TerritoryTabsHeader.jsx`
+### P1 - High Priority (EN COURS)
+- [~] **Refactoring de MonTerritoireBionicPage.jsx** (~2985 lignes) - EN COURS
+  - ✅ TerritoryHeader.jsx créé
+  - ✅ LayersPanelContent.jsx créé
+  - [ ] Remplacer le header inline par TerritoryHeader
+  - [ ] Remplacer le sidebar inline par LayersPanelContent
+  - [ ] Migrer les useState vers BionicTerritoryContext
+- [ ] **Activer les couches Québec via proxy** dans MonTerritoireBionicPage
+  - Ajouter props showQuebecEco, showQuebecLidar, showQuebecTWI
 - [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
 - [ ] Test complet du système de backup avec credentials utilisateur
-- [ ] Import/Export GPX/KML pour les waypoints
 
 ### P2 - Medium Priority
+- [ ] Import/Export GPX/KML pour les waypoints
 - [ ] Bouton "Exporter Styles" (QGIS/ArcGIS) via BionicStyleExporter.js
 - [ ] Correction de la flèche GPS LIVE (stem non visible)
 - [ ] Correction des warnings ESLint (apostrophes non-échappées)
@@ -696,7 +703,16 @@ Fonctionnalités implémentées:
 
 ## Next Tasks List
 
-1. **Configuration Backup Cloud** (User action required)
+1. **Compléter le refactoring** (Session suivante)
+   - Intégrer TerritoryHeader dans MonTerritoireBionicPage
+   - Intégrer LayersPanelContent dans le panneau latéral
+   - Réduire la taille de MonTerritoireBionicPage sous 1500 lignes
+
+2. **Activer les données Québec** 
+   - Ajouter UI pour toggle les couches WMS Québec
+   - Tester avec les 3 couches (peuplements, LiDAR, TWI)
+
+3. **Configuration Backup Cloud** (User action required)
    - Créer compte MongoDB Atlas
    - Créer bucket Google Cloud Storage
    - Entrer credentials dans Admin > BACKUP
