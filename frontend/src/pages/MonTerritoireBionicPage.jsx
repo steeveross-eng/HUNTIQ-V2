@@ -1944,21 +1944,9 @@ const MonTerritoireBionicPage = () => {
                           />
                         </div>
                         
-                        {/* Seuil minimum */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] text-gray-400">Seuil min.</span>
-                            <span className="text-[10px] text-[#f5a623]">{minPercentageFilter}%</span>
-                          </div>
-                          <input 
-                            type="range" 
-                            min="30" 
-                            max="80" 
-                            step="5"
-                            value={minPercentageFilter}
-                            onChange={(e) => setMinPercentageFilter(parseInt(e.target.value))}
-                            className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#f5a623]"
-                          />
+                        {/* Indicateur seuil fixé à 80-100% */}
+                        <div className="text-[9px] text-gray-500 text-center py-1 border-t border-gray-700/50 mt-1">
+                          Affichage: zones 80-100% uniquement
                         </div>
                       </div>
                     )}
