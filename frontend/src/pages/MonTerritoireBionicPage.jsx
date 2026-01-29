@@ -1571,61 +1571,6 @@ const MonTerritoireBionicPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
-                {/* Score Global avec Dropdown - Agrandi x1.3 */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="bg-[#f5a623]/15 hover:bg-[#f5a623]/25 border border-[#f5a623]/40 rounded-lg px-4 py-3 h-auto"
-                      data-testid="score-global-dropdown"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-left">
-                          <div className="text-[11px] text-gray-400 uppercase tracking-wide">Score Global</div>
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-[32px] font-bold text-white leading-none">{displayScore}</span>
-                            <span className="text-gray-500 text-lg">/100</span>
-                          </div>
-                        </div>
-                        <ChevronDown className="h-5 w-5 text-[#f5a623]" />
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-900 border-gray-700 w-72 p-3 z-[9999]" align="end">
-                    <div className="text-xs text-gray-400 uppercase mb-3 font-medium">Détails du Score</div>
-                    <div className="space-y-2">
-                      {SCORE_CATEGORIES.map((cat) => {
-                        const score = categoryScores[cat.id] || 0;
-                        return (
-                          <div key={cat.id} className="bg-gray-800/60 rounded-lg p-2.5">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm text-gray-200 flex items-center gap-2">
-                                <span className="text-base">{cat.icon}</span>
-                                {cat.name}
-                              </span>
-                              <span className="text-sm font-bold text-white">{score}%</span>
-                            </div>
-                            <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{ 
-                                  width: `${score}%`,
-                                  backgroundColor: score >= 80 ? '#22c55e' : score >= 60 ? '#f5a623' : '#ef4444'
-                                }} 
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-gray-700">
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>Position analysée</span>
-                        <span className="font-mono">{currentMapCenter.lat.toFixed(4)}, {currentMapCenter.lng.toFixed(4)}</span>
-                      </div>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </Tabs>
           </div>
