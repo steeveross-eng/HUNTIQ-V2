@@ -4,6 +4,11 @@
  * Composant de rendu des zones BIONIC micro-délimitées
  * Style visuel "DANY LAVOIE" - SEGMENTATION AVANCÉE avec CLIPPING GÉOMÉTRIQUE
  * 
+ * PIPELINE ACTIF: BIONIC_PIPELINE_TOTAL_C2A
+ * - Hydrique + Urbain + Relocalisation intelligente
+ * - QA essentiels + Autocorrection hydrique
+ * - Output final: Z_AFFICHAGE_FINAL
+ * 
  * RÈGLES CLÉS DE RENDU :
  * 1. Chaque zone = entité graphique INDÉPENDANTE
  * 2. Superpositions = couches DISTINCTES visibles simultanément
@@ -32,6 +37,10 @@ import {
 
 // Import du système de pondération habitat optimal
 import { calculateAdjustedScore, getModuleWeight } from '@/hooks/useHabitatOptimal';
+
+// Import du pipeline BIONIC C2-A
+import { BIONIC_PIPELINE_TOTAL_C2A, applyBionicPipelineC2A, validateZoneC2A } from '@/services/BionicPipelineC2A';
+
 
 // Configuration des modules thématiques - COULEURS OFFICIELLES BIONIC™
 // Mapping vers les nouvelles couleurs définies
