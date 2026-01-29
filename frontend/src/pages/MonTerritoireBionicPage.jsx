@@ -2169,8 +2169,8 @@ const MonTerritoireBionicPage = () => {
                   <div className="bionic-private-overlay" />
                 )}
                 
-                {/* BIONIC™ ZONES FORESTIÈRES COLORÉES - Visible quand BIONIC est actif */}
-                {activeBaseMap === 'bionic' && pipelineEnabled && (
+                {/* BIONIC™ ZONES FORESTIÈRES COLORÉES - Toujours actif sur tous les fonds de carte */}
+                {pipelineEnabled && (
                   <BionicForestZonesLayer
                     mapCenter={mapCenter}
                     enabled={true}
@@ -2181,8 +2181,8 @@ const MonTerritoireBionicPage = () => {
                   />
                 )}
                 
-                {/* Hotspots et trajets d'approche BIONIC - Visible uniquement en mode BIONIC */}
-                {activeBaseMap === 'bionic' && carteBionic && pipelineEnabled && (
+                {/* Hotspots et trajets d'approche BIONIC - Toujours actif sur tous les fonds de carte */}
+                {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
                     generatorResults={carteBionic}
                     mapCenter={mapCenter}
@@ -2196,8 +2196,8 @@ const MonTerritoireBionicPage = () => {
                 )}
               </MapContainer>
               
-              {/* BIONIC™ MAP OVERLAY - Effet visuel 10X distinctif */}
-              {activeBaseMap === 'bionic' && pipelineEnabled && (
+              {/* BIONIC™ MAP OVERLAY - Toujours actif sur tous les fonds de carte */}
+              {pipelineEnabled && (
                 <BionicMapOverlay
                   active={true}
                   showBorder={true}
