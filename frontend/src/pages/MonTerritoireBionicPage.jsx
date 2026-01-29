@@ -2271,6 +2271,21 @@ const MonTerritoireBionicPage = () => {
                   />
                 )}
                 
+                {/* ZONES COMPORTEMENTALES DU GIBIER - Circulation, Cache, Alimentation, Repos */}
+                {pipelineEnabled && showBehaviorZones && (
+                  <WildlifeBehaviorLayer
+                    mapCenter={mapCenter}
+                    enabled={true}
+                    targetSpecies={selectedEspece}
+                    showLegend={true}
+                    minScore={60}
+                    activeBehaviors={activeBehaviors}
+                    onZoneClick={(zoneProps) => {
+                      console.log('[BIONIC] Zone comportementale cliquée:', zoneProps);
+                    }}
+                  />
+                )}
+                
                 {/* Hotspots et trajets d'approche BIONIC - Toujours actif sur tous les fonds de carte */}
                 {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
