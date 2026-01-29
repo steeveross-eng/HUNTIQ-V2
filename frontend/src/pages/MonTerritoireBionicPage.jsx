@@ -2376,6 +2376,17 @@ const MonTerritoireBionicPage = () => {
                   />
                 )}
                 
+                {/* OVERLAY TOPOGRAPHIQUE - Courbes de niveau et relief */}
+                <TopographicOverlay
+                  enabled={topoEnabled}
+                  showHillshade={topoHillshade}
+                  hillshadeOpacity={topoHillshadeOpacity}
+                  showContours={topoContours}
+                  contourStyle={topoContourStyle}
+                  showElevationIndicator={topoEnabled}
+                  showLegend={topoEnabled && topoContours}
+                />
+                
                 {/* Hotspots et trajets d'approche BIONIC - Toujours actif sur tous les fonds de carte */}
                 {carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
