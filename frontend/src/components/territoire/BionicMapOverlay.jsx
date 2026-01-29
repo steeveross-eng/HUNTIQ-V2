@@ -383,15 +383,30 @@ const BionicMapOverlay = ({
   onActivate
 }) => {
   const [justActivated, setJustActivated] = useState(active);
+  const activationTimerRef = useRef(null);
   
   useEffect(() => {
-    if (active) {
-      setJustActivated(true);
-      const timer = setTimeout(() => setJustActivated(false), 3500);
-      return () => clearTimeout(timer);
-    } else {
-      setJustActivated(false);
+    // Clear any existing timer
+    if (activationTimerRef.current) {
+      clearTimeout(activationTimerRef.current);
     }
+    
+    if (active) {
+      // Use setTimeout to defer the state update
+      activationTimerRef.current = setTimeout(() => {
+        setJustActivated(true);
+        // Hide after 3.5 seconds
+        activationTimerRef.current = setTimeout(() => setJustActivated(false), 3500);
+      }, 0);
+    } else {
+      activationTimerRef.current = setTimeout(() => setJustActivated(false), 0);
+    }
+    
+    return () => {
+      if (activationTimerRef.current) {
+        clearTimeout(activationTimerRef.current);
+      }
+    };
   }, [active]);
   
   return (
