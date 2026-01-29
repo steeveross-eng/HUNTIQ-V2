@@ -86,13 +86,15 @@ const BionicBorderGlow = ({ active, intensity = 'high' }) => {
 // ═══════════════════════════════════════════════════════════════
 
 const BionicActiveIndicator = ({ show, version = '3.3' }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(show);
   
   useEffect(() => {
     if (show) {
       setVisible(true);
       const timer = setTimeout(() => setVisible(false), 3000);
       return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
     }
   }, [show]);
   
