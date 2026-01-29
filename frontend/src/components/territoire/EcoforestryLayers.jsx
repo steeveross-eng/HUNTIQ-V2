@@ -1377,6 +1377,7 @@ const EcoforestryLayers = ({
 }) => {
   const baseMap = BASE_MAPS[baseMapId] || BASE_MAPS.dark;
   const isEcoMapSelected = baseMapId === 'ecoforestry';
+  const isBionicCanadaSelected = baseMapId === 'bionic_canada';
   
   // LOGIQUE DE FALLBACK SIMPLIFIÉE:
   // Si le fond écoforestier est sélectionné, toujours utiliser le fallback
@@ -1389,8 +1390,13 @@ const EcoforestryLayers = ({
   // Déterminer le fond de carte effectif à utiliser
   let effectiveBaseMap;
   let shouldRenderWMS = false;
+  let shouldRenderVectorTiles = false;
   
-  if (isEcoMapSelected) {
+  if (isBionicCanadaSelected) {
+    // Mode BIONIC Canada - Tuiles vectorielles
+    effectiveBaseMap = baseMap;
+    shouldRenderVectorTiles = true;
+  } else if (isEcoMapSelected) {
     // Mode écoforestier sélectionné
     if (fallbackStatus === EcoMapStatus.AVAILABLE) {
       // WMS confirmé disponible - utiliser le WMS
@@ -1420,6 +1426,14 @@ const EcoforestryLayers = ({
   
   return (
     <>
+      {/* BIONIC Canada Vector Tiles Layer */}
+      {shouldRenderVectorTiles && (
+        <BionicCanadaVectorLayer
+          enabled={true}
+          layerConfig={baseMap.layers || {}}
+        />
+      )}
+      
       {/* Base Map Layer - avec fallback automatique */}
       {shouldRenderWMS ? (
         <WMSTileLayer
@@ -1434,11 +1448,21 @@ const EcoforestryLayers = ({
           format="image/png"
           transparent={false}
         />
-      ) : (
+      ) : !shouldRenderVectorTiles ? (
         <TileLayer
           url={effectiveBaseMap.url}
           attribution={effectiveBaseMap.attribution}
           maxZoom={effectiveBaseMap.maxZoom || 18}
+        />
+      ) : null}
+      
+      {/* Fond de base pour BIONIC Canada (sous les tuiles vectorielles) */}
+      {shouldRenderVectorTiles && (
+        <TileLayer
+          url="https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw"
+          attribution="&copy; Mapbox"
+          maxZoom={18}
+          opacity={0.3}
         />
       )}
       
