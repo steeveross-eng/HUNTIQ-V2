@@ -2181,8 +2181,8 @@ const MonTerritoireBionicPage = () => {
                   />
                 )}
                 
-                {/* Hotspots et trajets d'approche BIONIC - Contrôlé par pipelineEnabled */}
-                {carteBionic && pipelineEnabled && (
+                {/* Hotspots et trajets d'approche BIONIC - Visible uniquement en mode BIONIC */}
+                {activeBaseMap === 'bionic' && carteBionic && pipelineEnabled && (
                   <BionicHotspotsLayer
                     generatorResults={carteBionic}
                     mapCenter={mapCenter}
