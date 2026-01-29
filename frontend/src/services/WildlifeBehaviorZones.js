@@ -17,6 +17,7 @@
 
 /**
  * Comportements du gibier avec couleurs distinctives BIONIC
+ * COULEURS OPTIMISÉES pour visibilité maximale
  */
 export const WILDLIFE_BEHAVIORS = {
   // 🦌 CIRCULATION - Corridors de déplacement
@@ -25,8 +26,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Corridor de circulation',
     icon: '🦌',
     description: 'Zones de déplacement préférées',
-    color: '#ff6b35',           // Orange vif
-    glowColor: '#ff8c5a',
+    color: '#ff5500',           // Orange INTENSE
+    glowColor: '#ff7733',
     pattern: 'arrows',
     criteria: {
       forestTypes: ['MIX', 'FIM', 'REM'],
@@ -45,8 +46,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Zone de cache/abri',
     icon: '🌲',
     description: 'Couvert dense pour se cacher',
-    color: '#00ff88',           // Vert néon
-    glowColor: '#33ffaa',
+    color: '#00ff44',           // Vert NÉON INTENSE
+    glowColor: '#44ff77',
     pattern: 'dense',
     criteria: {
       forestTypes: ['EPN', 'SAB', 'THO', 'PRU'],
@@ -65,8 +66,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Zone d\'alimentation',
     icon: '🍂',
     description: 'Ressources alimentaires abondantes',
-    color: '#ffd93d',           // Jaune doré
-    glowColor: '#ffe066',
+    color: '#ffcc00',           // Jaune OR INTENSE
+    glowColor: '#ffdd44',
     pattern: 'dots',
     criteria: {
       forestTypes: ['BOJ', 'ERS', 'ERR', 'PET', 'FRN', 'BOP'],
@@ -85,8 +86,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Zone de repos/dortoir',
     icon: '🛏️',
     description: 'Ravages et zones de repos nocturne',
-    color: '#c084fc',           // Violet
-    glowColor: '#d8b4fe',
+    color: '#aa44ff',           // Violet INTENSE
+    glowColor: '#cc77ff',
     pattern: 'circles',
     criteria: {
       forestTypes: ['EPN', 'SAB', 'THO', 'MEL'],
@@ -105,8 +106,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Point d\'eau',
     icon: '💧',
     description: 'Sources d\'eau et zones humides',
-    color: '#00d4ff',           // Cyan vif
-    glowColor: '#33e0ff',
+    color: '#00ccff',           // Cyan ÉLECTRIQUE
+    glowColor: '#44ddff',
     pattern: 'waves',
     criteria: {
       forestTypes: ['MIL', 'EAU'],
@@ -125,8 +126,8 @@ export const WILDLIFE_BEHAVIORS = {
     name: 'Hotspot Optimal BIONIC',
     icon: '🔥',
     description: 'Zone à très haute probabilité de présence',
-    color: '#ff0066',           // Rose/Magenta vif
-    glowColor: '#ff3385',
+    color: '#ff0055',           // Rose/Magenta ÉLECTRIQUE
+    glowColor: '#ff4488',
     pattern: 'pulse',
     criteria: {
       multiZone: true,          // Intersection de plusieurs comportements
