@@ -7,7 +7,6 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { 
-  Circle, 
   Polygon, 
   Popup, 
   Tooltip,
