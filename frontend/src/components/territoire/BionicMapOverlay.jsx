@@ -87,15 +87,30 @@ const BionicBorderGlow = ({ active, intensity = 'high' }) => {
 
 const BionicActiveIndicator = ({ show, version = '3.3' }) => {
   const [visible, setVisible] = useState(show);
+  const timerRef = useRef(null);
   
   useEffect(() => {
-    if (show) {
-      setVisible(true);
-      const timer = setTimeout(() => setVisible(false), 3000);
-      return () => clearTimeout(timer);
-    } else {
-      setVisible(false);
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
+    
+    if (show) {
+      // Use setTimeout to defer the state update
+      timerRef.current = setTimeout(() => {
+        setVisible(true);
+        // Hide after 3 seconds
+        timerRef.current = setTimeout(() => setVisible(false), 3000);
+      }, 0);
+    } else {
+      timerRef.current = setTimeout(() => setVisible(false), 0);
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
   }, [show]);
   
   if (!visible) return null;
