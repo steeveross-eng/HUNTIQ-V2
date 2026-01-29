@@ -519,8 +519,8 @@ const BionicForestZonesLayer = ({
         />
       )}
       
-      {/* Couches WMS Canada */}
-      {showCanadaForest && (
+      {/* Couches WMS Canada - Toujours disponible ou comme fallback */}
+      {(showCanadaForest || useCanadaFallback) && (
         <BionicWMSLayer
           config={CANADA_WMS_CONFIG.forest_cover}
           opacity={opacity * 0.7}
