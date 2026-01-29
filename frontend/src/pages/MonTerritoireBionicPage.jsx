@@ -762,6 +762,25 @@ const MonTerritoireBionicPage = () => {
     }));
   }, []);
   
+  // Callback pour mettre à jour le statut de chargement des couches WMS Québec
+  const handleQuebecLoadingStatus = useCallback((wmsStatus) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      ecoforestry: { 
+        ...prev.ecoforestry, 
+        loading: wmsStatus.quebec_eco === 'loading' 
+      },
+      lidar: { 
+        ...prev.lidar, 
+        loading: wmsStatus.quebec_lidar === 'loading' 
+      },
+      twi: { 
+        ...prev.twi, 
+        loading: wmsStatus.quebec_twi === 'loading' 
+      }
+    }));
+  }, []);
+  
   // Import du service d'exclusion permanent
   const filterWaterZonesRef = useRef(null);
   
