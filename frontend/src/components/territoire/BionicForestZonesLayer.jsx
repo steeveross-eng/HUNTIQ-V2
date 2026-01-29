@@ -566,7 +566,7 @@ const BionicForestZonesLayer = ({
           params={{
             // Paramètres passés au proxy
           }}
-          opacity={0.6}
+          opacity={quebecOpacities.eco}
           zIndex={400}
           attribution={WMS_PROXY_CONFIG.quebec_eco.attribution}
           eventHandlers={{
@@ -582,7 +582,7 @@ const BionicForestZonesLayer = ({
         <WMSTileLayer
           url={buildProxyUrl('quebec_lidar', 'lidar_dendro') + '&'}
           params={{}}
-          opacity={0.5}
+          opacity={quebecOpacities.lidar}
           zIndex={410}
           attribution={WMS_PROXY_CONFIG.quebec_lidar.attribution}
           eventHandlers={{
@@ -598,7 +598,7 @@ const BionicForestZonesLayer = ({
         <WMSTileLayer
           url={buildProxyUrl('quebec_terrain', 'twi') + '&'}
           params={{}}
-          opacity={0.4}
+          opacity={quebecOpacities.twi}
           zIndex={420}
           attribution={WMS_PROXY_CONFIG.quebec_twi.attribution}
           eventHandlers={{
