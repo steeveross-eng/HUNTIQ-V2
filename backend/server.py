@@ -617,14 +617,16 @@ async def admin_login(login: AdminLogin):
 async def user_login(login: UserLogin):
     """Authentification utilisateur"""
     try:
-        logger.info(f"Login attempt for email: {login.email}")
+        print(f"[AUTH] Login attempt for email: {login.email}")
         user = await db.users.find_one({"email": login.email})
-        logger.info(f"User found: {user is not None}")
+        print(f"[AUTH] User found: {user is not None}, user data: {user}")
         if not user:
             raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
         
         password_hash = hashlib.sha256(login.password.encode()).hexdigest()
-        logger.info(f"Password hash match: {user.get('password_hash') == password_hash}")
+        print(f"[AUTH] Input hash: {password_hash}")
+        print(f"[AUTH] Stored hash: {user.get('password_hash')}")
+        print(f"[AUTH] Match: {user.get('password_hash') == password_hash}")
         if user.get("password_hash") != password_hash:
             raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
         
@@ -652,7 +654,7 @@ async def user_login(login: UserLogin):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Login error: {e}")
+        print(f"[AUTH] Login error: {e}")
         raise HTTPException(status_code=500, detail="Erreur serveur")
 
 @api_router.post("/auth/register")
