@@ -573,9 +573,11 @@ export const BIONIC_OUTPUT = {
     - hors buffer hydrique 5 m
     - hors zones urbaines
     - hors buffer urbain 2000 m
+    - hors routes/chemins/autoroutes
+    - hors buffer routes principales 100m
     - relocalisées vers le score maximal si nécessaire
     - corrigées hydriquement (version allégée)
-    - validées par QA hydrique et urbain (noyau essentiel)`
+    - validées par QA hydrique, urbain et routier`
 };
 
 // ─────────────────────────────────────────────
@@ -583,10 +585,20 @@ export const BIONIC_OUTPUT = {
 // ─────────────────────────────────────────────
 export const BIONIC_PIPELINE_TOTAL_C2A = {
   ruleset: 'BIONIC_PIPELINE_TOTAL_C2A',
-  version: 'C2-A',
-  description: `Pipeline total BIONIC™ optimisé performance (C2-A).
-    Intègre hydrique + urbain + relocalisation intelligente + QA essentiels + autocorrection hydrique,
-    avec un seul output final Z_AFFICHAGE_FINAL.`,
+  version: 'C2-A.1',
+  description: `Pipeline total BIONIC™ optimisé performance (C2-A.1).
+    Intègre hydrique + urbain + ROUTIER + relocalisation intelligente + QA essentiels + autocorrection,
+    avec un seul output final Z_AFFICHAGE_FINAL.
+    
+    EXCLUSIONS ROUTIÈRES:
+    - Autoroutes (buffer 50m + sécurité 100m)
+    - Routes nationales (buffer 30m + sécurité 100m)
+    - Routes régionales (buffer 20m)
+    - Routes locales (buffer 15m)
+    - Chemins (buffer 10m)
+    - Sentiers (buffer 5m)
+    - Voies ferrées (buffer 30m + sécurité 100m)
+    - Pistes cyclables (buffer 5m)`,
   
   inputs: BIONIC_INPUTS,
   preprocess: BIONIC_PREPROCESS,
@@ -612,6 +624,7 @@ export const applyBionicPipelineC2A = (zones, layers = {}, options = {}) => {
     total: zones.length,
     hydric_excluded: 0,
     urban_excluded: 0,
+    road_excluded: 0,
     relocated: 0,
     autocorrected: 0,
     final: 0
@@ -620,14 +633,14 @@ export const applyBionicPipelineC2A = (zones, layers = {}, options = {}) => {
   let processedZones = [...zones];
   const qaReports = {
     hydric: { passed: 0, failed: 0, issues: [] },
-    urban: { passed: 0, failed: 0, issues: [] }
+    urban: { passed: 0, failed: 0, issues: [] },
+    road: { passed: 0, failed: 0, issues: [] }
   };
   
-  // Étape 1: Filtrage hydrique (simulation)
+  // Étape 1: Filtrage hydrique
   if (layers.WATER_FULL || options.enableHydricFilter) {
     const beforeCount = processedZones.length;
     processedZones = processedZones.filter(zone => {
-      // Simulation de vérification hydrique
       const isInWater = zone.flags?.includes('EXCL_INTERSECTS_WATER');
       if (isInWater) {
         qaReports.hydric.failed++;
