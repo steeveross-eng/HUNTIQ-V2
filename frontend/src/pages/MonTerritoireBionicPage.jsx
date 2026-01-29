@@ -1831,6 +1831,28 @@ const MonTerritoireBionicPage = () => {
                   />
                   
                   {/* ═══════════════════════════════════════════════════════════
+                      ANALYSE PAR WAYPOINT - Zone Focalisée
+                  ═══════════════════════════════════════════════════════════ */}
+                  <ZoneAnalysisControlPanel
+                    enabled={zoneAnalysisEnabled}
+                    onToggle={toggleZoneAnalysis}
+                    selectedWaypoint={zoneAnalysisWaypoint}
+                    waypoints={activeWaypoints}
+                    onSelectWaypoint={(wp) => {
+                      setZoneAnalysisWaypoint(wp);
+                      if (wp) {
+                        setMapCenter([wp.lat, wp.lng]);
+                        setMapZoom(14);
+                      }
+                    }}
+                    analysisArea={zoneAnalysisArea}
+                    onAreaChange={setZoneAnalysisArea}
+                    analysisResult={zoneAnalysisResult}
+                    collapsed={zoneAnalysisCollapsed}
+                    onToggleCollapse={() => setZoneAnalysisCollapsed(!zoneAnalysisCollapsed)}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
                       GÉNÉRATEUR CARTE BIONIC™ v3.1
                   ═══════════════════════════════════════════════════════════ */}
                   <div className="border-t border-gray-700 pt-2 mt-2">
