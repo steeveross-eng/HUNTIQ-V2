@@ -227,6 +227,7 @@ const QuebecLayersPanel = ({
 }) => {
   const activeCount = Object.values(layers).filter(l => l.enabled).length;
   const anyLoading = Object.values(layers).some(l => l.loading);
+  const loadingCount = Object.values(layers).filter(l => l.loading).length;
   
   return (
     <div className="border-b border-gray-700 pb-3 mb-2">
@@ -236,13 +237,17 @@ const QuebecLayersPanel = ({
             <span className="flex items-center gap-1.5">
               <span className="text-base">🗺️</span>
               <span>Couches Données Québec</span>
-              {activeCount > 0 && (
+              {activeCount > 0 && !anyLoading && (
                 <Badge className="bg-[#f5a623] text-black text-[8px] px-1.5 py-0">
                   {activeCount}/3
                 </Badge>
               )}
               {anyLoading && (
-                <Loader2 className="h-3 w-3 animate-spin text-[#f5a623]" />
+                <Badge className="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0 animate-pulse flex items-center gap-1">
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                  {loadingCount} en cours
+                </Badge>
+              )}
               )}
             </span>
             {collapsed ? (
