@@ -9,7 +9,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://huntiq-tracker-1.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://huntiq-habitat.preview.emergentagent.com')
 ADMIN_EMAIL = "steeve.ross@gmail.com"
 
 

@@ -8,7 +8,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://huntiq-tracker-1.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://huntiq-habitat.preview.emergentagent.com').rstrip('/')
 
 # Test user credentials
 TEST_USER_ID = f"TEST_user_{uuid.uuid4().hex[:8]}"
