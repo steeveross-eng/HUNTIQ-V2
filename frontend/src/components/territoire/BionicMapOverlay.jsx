@@ -367,13 +367,15 @@ const BionicMapOverlay = ({
   version = '3.3',
   onActivate
 }) => {
-  const [justActivated, setJustActivated] = useState(false);
+  const [justActivated, setJustActivated] = useState(active);
   
   useEffect(() => {
     if (active) {
       setJustActivated(true);
       const timer = setTimeout(() => setJustActivated(false), 3500);
       return () => clearTimeout(timer);
+    } else {
+      setJustActivated(false);
     }
   }, [active]);
   
