@@ -752,14 +752,14 @@ Fonctionnalités implémentées:
 ## Next Tasks List
 
 1. **Poursuivre le refactoring** (Prochaine session)
-   - Intégrer LayersPanelContent dans le panneau latéral
-   - Migrer les 50+ useState vers BionicTerritoryContext
+   - Intégrer LayersPanelContent modulaire dans le panneau latéral
+   - Migrer les 61 useState vers BionicTerritoryContext
    - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes
 
-2. **Implémenter l'analyse par Waypoint** (P0)
-   - Compléter WaypointZoneAnalysis.jsx
-   - UI pour sélection waypoint et rayon (2, 4, 10 km²)
-   - Générer un seul "hotspot" dans la zone
+2. **Améliorer l'analyse par Waypoint** (P2)
+   - Connecter au backend pour analyse réelle (vs simulation)
+   - Persister les résultats d'analyse
+   - Export des résultats (PDF/GPX)
 
 3. **Configuration Backup Cloud** (Action utilisateur requise)
    - Créer compte MongoDB Atlas
