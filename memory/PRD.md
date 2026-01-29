@@ -121,6 +121,12 @@
   - Affichage de la zone d'analyse circulaire
   - Identification du hotspot optimal
   - Toast de notification avec score et distance
+- ✅ **MODE TEMPS RÉEL ACTIVÉ** 🔥
+  - Toggle "Mode Temps Réel" avec Switch (activé par défaut)
+  - Sélection d'un waypoint → Analyse automatique instantanée
+  - Carte centrée automatiquement (zoom 14)
+  - Toast: "🔍 Analyse en cours..." puis "🎯 Hotspot optimal identifié: XX%"
+  - Changement de zone (2/4/10 km²) → Re-analyse automatique
 
 #### 📊 États ajoutés pour l'analyse
 - `zoneAnalysisEnabled` - Activation/désactivation de l'analyse
