@@ -4,6 +4,11 @@
  * Couche de visualisation des zones comportementales du gibier
  * Affiche les zones de: Circulation, Cache, Alimentation, Repos, Points d'eau
  * 
+ * VERSION 2.0 - Zones FUSIONNÉES et ORGANIQUES
+ * - Utilise Turf.js pour fusionner les polygones adjacents
+ * - Génère des formes organiques au lieu de cercles
+ * - Suit la topographie naturelle
+ * 
  * Visuel PUISSANT avec effets de glow, animations et légende interactive
  */
 
@@ -16,6 +21,10 @@ import {
   generateBehaviorLegend
 } from '@/services/WildlifeBehaviorZones';
 import { generateDemoForestData, FOREST_CLASSIFICATION } from '@/services/QuebecEcoforestryService';
+import { 
+  generateOrganicForestZones, 
+  mergeZonesByBehavior 
+} from '@/services/ZoneMerger';
 
 // ═══════════════════════════════════════════════════════════════
 // STYLES CSS DYNAMIQUES
