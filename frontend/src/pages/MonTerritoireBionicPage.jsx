@@ -898,6 +898,23 @@ const MonTerritoireBionicPage = () => {
     }
   }, [zoneAnalysisEnabled, zoneAnalysisWaypoint]);
   
+  // Déclencher l'analyse de zone manuellement
+  const handleAnalyzeZone = useCallback(async () => {
+    if (!zoneAnalysisWaypoint) {
+      toast.warning('Sélectionnez un waypoint d\'abord');
+      return;
+    }
+    
+    setZoneAnalysisEnabled(true);
+    setZoneAnalysisResult(null);
+    
+    toast.info(`🔍 Analyse en cours...`, {
+      description: `Zone de ${zoneAnalysisArea} km² autour de "${zoneAnalysisWaypoint.name || 'Waypoint'}"`
+    });
+    
+    // L'analyse réelle est déclenchée par le useEffect qui surveille zoneAnalysisEnabled
+  }, [zoneAnalysisWaypoint, zoneAnalysisArea]);
+  
   // Hooks BIONIC
   const { 
     layersVisible, 
