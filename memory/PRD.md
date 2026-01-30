@@ -128,6 +128,23 @@
   - Toast: "🔍 Analyse en cours..." puis "🎯 Hotspot optimal identifié: XX%"
   - Changement de zone (2/4/10 km²) → Re-analyse automatique
 
+#### 🛰️ Backend WMS Connecté (Données Réelles Québec) ✅ **NOUVEAU**
+- ✅ **Nouvel endpoint `/api/bionic-territory/analyze/advanced`** créé
+  - Interrogation des sources WMS gouvernementales:
+    - Carte Écoforestière (peuplements, densité, hauteur)
+    - LiDAR Dendrométrique (canopée)
+    - Indice d'Humidité TWI (zones humides)
+    - Hydrographie (cours d'eau)
+  - Génération de zones comportementales basée sur les données réelles
+  - Calcul du hotspot optimal avec score et distance
+  - Recommandations de chasse personnalisées
+- ✅ **Frontend connecté au backend**
+  - Appel API automatique à la sélection du waypoint
+  - Fallback vers simulation si API indisponible
+  - Affichage enrichi: heure optimale, stratégie d'approche, source des données
+- ✅ **Types de comportement unifiés** (backend + frontend)
+  - cover/shelter, feeding/browse, travel/corridor, water, rest/bedding, hotspot
+
 #### 📊 États ajoutés pour l'analyse
 - `zoneAnalysisEnabled` - Activation/désactivation de l'analyse
 - `zoneAnalysisWaypoint` - Waypoint sélectionné pour l'analyse
