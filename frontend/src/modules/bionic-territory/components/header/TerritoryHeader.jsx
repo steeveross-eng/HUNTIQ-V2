@@ -480,6 +480,16 @@ const TerritoryHeader = ({
               selectedEspece={selectedEspece}
               onSelectEspece={onSelectEspece}
             />
+            
+            {/* Habitat Optimal Score avec Dropdown Modules */}
+            <HabitatScoreDropdown
+              score={habitatScore}
+              rating={habitatRating}
+              presenceProb={presenceProb}
+              bestTime={bestTime}
+              modules={thematicModules}
+              onModuleToggle={onModuleToggle}
+            />
           </div>
         </div>
       </div>
@@ -487,5 +497,139 @@ const TerritoryHeader = ({
   );
 };
 
+/**
+ * Composant Habitat Score avec Dropdown des Modules Thématiques
+ */
+const HabitatScoreDropdown = memo(({
+  score = 63,
+  rating = { label: 'Bon', color: 'bg-yellow-500', textColor: 'text-yellow-400', emoji: '👍' },
+  presenceProb = 95,
+  bestTime = 'Crépuscule',
+  modules = [],
+  onModuleToggle
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Modules thématiques par défaut si non fournis
+  const defaultModules = [
+    { id: 'habitat', name: 'Habitat Optimal', icon: '🏠', enabled: true, score: 63 },
+    { id: 'meteo', name: 'Analyse Météo', icon: '🌤️', enabled: true, score: 78 },
+    { id: 'approche', name: 'Approche Optimale', icon: '🎯', enabled: true, score: 96 },
+    { id: 'alimentation', name: 'Zones Alimentation', icon: '🍃', enabled: false, score: 73 },
+    { id: 'comportement', name: 'Comportements', icon: '🦌', enabled: true, score: 85 },
+    { id: 'hotspots', name: 'Hotspots IA', icon: '🔥', enabled: false, score: 91 }
+  ];
+  
+  const activeModules = modules.length > 0 ? modules : defaultModules;
+  
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="bg-gray-900/80 hover:bg-gray-800 border border-gray-700 hover:border-[#f5a623]/50 rounded-md px-3 h-10"
+          data-testid="habitat-score-dropdown"
+        >
+          <div className="flex items-center gap-2">
+            {/* Score principal */}
+            <div className="flex items-center gap-1">
+              <span className="text-2xl font-bold text-[#f5a623]">{score}</span>
+              <span className="text-[10px] text-gray-500">/100</span>
+            </div>
+            
+            {/* Emoji rating */}
+            <span className="text-lg">{rating.emoji || '👍'}</span>
+            
+            {/* Label */}
+            <div className="flex flex-col items-start">
+              <span className={`text-[10px] font-semibold ${rating.textColor}`}>{rating.label?.toUpperCase()}</span>
+              <span className="text-[8px] text-gray-500">Habitat Optimal</span>
+            </div>
+            
+            {/* Flèche dropdown */}
+            <ChevronDown className={`h-4 w-4 text-gray-400 ml-1 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          </div>
+        </Button>
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent 
+        className="bg-gray-900 border border-gray-700 w-72 p-0 z-[9999]" 
+        align="end"
+      >
+        {/* En-tête du dropdown */}
+        <div className="px-3 py-2 bg-gradient-to-r from-[#f5a623]/20 to-transparent border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-[#f5a623]" />
+              <span className="text-xs font-semibold text-white">MODULES THÉMATIQUES</span>
+            </div>
+            <Badge className="bg-green-500/20 text-green-400 text-[9px]">
+              {activeModules.filter(m => m.enabled).length}/{activeModules.length}
+            </Badge>
+          </div>
+        </div>
+        
+        {/* Résumé Habitat Optimal */}
+        <div className="px-3 py-2 bg-gray-800/50 border-b border-gray-700">
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Probabilité présence</span>
+              <span className="text-green-400 font-bold">{presenceProb}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Meilleur moment</span>
+              <span className="text-amber-400 font-medium">{bestTime}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Liste des modules */}
+        <div className="max-h-[250px] overflow-y-auto">
+          {activeModules.map((module) => (
+            <div 
+              key={module.id}
+              className={`flex items-center justify-between px-3 py-2 hover:bg-gray-800/50 cursor-pointer border-b border-gray-800/50 transition-colors ${
+                module.enabled ? '' : 'opacity-50'
+              }`}
+              onClick={() => onModuleToggle && onModuleToggle(module.id)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-base">{module.icon}</span>
+                <div>
+                  <div className="text-[11px] text-white font-medium">{module.name}</div>
+                  <div className="text-[9px] text-gray-500">
+                    Score: <span className={module.score >= 80 ? 'text-green-400' : module.score >= 60 ? 'text-yellow-400' : 'text-orange-400'}>
+                      {module.score}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {module.enabled ? (
+                  <Badge className="bg-green-500/20 text-green-400 text-[8px]">Actif</Badge>
+                ) : (
+                  <Badge className="bg-gray-700 text-gray-400 text-[8px]">Inactif</Badge>
+                )}
+                <div className={`w-2 h-2 rounded-full ${module.enabled ? 'bg-green-500' : 'bg-gray-600'}`} />
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Footer */}
+        <div className="px-3 py-2 bg-gray-800/30 border-t border-gray-700">
+          <div className="flex items-center justify-between text-[9px] text-gray-500">
+            <span>Cliquez pour activer/désactiver</span>
+            <span className="text-[#f5a623]">BIONIC™ v3.3</span>
+          </div>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+});
+
+HabitatScoreDropdown.displayName = 'HabitatScoreDropdown';
+
 export default memo(TerritoryHeader);
-export { NotificationsPanel, WaypointCreationMenu, GroupsMenu, SpeciesSelector };
+export { NotificationsPanel, WaypointCreationMenu, GroupsMenu, SpeciesSelector, HabitatScoreDropdown };
