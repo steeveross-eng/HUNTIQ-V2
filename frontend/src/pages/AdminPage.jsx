@@ -285,14 +285,28 @@ const AdminPage = ({ onProductsUpdate }) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-background border-border text-white"
-                placeholder="••••••••"
-                data-testid="admin-password-input"
-              />
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Email administrateur</label>
+                <Input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="bg-background border-border text-white"
+                  placeholder="steeve.ross@gmail.com"
+                  data-testid="admin-email-input"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Mot de passe</label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-background border-border text-white"
+                  placeholder="••••••••"
+                  data-testid="admin-password-input"
+                />
+              </div>
               <Button type="submit" className="w-full btn-golden text-black font-semibold" disabled={loading} data-testid="admin-login-btn">
                 {loading ? "Connexion..." : "Se connecter"}
               </Button>
