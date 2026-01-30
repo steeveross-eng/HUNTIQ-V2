@@ -12,8 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Brain, ArrowLeft, Zap, Wifi, WifiOff, RefreshCw, Cloud, 
   Users, Plus, ChevronDown, Map, MapPin, BookMarked, X,
-  Navigation, Crosshair, Edit2, Target
+  Navigation, Crosshair, Edit2, Target, Home, CloudSun, Sprout, Activity, Flame, TreePine, Mountain
 } from 'lucide-react';
+import { SPECIES_IMAGES, THEMATIC_MODULES_CONFIG, getScoreRatingScientific } from '@/config/ProfessionalAssets';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
