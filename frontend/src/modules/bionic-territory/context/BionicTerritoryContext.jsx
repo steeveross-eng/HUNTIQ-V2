@@ -89,8 +89,30 @@ const initialState = {
       baseMap: null,
       overlays: []
     },
-    ecoLayerOpacities: {}
+    ecoLayerOpacities: {},
+    // Couches comportementales
+    showBehaviorZones: true,
+    // Overlay topographique
+    topoEnabled: false,
+    // Couches Québec WMS
+    quebecLayers: {
+      ecoforestry: { enabled: false, opacity: 60 },
+      lidar: { enabled: false, opacity: 50 },
+      twi: { enabled: false, opacity: 50 }
+    }
   },
+  
+  // Thematic Modules State (Habitat Score dropdown)
+  thematicModules: [
+    { id: 'habitat', name: 'Habitat Optimal', enabled: true, score: 63 },
+    { id: 'meteo', name: 'Analyse Météo', enabled: true, score: 78 },
+    { id: 'approche', name: 'Approche Optimale', enabled: true, score: 96 },
+    { id: 'alimentation', name: 'Zones Alimentation', enabled: false, score: 73 },
+    { id: 'comportement', name: 'Comportements Gibier', enabled: true, score: 85 },
+    { id: 'hotspots', name: 'Hotspots IA', enabled: false, score: 91 },
+    { id: 'peuplements', name: 'Peuplements Forestiers', enabled: true, score: 88 },
+    { id: 'topographie', name: 'Overlay Topographique', enabled: false, score: 75 }
+  ],
   
   // Waypoints State
   waypoints: {
