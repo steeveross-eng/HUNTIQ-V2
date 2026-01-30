@@ -1124,12 +1124,14 @@ const AdminPage = ({ onProductsUpdate }) => {
           {/* Urban Module BIONIC™ Tab */}
           <TabsContent value="urban" className="space-y-6">
             <UrbanModuleAdminPanel 
-              onConfigChange={(config) => {
-                console.log('[Admin] Urban config changed:', config);
-                toast.success('Configuration urbaine mise à jour');
+              onConfigChange={(newConfig) => {
+                updateUrbanConfig(newConfig);
+                toast.success('Configuration urbaine mise à jour en temps réel', {
+                  description: `Buffer: ${newConfig.bufferDistance}m, Rayon: ${newConfig.searchRadius}m`
+                });
               }}
-              currentStats={{}}
-              qaReport={null}
+              currentStats={urbanStats}
+              qaReport={urbanQAReport}
             />
           </TabsContent>
         </Tabs>
