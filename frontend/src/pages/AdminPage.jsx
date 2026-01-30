@@ -109,6 +109,7 @@ const AdminPage = ({ onProductsUpdate }) => {
   const { t } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [refreshing, setRefreshing] = useState(false);
