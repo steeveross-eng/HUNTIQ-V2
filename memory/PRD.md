@@ -1016,3 +1016,4 @@ Fonctionnalités implémentées:
 - Le système de backup est prêt mais nécessite la configuration par l'utilisateur
 - MongoDB Atlas offre 512MB gratuit (tier M0)
 - Google Cloud offre 300$ de crédits gratuits
+- Export PDF/GPX disponible après une analyse de zone
