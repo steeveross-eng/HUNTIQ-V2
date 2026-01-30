@@ -564,12 +564,6 @@ const WaypointZoneAnalysis = ({
     };
     
     generateAnalysis();
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    generateAnalysis();
   }, [enabled, waypoint, analysisArea, targetSpecies, areaConfig.radius, calculateOptimalHotspot, onAnalysisComplete]);
   
   // Style pour les zones
