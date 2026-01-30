@@ -191,6 +191,12 @@ db = client[os.environ['DB_NAME']]
 # Admin password hash (Saturn5858*)
 ADMIN_PASSWORD_HASH = hashlib.sha256("Saturn5858*".encode()).hexdigest()
 
+# Liste des emails administrateurs autorisés
+ADMIN_EMAILS = [
+    "steeve.ross@gmail.com",
+    "admin@huntiq.com"
+]
+
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
