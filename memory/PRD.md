@@ -99,7 +99,42 @@
 
 ## What's Been Implemented
 
-### Phase 52s (January 30, 2026 - Session 4) - Connexion Modules & Backup E2E ✅ **NOUVEAU**
+### Phase 52t (January 30, 2026 - Session 5) - Refactoring Context & Admin Urbain ✅ **NOUVEAU**
+
+**Refactoring majeur du BionicTerritoryContext + Connexion Admin Urbain temps réel**
+
+#### 🏗️ BionicTerritoryContext Étendu (~40 nouveaux états)
+- ✅ **Map State** : center, zoom, currentZoom, currentCenter, bounds, baseMap
+- ✅ **Layers State** : activeEcoLayers étendu, activeBehaviors, topoHillshade, topoHillshadeOpacity, topoContours, topoContourStyle, topoCollapsed
+- ✅ **Zone Analysis State** : enabled, waypoint, area, result, collapsed, autoMode
+- ✅ **Dialog State** : showShareDialog, waypointToShare, showCreateGroupDialog, selectedGroup, showAddPlaceDialog, newPlace, editingPlace, showAddWaypointDialog, newWaypoint
+- ✅ **Cursor State** : position, data, elevation, showInfo
+- ✅ **Zones State** : displayMode, showConcentricCircles, showCorridors, waterExclusionStats, isFilteringWater
+- ✅ **Nouveaux selectors** : 40+ getters typés par domaine
+- ✅ **Nouvelles actions** : 40+ setters avec dispatch vers reducer
+
+#### 🏙️ Admin Urbain Temps Réel
+- ✅ **useUrbanConfig Hook** créé (`/app/frontend/src/hooks/useUrbanConfig.js`)
+  - Persistance localStorage (clé: `bionic_urban_config`)
+  - Auto-apply au service UrbanExclusionService
+  - Synchronisation cross-tab via storage event
+- ✅ **UrbanExclusionService étendu** avec :
+  - `updateUrbanConfig()` - Met à jour URBAN_CONFIG dynamiquement
+  - `loadUrbanConfigFromStorage()` - Charge config depuis localStorage
+  - `URBAN_CONFIG.ENABLED` - Toggle global du module
+- ✅ **AdminPage connecté** via useUrbanConfig hook
+- ✅ **4 Sliders fonctionnels** :
+  - Buffer urbain : 500-5000m (défaut 2000m)
+  - Rayon de recherche : 1000-10000m (défaut 5000m)
+  - Distance minimale : 500-5000m (défaut 2000m)
+  - Points candidats : 8-72 (défaut 36)
+
+#### ✅ Tests Validés
+- Backend : 100% (12/12 tests)
+- Frontend : 100% (tous les tests UI)
+- Fichier test créé : `/app/backend/tests/test_urban_config_api.py`
+
+### Phase 52s (January 30, 2026 - Session 4) - Connexion Modules & Backup E2E ✅
 
 **Connexion des modules thématiques aux couches de la carte + Tests E2E Backup**
 
