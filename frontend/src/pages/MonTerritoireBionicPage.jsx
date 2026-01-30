@@ -2304,6 +2304,15 @@ const MonTerritoireBionicPage = () => {
                 )}
               </div>
               
+              {/* MICRO-LÉGENDE PEUPLEMENTS FORESTIERS */}
+              {pipelineEnabled && (
+                <ForestStandLegendMicro
+                  collapsed={forestLegendCollapsed}
+                  onToggleCollapse={() => setForestLegendCollapsed(!forestLegendCollapsed)}
+                  position="bottomRight"
+                />
+              )}
+              
               {/* Bandeau météo */}
               {weather && (
                 <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-black/90 backdrop-blur-sm rounded-lg border border-gray-700 p-2">
