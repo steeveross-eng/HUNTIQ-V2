@@ -791,53 +791,129 @@ export function BionicTerritoryProvider({ children, initialOverrides = {} }) {
   // ─────────────────────────────────────────────────────────────
   
   const actions = useMemo(() => ({
-    // Map Actions
+    // ═══════════════════════════════════════════════════════════
+    // MAP ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setMapCenter: (center) => dispatch({ type: BIONIC_ACTIONS.SET_MAP_CENTER, payload: center }),
     setMapZoom: (zoom) => dispatch({ type: BIONIC_ACTIONS.SET_MAP_ZOOM, payload: zoom }),
+    setCurrentZoom: (zoom) => dispatch({ type: BIONIC_ACTIONS.SET_CURRENT_ZOOM, payload: zoom }),
+    setCurrentCenter: (center) => dispatch({ type: BIONIC_ACTIONS.SET_CURRENT_CENTER, payload: center }),
     setMapBounds: (bounds) => dispatch({ type: BIONIC_ACTIONS.SET_MAP_BOUNDS, payload: bounds }),
     setBaseMap: (baseMap) => dispatch({ type: BIONIC_ACTIONS.SET_BASE_MAP, payload: baseMap }),
     
-    // Layers Actions
+    // ═══════════════════════════════════════════════════════════
+    // LAYERS ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setPipelineEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_PIPELINE_ENABLED, payload: enabled }),
     setPipelineCollapsed: (collapsed) => dispatch({ type: BIONIC_ACTIONS.SET_PIPELINE_COLLAPSED, payload: collapsed }),
     toggleEcoLayer: (layerId, value) => dispatch({ type: BIONIC_ACTIONS.TOGGLE_ECO_LAYER, payload: { layerId, value } }),
     setEcoLayerOpacity: (layerId, opacity) => dispatch({ type: BIONIC_ACTIONS.SET_ECO_LAYER_OPACITY, payload: { layerId, opacity } }),
     setActiveEcoLayers: (layers) => dispatch({ type: BIONIC_ACTIONS.SET_ACTIVE_ECO_LAYERS, payload: layers }),
     setShowBehaviorZones: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_BEHAVIOR_ZONES, payload: show }),
-    setTopoEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_ENABLED, payload: enabled }),
+    setActiveBehaviors: (behaviors) => dispatch({ type: BIONIC_ACTIONS.SET_ACTIVE_BEHAVIORS, payload: behaviors }),
     setQuebecLayers: (layers) => dispatch({ type: BIONIC_ACTIONS.SET_QUEBEC_LAYERS, payload: layers }),
     
-    // Thematic Modules Actions
+    // ═══════════════════════════════════════════════════════════
+    // TOPOGRAPHIC ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setTopoEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_ENABLED, payload: enabled }),
+    setTopoHillshade: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_HILLSHADE, payload: enabled }),
+    setTopoHillshadeOpacity: (opacity) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_HILLSHADE_OPACITY, payload: opacity }),
+    setTopoContours: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_CONTOURS, payload: enabled }),
+    setTopoContourStyle: (style) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_CONTOUR_STYLE, payload: style }),
+    setTopoCollapsed: (collapsed) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_COLLAPSED, payload: collapsed }),
+    
+    // ═══════════════════════════════════════════════════════════
+    // THEMATIC MODULES ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setThematicModules: (modules) => dispatch({ type: BIONIC_ACTIONS.SET_THEMATIC_MODULES, payload: modules }),
     toggleThematicModule: (moduleId) => dispatch({ type: BIONIC_ACTIONS.TOGGLE_THEMATIC_MODULE, payload: moduleId }),
     
-    // Waypoints Actions
+    // ═══════════════════════════════════════════════════════════
+    // SPECIES ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setSelectedEspece: (espece) => dispatch({ type: BIONIC_ACTIONS.SET_SELECTED_ESPECE, payload: espece }),
+    
+    // ═══════════════════════════════════════════════════════════
+    // ZONE ANALYSIS ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setZoneAnalysisEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_ENABLED, payload: enabled }),
+    setZoneAnalysisWaypoint: (waypoint) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_WAYPOINT, payload: waypoint }),
+    setZoneAnalysisArea: (area) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_AREA, payload: area }),
+    setZoneAnalysisResult: (result) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_RESULT, payload: result }),
+    setZoneAnalysisCollapsed: (collapsed) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_COLLAPSED, payload: collapsed }),
+    setZoneAnalysisAutoMode: (autoMode) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_ANALYSIS_AUTO_MODE, payload: autoMode }),
+    
+    // ═══════════════════════════════════════════════════════════
+    // WAYPOINTS ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setWaypoints: (waypoints) => dispatch({ type: BIONIC_ACTIONS.SET_WAYPOINTS, payload: waypoints }),
     addWaypoint: (waypoint) => dispatch({ type: BIONIC_ACTIONS.ADD_WAYPOINT, payload: waypoint }),
     updateWaypoint: (waypoint) => dispatch({ type: BIONIC_ACTIONS.UPDATE_WAYPOINT, payload: waypoint }),
     deleteWaypoint: (id) => dispatch({ type: BIONIC_ACTIONS.DELETE_WAYPOINT, payload: id }),
     setSelectedWaypoint: (waypoint) => dispatch({ type: BIONIC_ACTIONS.SET_SELECTED_WAYPOINT, payload: waypoint }),
+    setSelectedWaypointForZones: (waypoint) => dispatch({ type: BIONIC_ACTIONS.SET_SELECTED_WAYPOINT_FOR_ZONES, payload: waypoint }),
     
-    // Generator Actions
+    // ═══════════════════════════════════════════════════════════
+    // GENERATOR ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setCarteBionic: (carte) => dispatch({ type: BIONIC_ACTIONS.SET_CARTE_BIONIC, payload: carte }),
     setGenerating: (generating) => dispatch({ type: BIONIC_ACTIONS.SET_GENERATING, payload: generating }),
     
-    // UI Actions
+    // ═══════════════════════════════════════════════════════════
+    // UI ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setActiveTab: (tab) => dispatch({ type: BIONIC_ACTIONS.SET_ACTIVE_TAB, payload: tab }),
     setLayersPanelVisible: (visible) => dispatch({ type: BIONIC_ACTIONS.SET_LAYERS_PANEL_VISIBLE, payload: visible }),
     setAnalysisPanelVisible: (visible) => dispatch({ type: BIONIC_ACTIONS.SET_ANALYSIS_PANEL_VISIBLE, payload: visible }),
     setPrivacyMode: (mode) => dispatch({ type: BIONIC_ACTIONS.SET_PRIVACY_MODE, payload: mode }),
     setGpsLiveEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_GPS_LIVE_ENABLED, payload: enabled }),
     setMapClickMode: (mode) => dispatch({ type: BIONIC_ACTIONS.SET_MAP_CLICK_MODE, payload: mode }),
+    setQuickWaypointMode: (mode) => dispatch({ type: BIONIC_ACTIONS.SET_QUICK_WAYPOINT_MODE, payload: mode }),
+    setLiveMode: (mode) => dispatch({ type: BIONIC_ACTIONS.SET_LIVE_MODE, payload: mode }),
+    setShowEcoforestryPanel: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_ECOFORESTRY_PANEL, payload: show }),
+    setForestLegendCollapsed: (collapsed) => dispatch({ type: BIONIC_ACTIONS.SET_FOREST_LEGEND_COLLAPSED, payload: collapsed }),
+    setShowGroupDashboard: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_GROUP_DASHBOARD, payload: show }),
     
-    // Position Actions
+    // ═══════════════════════════════════════════════════════════
+    // DIALOG ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setShowShareDialog: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_SHARE_DIALOG, payload: show }),
+    setWaypointToShare: (waypoint) => dispatch({ type: BIONIC_ACTIONS.SET_WAYPOINT_TO_SHARE, payload: waypoint }),
+    setShowCreateGroupDialog: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_CREATE_GROUP_DIALOG, payload: show }),
+    setSelectedGroup: (group) => dispatch({ type: BIONIC_ACTIONS.SET_SELECTED_GROUP, payload: group }),
+    setShowAddPlaceDialog: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_ADD_PLACE_DIALOG, payload: show }),
+    setNewPlace: (place) => dispatch({ type: BIONIC_ACTIONS.SET_NEW_PLACE, payload: place }),
+    setEditingPlace: (place) => dispatch({ type: BIONIC_ACTIONS.SET_EDITING_PLACE, payload: place }),
+    setShowAddWaypointDialog: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_ADD_WAYPOINT_DIALOG, payload: show }),
+    setNewWaypoint: (waypoint) => dispatch({ type: BIONIC_ACTIONS.SET_NEW_WAYPOINT, payload: waypoint }),
+    
+    // ═══════════════════════════════════════════════════════════
+    // POSITION ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setUserPosition: (position) => dispatch({ type: BIONIC_ACTIONS.SET_USER_POSITION, payload: position }),
     setWatchingPosition: (watching) => dispatch({ type: BIONIC_ACTIONS.SET_WATCHING_POSITION, payload: watching }),
     
-    // Zones Actions
+    // ═══════════════════════════════════════════════════════════
+    // CURSOR ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    setCursorPosition: (position) => dispatch({ type: BIONIC_ACTIONS.SET_CURSOR_POSITION, payload: position }),
+    setCursorData: (data) => dispatch({ type: BIONIC_ACTIONS.SET_CURSOR_DATA, payload: data }),
+    setCursorElevation: (elevation) => dispatch({ type: BIONIC_ACTIONS.SET_CURSOR_ELEVATION, payload: elevation }),
+    setShowCursorInfo: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_CURSOR_INFO, payload: show }),
+    
+    // ═══════════════════════════════════════════════════════════
+    // ZONES ACTIONS
+    // ═══════════════════════════════════════════════════════════
     setSelectedZone: (zone) => dispatch({ type: BIONIC_ACTIONS.SET_SELECTED_ZONE, payload: zone }),
     setMicroZones: (zones) => dispatch({ type: BIONIC_ACTIONS.SET_MICRO_ZONES, payload: zones }),
     setFilteredZones: (zones) => dispatch({ type: BIONIC_ACTIONS.SET_FILTERED_ZONES, payload: zones }),
-    setMinPercentageFilter: (min) => dispatch({ type: BIONIC_ACTIONS.SET_MIN_PERCENTAGE_FILTER, payload: min })
+    setMinPercentageFilter: (min) => dispatch({ type: BIONIC_ACTIONS.SET_MIN_PERCENTAGE_FILTER, payload: min }),
+    setZoneDisplayMode: (mode) => dispatch({ type: BIONIC_ACTIONS.SET_ZONE_DISPLAY_MODE, payload: mode }),
+    setShowConcentricCircles: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_CONCENTRIC_CIRCLES, payload: show }),
+    setShowCorridors: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_CORRIDORS, payload: show }),
+    setWaterExclusionStats: (stats) => dispatch({ type: BIONIC_ACTIONS.SET_WATER_EXCLUSION_STATS, payload: stats }),
+    setIsFilteringWater: (filtering) => dispatch({ type: BIONIC_ACTIONS.SET_IS_FILTERING_WATER, payload: filtering })
   }), []);
   
   // ─────────────────────────────────────────────────────────────
