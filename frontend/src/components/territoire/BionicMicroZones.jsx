@@ -858,9 +858,9 @@ const BionicMicroZones = ({
   return (
     <>
       {/* COUCHE 1 : Zones micro-délimitées (entités indépendantes) */}
-      {visibleZones.map(zone => (
+      {visibleZones.map((zone, zoneIndex) => (
         <MicroZone
-          key={zone.id}
+          key={`zone-${zone.id}-${zoneIndex}`}
           zone={zone}
           isHovered={hoveredZoneId === zone.id}
           onHover={handleHover}
