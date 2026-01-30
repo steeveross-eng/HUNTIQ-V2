@@ -593,9 +593,30 @@ const WaypointZoneAnalysis = ({
   
   // Style pour les zones
   const getZoneStyle = useCallback((feature) => {
-    const behavior = feature.properties?.behavior || {
-      primary: { id: feature.properties?.behaviorId || 'shelter', score: feature.properties?.behaviorScore || 70 }
+    // Mapping des types de comportement backend vers frontend
+    const behaviorMapping = {
+      'cover': 'shelter',
+      'feeding': 'browse', 
+      'travel': 'travel',
+      'water': 'water',
+      'rest': 'bedding',
+      'shelter': 'shelter',
+      'browse': 'browse',
+      'bedding': 'bedding'
     };
+    
+    const backendBehaviorId = feature.properties?.behaviorId || 'shelter';
+    const mappedBehaviorId = behaviorMapping[backendBehaviorId] || 'shelter';
+    
+    const behavior = feature.properties?.behavior || {
+      primary: { id: mappedBehaviorId, score: feature.properties?.behaviorScore || 70 }
+    };
+    
+    // Si behavior.primary.id n'est pas mappé, le mapper aussi
+    if (behavior.primary && behaviorMapping[behavior.primary.id]) {
+      behavior.primary.id = behaviorMapping[behavior.primary.id];
+    }
+    
     return getBehaviorStyle(behavior);
   }, []);
   
