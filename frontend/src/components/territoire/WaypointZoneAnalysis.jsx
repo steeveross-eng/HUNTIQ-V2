@@ -329,16 +329,41 @@ export const ZoneAnalysisControlPanel = memo(({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Distance du waypoint</span>
-                  <span className="text-white">{analysisResult.distanceFromCenter}m</span>
+                  <span className="text-white">
+                    {analysisResult.distanceFromCenter}m 
+                    {analysisResult.approachDirection && <span className="text-gray-500 ml-1">({analysisResult.approachDirection})</span>}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Zones analysées</span>
                   <span className="text-white">{analysisResult.zonesCount}</span>
                 </div>
+                {/* Informations WMS enrichies */}
+                {analysisResult.bestTimeWindow && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">⏰ Heure optimale</span>
+                    <span className="text-green-400 font-medium">{analysisResult.bestTimeWindow}</span>
+                  </div>
+                )}
+                {analysisResult.dataSource && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">📊 Source</span>
+                    <span className={`${analysisResult.dataSource === 'wms_real' ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {analysisResult.dataSource === 'wms_real' ? '🛰️ WMS Réel' : '⚡ Simulation'}
+                    </span>
+                  </div>
+                )}
               </div>
               
-              <div className="mt-2 pt-2 border-t border-[#ff0055]/20 text-[9px] text-[#ff0055]">
-                🎯 {analysisResult.huntingTip}
+              {/* Stratégie d'approche */}
+              {analysisResult.approachStrategy && (
+                <div className="mt-2 pt-2 border-t border-[#ff0055]/20 text-[9px] text-amber-300">
+                  🎯 {analysisResult.approachStrategy}
+                </div>
+              )}
+              
+              <div className="mt-1 text-[9px] text-[#ff0055]">
+                💡 {analysisResult.huntingTip}
               </div>
             </div>
           )}
