@@ -79,6 +79,9 @@ import {
   PIPELINE_LAYERS as MODULE_PIPELINE_LAYERS
 } from '@/modules/bionic-territory';
 
+// Sidebar modulaire
+import TerritorySidebar from '@/modules/bionic-territory/components/sidebar/TerritorySidebar';
+
 import { 
   BIONIC_LAYERS, 
   SCORE_CATEGORIES,
