@@ -91,6 +91,7 @@ import AutoOptimizationPanel from "@/components/admin/AutoOptimizationPanel";
 import UrbanModuleAdminPanel from "@/components/admin/UrbanModuleAdminPanel";
 import { SaleModeBadge, AutoCategorizeButton } from "@/components/SharedComponents";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUrbanConfig } from "@/hooks/useUrbanConfig";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
