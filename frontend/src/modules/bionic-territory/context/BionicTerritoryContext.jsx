@@ -268,7 +268,9 @@ const initialState = {
 
 function bionicTerritoryReducer(state, action) {
   switch (action.type) {
-    // Map Actions
+    // ═══════════════════════════════════════════════════════════
+    // MAP ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_MAP_CENTER:
       return {
         ...state,
@@ -279,6 +281,18 @@ function bionicTerritoryReducer(state, action) {
       return {
         ...state,
         map: { ...state.map, zoom: action.payload, currentZoom: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_CURRENT_ZOOM:
+      return {
+        ...state,
+        map: { ...state.map, currentZoom: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_CURRENT_CENTER:
+      return {
+        ...state,
+        map: { ...state.map, currentCenter: action.payload }
       };
     
     case BIONIC_ACTIONS.SET_MAP_BOUNDS:
@@ -293,7 +307,9 @@ function bionicTerritoryReducer(state, action) {
         map: { ...state.map, baseMap: action.payload }
       };
     
-    // Layers Actions
+    // ═══════════════════════════════════════════════════════════
+    // LAYERS ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_PIPELINE_ENABLED:
       return {
         ...state,
@@ -307,18 +323,13 @@ function bionicTerritoryReducer(state, action) {
       };
     
     case BIONIC_ACTIONS.TOGGLE_ECO_LAYER:
-      const { layerId, value } = action.payload;
-      const currentOverlays = state.layers.activeEcoLayers.overlays || [];
-      const newOverlays = value
-        ? [...currentOverlays, layerId]
-        : currentOverlays.filter(id => id !== layerId);
       return {
         ...state,
         layers: {
           ...state.layers,
           activeEcoLayers: {
             ...state.layers.activeEcoLayers,
-            overlays: newOverlays
+            [action.payload.layerId]: action.payload.value
           }
         }
       };
@@ -341,7 +352,66 @@ function bionicTerritoryReducer(state, action) {
         layers: { ...state.layers, activeEcoLayers: action.payload }
       };
     
-    // Thematic Modules Actions
+    case BIONIC_ACTIONS.SET_SHOW_BEHAVIOR_ZONES:
+      return {
+        ...state,
+        layers: { ...state.layers, showBehaviorZones: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_ACTIVE_BEHAVIORS:
+      return {
+        ...state,
+        layers: { ...state.layers, activeBehaviors: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_QUEBEC_LAYERS:
+      return {
+        ...state,
+        layers: { ...state.layers, quebecLayers: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // TOPOGRAPHIC ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_TOPO_ENABLED:
+      return {
+        ...state,
+        layers: { ...state.layers, topoEnabled: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_HILLSHADE:
+      return {
+        ...state,
+        layers: { ...state.layers, topoHillshade: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_HILLSHADE_OPACITY:
+      return {
+        ...state,
+        layers: { ...state.layers, topoHillshadeOpacity: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_CONTOURS:
+      return {
+        ...state,
+        layers: { ...state.layers, topoContours: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_CONTOUR_STYLE:
+      return {
+        ...state,
+        layers: { ...state.layers, topoContourStyle: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_COLLAPSED:
+      return {
+        ...state,
+        layers: { ...state.layers, topoCollapsed: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // THEMATIC MODULES ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_THEMATIC_MODULES:
       return {
         ...state,
@@ -356,25 +426,57 @@ function bionicTerritoryReducer(state, action) {
         )
       };
     
-    case BIONIC_ACTIONS.SET_SHOW_BEHAVIOR_ZONES:
+    // ═══════════════════════════════════════════════════════════
+    // SPECIES ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_SELECTED_ESPECE:
       return {
         ...state,
-        layers: { ...state.layers, showBehaviorZones: action.payload }
+        selectedEspece: action.payload
       };
     
-    case BIONIC_ACTIONS.SET_TOPO_ENABLED:
+    // ═══════════════════════════════════════════════════════════
+    // ZONE ANALYSIS ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_ENABLED:
       return {
         ...state,
-        layers: { ...state.layers, topoEnabled: action.payload }
+        zoneAnalysis: { ...state.zoneAnalysis, enabled: action.payload }
       };
     
-    case BIONIC_ACTIONS.SET_QUEBEC_LAYERS:
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_WAYPOINT:
       return {
         ...state,
-        layers: { ...state.layers, quebecLayers: action.payload }
+        zoneAnalysis: { ...state.zoneAnalysis, waypoint: action.payload }
       };
     
-    // Waypoints Actions
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_AREA:
+      return {
+        ...state,
+        zoneAnalysis: { ...state.zoneAnalysis, area: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_RESULT:
+      return {
+        ...state,
+        zoneAnalysis: { ...state.zoneAnalysis, result: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_COLLAPSED:
+      return {
+        ...state,
+        zoneAnalysis: { ...state.zoneAnalysis, collapsed: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_ZONE_ANALYSIS_AUTO_MODE:
+      return {
+        ...state,
+        zoneAnalysis: { ...state.zoneAnalysis, autoMode: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // WAYPOINTS ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_WAYPOINTS:
       return {
         ...state,
@@ -413,7 +515,15 @@ function bionicTerritoryReducer(state, action) {
         waypoints: { ...state.waypoints, selected: action.payload }
       };
     
-    // Generator Actions
+    case BIONIC_ACTIONS.SET_SELECTED_WAYPOINT_FOR_ZONES:
+      return {
+        ...state,
+        waypoints: { ...state.waypoints, selectedForZones: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // GENERATOR ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_CARTE_BIONIC:
       return {
         ...state,
@@ -430,7 +540,15 @@ function bionicTerritoryReducer(state, action) {
         generator: { ...state.generator, isGenerating: action.payload }
       };
     
-    // UI Actions
+    // ═══════════════════════════════════════════════════════════
+    // UI ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_ACTIVE_TAB:
+      return {
+        ...state,
+        ui: { ...state.ui, activeTab: action.payload }
+      };
+    
     case BIONIC_ACTIONS.SET_LAYERS_PANEL_VISIBLE:
       return {
         ...state,
@@ -461,7 +579,96 @@ function bionicTerritoryReducer(state, action) {
         ui: { ...state.ui, mapClickMode: action.payload }
       };
     
-    // Position Actions
+    case BIONIC_ACTIONS.SET_QUICK_WAYPOINT_MODE:
+      return {
+        ...state,
+        ui: { ...state.ui, quickWaypointMode: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_LIVE_MODE:
+      return {
+        ...state,
+        ui: { ...state.ui, liveMode: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_ECOFORESTRY_PANEL:
+      return {
+        ...state,
+        ui: { ...state.ui, showEcoforestryPanel: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_FOREST_LEGEND_COLLAPSED:
+      return {
+        ...state,
+        ui: { ...state.ui, forestLegendCollapsed: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_GROUP_DASHBOARD:
+      return {
+        ...state,
+        ui: { ...state.ui, showGroupDashboard: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // DIALOG ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_SHOW_SHARE_DIALOG:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, showShareDialog: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_WAYPOINT_TO_SHARE:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, waypointToShare: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_CREATE_GROUP_DIALOG:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, showCreateGroupDialog: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SELECTED_GROUP:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, selectedGroup: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_ADD_PLACE_DIALOG:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, showAddPlaceDialog: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_NEW_PLACE:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, newPlace: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_EDITING_PLACE:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, editingPlace: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_ADD_WAYPOINT_DIALOG:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, showAddWaypointDialog: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_NEW_WAYPOINT:
+      return {
+        ...state,
+        dialogs: { ...state.dialogs, newWaypoint: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // POSITION ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_USER_POSITION:
       return {
         ...state,
@@ -474,7 +681,36 @@ function bionicTerritoryReducer(state, action) {
         position: { ...state.position, watching: action.payload }
       };
     
-    // Zones Actions
+    // ═══════════════════════════════════════════════════════════
+    // CURSOR ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    case BIONIC_ACTIONS.SET_CURSOR_POSITION:
+      return {
+        ...state,
+        cursor: { ...state.cursor, position: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_CURSOR_DATA:
+      return {
+        ...state,
+        cursor: { ...state.cursor, data: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_CURSOR_ELEVATION:
+      return {
+        ...state,
+        cursor: { ...state.cursor, elevation: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_CURSOR_INFO:
+      return {
+        ...state,
+        cursor: { ...state.cursor, showInfo: action.payload }
+      };
+    
+    // ═══════════════════════════════════════════════════════════
+    // ZONES ACTIONS
+    // ═══════════════════════════════════════════════════════════
     case BIONIC_ACTIONS.SET_SELECTED_ZONE:
       return {
         ...state,
@@ -497,6 +733,36 @@ function bionicTerritoryReducer(state, action) {
       return {
         ...state,
         zones: { ...state.zones, minPercentageFilter: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_ZONE_DISPLAY_MODE:
+      return {
+        ...state,
+        zones: { ...state.zones, displayMode: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_CONCENTRIC_CIRCLES:
+      return {
+        ...state,
+        zones: { ...state.zones, showConcentricCircles: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_CORRIDORS:
+      return {
+        ...state,
+        zones: { ...state.zones, showCorridors: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_WATER_EXCLUSION_STATS:
+      return {
+        ...state,
+        zones: { ...state.zones, waterExclusionStats: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_IS_FILTERING_WATER:
+      return {
+        ...state,
+        zones: { ...state.zones, isFilteringWater: action.payload }
       };
     
     default:
