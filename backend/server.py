@@ -611,10 +611,29 @@ async def root():
 
 @api_router.post("/admin/login")
 async def admin_login(login: AdminLogin):
+    """
+    Authentification administrateur
+    - Vérifie le mot de passe admin (Saturn5858*)
+    - Si email fourni, vérifie qu'il est dans la liste des admins autorisés
+    """
     password_hash = hashlib.sha256(login.password.encode()).hexdigest()
-    if password_hash == ADMIN_PASSWORD_HASH:
-        return {"success": True, "message": "Authentification réussie"}
-    raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+    
+    # Vérifier le mot de passe
+    if password_hash != ADMIN_PASSWORD_HASH:
+        raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+    
+    # Si email fourni, vérifier qu'il est autorisé
+    if login.email:
+        if login.email.lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            print(f"[ADMIN] Email non autorisé: {login.email}")
+            raise HTTPException(status_code=401, detail="Email non autorisé pour l'administration")
+        print(f"[ADMIN] Connexion réussie pour: {login.email}")
+    
+    return {
+        "success": True, 
+        "message": "Authentification réussie",
+        "email": login.email
+    }
 
 # ============================================
 # USER AUTHENTICATION
