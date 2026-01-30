@@ -451,53 +451,119 @@ const WaypointZoneAnalysis = ({
         const center = [waypoint.lat, waypoint.lng];
         const radiusKm = areaConfig.radius;
         
-        // Convertir le rayon km en degrés (approximatif)
-        const radiusDeg = radiusKm / 111;
-        
-        // Générer les zones organiques dans le rayon
-        const zonesData = generateOrganicForestZones(center, radiusDeg, {
-          targetSpecies,
-          gridDensity: analysisArea === '2' ? 4 : analysisArea === '4' ? 5 : 6
+        // 🎯 APPEL API BACKEND - Analyse avancée avec données WMS réelles
+        const API_URL = process.env.REACT_APP_BACKEND_URL;
+        const response = await fetch(`${API_URL}/api/bionic-territory/analyze/advanced`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            waypoint_id: waypoint.id,
+            center: { lat: waypoint.lat, lng: waypoint.lng },
+            radius_km: radiusKm,
+            target_species: targetSpecies?.toLowerCase() || 'orignal',
+            include_wms_data: true,
+            wms_layers: ['ecoforestry', 'lidar', 'humidity']
+          })
         });
         
-        // Filtrer les zones qui sont dans le rayon
-        // Note: GeoJSON utilise [lng, lat], pas [lat, lng]
-        const filteredFeatures = zonesData.features.filter(feature => {
-          try {
-            const coords = feature.geometry.coordinates[0][0];
-            // coords[0] = lng, coords[1] = lat (format GeoJSON)
-            // center[0] = lat, center[1] = lng
-            const dist = Math.sqrt(
-              Math.pow(coords[1] - center[0], 2) + 
-              Math.pow(coords[0] - center[1], 2)
-            );
-            // Garder toutes les zones générées car elles sont déjà dans le bon rayon
-            return dist <= radiusDeg * 1.5 || true; // Accepter toutes les zones générées
-          } catch {
-            return true;
+        if (response.ok) {
+          const analysisData = await response.json();
+          console.log('[Zone Analysis] 🎯 Données WMS reçues:', analysisData);
+          
+          // Convertir les zones backend en format GeoJSON pour Leaflet
+          const geoJsonFeatures = analysisData.behavior_zones.map(zone => ({
+            type: 'Feature',
+            properties: {
+              id: zone.id,
+              behaviorId: zone.behavior_type,
+              behaviorScore: zone.score,
+              confidence: zone.confidence,
+              behavior: {
+                primary: { 
+                  id: zone.behavior_type, 
+                  score: zone.score 
+                }
+              },
+              huntingTip: zone.hunting_tip,
+              dominantCover: zone.dominant_cover
+            },
+            geometry: {
+              type: 'Polygon',
+              coordinates: zone.coordinates
+            }
+          }));
+          
+          const geoJsonData = {
+            type: 'FeatureCollection',
+            features: geoJsonFeatures
+          };
+          
+          setZones(geoJsonData);
+          
+          // Utiliser le hotspot optimal du backend
+          const backendHotspot = analysisData.optimal_hotspot;
+          const hotspot = {
+            position: { lat: backendHotspot.position.lat, lng: backendHotspot.position.lng },
+            score: Math.round(backendHotspot.score),
+            dominantBehavior: backendHotspot.dominant_behavior,
+            distanceFromCenter: backendHotspot.distance_from_center_m,
+            zonesCount: analysisData.zones_count,
+            huntingTip: backendHotspot.hunting_tip,
+            approachDirection: backendHotspot.approach_direction,
+            bestTimeWindow: analysisData.best_time_window,
+            approachStrategy: analysisData.approach_strategy,
+            dataSource: analysisData.data_source,
+            wmsScores: backendHotspot.wms_scores
+          };
+          
+          setOptimalHotspot(hotspot);
+          
+          // Notifier le parent avec les données enrichies
+          if (onAnalysisComplete) {
+            onAnalysisComplete(hotspot);
           }
-        });
-        
-        const filteredZones = {
-          ...zonesData,
-          features: filteredFeatures
-        };
-        
-        setZones(filteredZones);
-        
-        // Calculer le hotspot optimal
-        const hotspot = calculateOptimalHotspot(filteredZones, center);
-        setOptimalHotspot(hotspot);
-        
-        // Notifier le parent
-        if (onAnalysisComplete && hotspot) {
-          onAnalysisComplete(hotspot);
+          
+          console.log(`[Zone Analysis] ✅ ${analysisData.zones_count} zones (source: ${analysisData.data_source}), Hotspot: ${hotspot.score}%`);
+          
+        } else {
+          // Fallback vers génération client-side si l'API échoue
+          console.warn('[Zone Analysis] API indisponible, fallback vers simulation');
+          await generateFallbackAnalysis(center, radiusKm);
         }
         
-        console.log(`[Zone Analysis] ${filteredFeatures.length} zones, Hotspot: ${hotspot?.score}%`);
-        
       } catch (error) {
-        console.error('[Zone Analysis] Erreur:', error);
+        console.error('[Zone Analysis] Erreur API:', error);
+        // Fallback vers simulation
+        const center = [waypoint.lat, waypoint.lng];
+        await generateFallbackAnalysis(center, areaConfig.radius);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Fonction de fallback (simulation client-side)
+    const generateFallbackAnalysis = async (center, radiusKm) => {
+      const radiusDeg = radiusKm / 111;
+      
+      const zonesData = generateOrganicForestZones(center, radiusDeg, {
+        targetSpecies,
+        gridDensity: analysisArea === '2' ? 4 : analysisArea === '4' ? 5 : 6
+      });
+      
+      setZones(zonesData);
+      
+      const hotspot = calculateOptimalHotspot(zonesData, center);
+      hotspot.dataSource = 'simulated';
+      setOptimalHotspot(hotspot);
+      
+      if (onAnalysisComplete && hotspot) {
+        onAnalysisComplete(hotspot);
+      }
+      
+      console.log(`[Zone Analysis] ⚠️ Fallback: ${zonesData.features.length} zones simulées`);
+    };
+    
+    generateAnalysis();
       } finally {
         setLoading(false);
       }
