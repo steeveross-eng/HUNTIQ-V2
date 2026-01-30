@@ -340,7 +340,15 @@ const TerritoryHeader = ({
   
   // Espèce
   selectedEspece,
-  onSelectEspece
+  onSelectEspece,
+  
+  // Habitat Score (nouveau)
+  habitatScore = 63,
+  habitatRating = { label: 'Bon', color: 'bg-yellow-500', textColor: 'text-yellow-400', emoji: '👍' },
+  presenceProb = 95,
+  bestTime = 'Crépuscule',
+  thematicModules = [],
+  onModuleToggle
 }) => {
   const navigate = useNavigate();
   const [showNotificationsPanel, setShowNotificationsPanel] = useState(false);
