@@ -41,22 +41,8 @@ import { GeoJSON } from 'react-leaflet';
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Mapping des comportements - supporte les IDs backend ET frontend
- */
-const WILDLIFE_BEHAVIORS = {
-  // IDs frontend originaux
-  shelter: { name: 'Zone de cache/abri', icon: '🛡️', color: '#00ff88' },
-  browse: { name: 'Zone d\'alimentation', icon: '🍃', color: '#ffff00' },
-  travel: { name: 'Corridor de circulation', icon: '🦌', color: '#ff8800' },
-  water: { name: 'Point d\'eau', icon: '💧', color: '#00aaff' },
-  bedding: { name: 'Zone de repos', icon: '😴', color: '#aa00ff' },
-  hotspot: { name: 'Hotspot', icon: '🔥', color: '#ff0055' },
-  // IDs backend (pour compatibilité)
-  cover: { name: 'Zone de cache/abri', icon: '🛡️', color: '#00ff88', huntingTip: 'Approche lente recommandée' },
-  feeding: { name: 'Zone d\'alimentation', icon: '🍃', color: '#ffff00', huntingTip: 'Active au crépuscule' },
-  rest: { name: 'Zone de repos/dortoir', icon: '😴', color: '#aa00ff', huntingTip: 'Éviter de déranger' }
-};
+// Note: WILDLIFE_BEHAVIORS est importé de WildlifeBehaviorZones.js
+// Il contient déjà les IDs: shelter, browse, travel, water, bedding, hotspot, cover, feeding, rest
 
 /**
  * Options de superficie d'analyse
