@@ -234,6 +234,39 @@ function bionicTerritoryReducer(state, action) {
         layers: { ...state.layers, activeEcoLayers: action.payload }
       };
     
+    // Thematic Modules Actions
+    case BIONIC_ACTIONS.SET_THEMATIC_MODULES:
+      return {
+        ...state,
+        thematicModules: action.payload
+      };
+    
+    case BIONIC_ACTIONS.TOGGLE_THEMATIC_MODULE:
+      return {
+        ...state,
+        thematicModules: state.thematicModules.map(m =>
+          m.id === action.payload ? { ...m, enabled: !m.enabled } : m
+        )
+      };
+    
+    case BIONIC_ACTIONS.SET_SHOW_BEHAVIOR_ZONES:
+      return {
+        ...state,
+        layers: { ...state.layers, showBehaviorZones: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_TOPO_ENABLED:
+      return {
+        ...state,
+        layers: { ...state.layers, topoEnabled: action.payload }
+      };
+    
+    case BIONIC_ACTIONS.SET_QUEBEC_LAYERS:
+      return {
+        ...state,
+        layers: { ...state.layers, quebecLayers: action.payload }
+      };
+    
     // Waypoints Actions
     case BIONIC_ACTIONS.SET_WAYPOINTS:
       return {
