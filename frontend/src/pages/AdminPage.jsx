@@ -113,6 +113,13 @@ const AdminPage = ({ onProductsUpdate }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [refreshing, setRefreshing] = useState(false);
   
+  // Hook pour la configuration urbaine temps réel
+  const { config: urbanConfig, updateMultiple: updateUrbanConfig, resetConfig: resetUrbanConfig } = useUrbanConfig();
+  
+  // État pour les statistiques urbaines et le rapport QA
+  const [urbanStats, setUrbanStats] = useState({});
+  const [urbanQAReport, setUrbanQAReport] = useState(null);
+  
   // Data states
   const [stats, setStats] = useState({});
   const [products, setProducts] = useState([]);
