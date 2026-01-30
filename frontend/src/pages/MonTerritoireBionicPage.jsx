@@ -1519,6 +1519,12 @@ const MonTerritoireBionicPage = () => {
         onCancelWaypointMode={handleCancelWaypointMode}
         selectedEspece={selectedEspece}
         onSelectEspece={setSelectedEspece}
+        habitatScore={displayScore}
+        habitatRating={rating}
+        presenceProb={Math.round(65 + (displayScore * 0.35))}
+        bestTime={displayScore >= 70 ? 'Crépuscule' : displayScore >= 50 ? 'Aube' : 'Midi'}
+        thematicModules={thematicModules}
+        onModuleToggle={handleModuleToggle}
       />
       
       {/* Contenu des onglets */}
