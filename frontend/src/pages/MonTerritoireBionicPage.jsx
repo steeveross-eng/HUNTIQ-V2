@@ -692,6 +692,7 @@ const MonTerritoireBionicPage = () => {
     courbes_niveau: false
   });
   const [ecoLayerOpacities, setEcoLayerOpacities] = useState({});
+  const [forestLegendCollapsed, setForestLegendCollapsed] = useState(true); // Légende micro peuplements
   
   // ============================================
   // SYSTÈME DE FALLBACK - Carte écoforestière
