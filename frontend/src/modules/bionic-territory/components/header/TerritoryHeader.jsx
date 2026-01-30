@@ -575,6 +575,17 @@ const MODULE_ICONS = {
 };
 
 /**
+ * Mapping des icônes de rating
+ */
+const RATING_ICONS = {
+  TrendingUp,
+  ThumbsUp,
+  Minus,
+  TrendingDown,
+  AlertTriangle
+};
+
+/**
  * Composant Habitat Score avec Dropdown des Modules Thématiques - Version Professionnelle
  */
 const HabitatScoreDropdown = memo(({
@@ -600,13 +611,7 @@ const HabitatScoreDropdown = memo(({
   const activeModules = modules.length > 0 ? modules : defaultModules;
   
   // Récupérer l'icône du rating
-  const RatingIcon = scientificRating.icon ? 
-    { TrendingUp: require('lucide-react').TrendingUp, 
-      ThumbsUp: require('lucide-react').ThumbsUp,
-      Minus: require('lucide-react').Minus,
-      TrendingDown: require('lucide-react').TrendingDown,
-      AlertTriangle: require('lucide-react').AlertTriangle
-    }[scientificRating.icon] : null;
+  const RatingIcon = scientificRating.icon ? RATING_ICONS[scientificRating.icon] : null;
   
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
