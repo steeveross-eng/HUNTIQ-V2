@@ -99,7 +99,40 @@
 
 ## What's Been Implemented
 
-### Phase 52u (January 30, 2026 - Session 6) - TerritorySidebar Modulaire ✅ **NOUVEAU**
+### Phase 52v (January 30, 2026 - Session 7) - Sidebar Intégré & Export PDF/GPX ✅ **NOUVEAU**
+
+**Intégration complète du TerritorySidebar + Service d'export des analyses**
+
+#### 🏗️ TerritorySidebar Intégré dans MonTerritoireBionicPage
+- ✅ **Code inline remplacé** : ~400 lignes de sidebar inline remplacées par `<TerritorySidebar />`
+- ✅ **MonTerritoireBionicPage réduit** : 3102 → 2802 lignes (-10%)
+- ✅ **Props connectés** : 35+ props passés au composant modulaire
+- ✅ **Fonctionnalités préservées** : Sélecteur fond carte, Pipeline v1.0, Couches Québec, Zones comportementales, Topographie, Analyse zone, Générateur BIONIC, Mode confidentialité
+
+#### 📤 Service d'Export Analyse (AnalysisExportService.js - 488 lignes)
+- ✅ **Persistance localStorage** : Historique des analyses (max 50)
+- ✅ **Export GPX** : Fichier GPS avec waypoint, hotspot optimal, zones comportementales
+- ✅ **Export PDF** : Rapport complet imprimable avec styles professionnels
+- ✅ **API Backend** : `saveAnalysisToServer()` prêt (fallback localStorage)
+
+#### 🎨 Composant AnalysisExportButtons (251 lignes)
+- ✅ **Dropdown menu** : Save, PDF, GPX options
+- ✅ **Historique récent** : 5 dernières analyses avec suppression
+- ✅ **Mode compact** : 3 boutons icônes pour espaces réduits
+- ✅ **Intégration** : Visible quand `zoneAnalysisResult` existe
+
+#### ✅ Tests Validés (100% - 9/9 fonctionnalités)
+- TerritorySidebar intégré et fonctionnel
+- Sélecteur fond carte (BIONIC™, Satellite, Terrain)
+- Pipeline v1.0 avec toggle ON/OFF et 8 sous-couches
+- Couches Données Québec fonctionnelles
+- Popup Comportements Gibier avec 6 types de zones
+- Score Habitat 83 EXCELLENT visible
+- Légende Peuplements Forestiers visible
+- AnalysisExportService créé (PDF/GPX)
+- AnalysisExportButtons prêt pour utilisation
+
+### Phase 52u (January 30, 2026 - Session 6) - TerritorySidebar Modulaire ✅
 
 **Création du composant TerritorySidebar modulaire pour réduire MonTerritoireBionicPage.jsx**
 
