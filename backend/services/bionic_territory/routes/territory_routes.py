@@ -104,7 +104,7 @@ class BehaviorZone(BaseModel):
     """Zone comportementale du gibier basée sur données WMS"""
     id: str
     behavior_type: str  # 'cover', 'feeding', 'travel', 'water', 'rest', 'hotspot'
-    coordinates: List[List[float]]  # GeoJSON polygon coordinates
+    coordinates: List[List[List[float]]]  # GeoJSON polygon: [[[lng, lat], ...]]
     score: float = Field(..., ge=0, le=100)
     confidence: float = Field(..., ge=0, le=1)
     area_sqm: float
