@@ -773,6 +773,7 @@ Fonctionnalités implémentées:
 - [x] **Composants modulaires créés** - TerritoryHeader, LayersPanelContent ✅
 - [x] **Panneau Couches Données Québec** - UI complète avec toggles et sliders ✅
 - [x] **Intégration TerritoryHeader** - Header modulaire intégré (Phase 52q) ✅
+- [x] **Refonte UI Professionnelle** - Photos réalistes + Icônes Lucide (Phase 52r) ✅
 
 ### P1 - High Priority (EN COURS)
 - [~] **Refactoring de MonTerritoireBionicPage.jsx** (2934 lignes restantes) - EN COURS
@@ -781,6 +782,8 @@ Fonctionnalités implémentées:
   - ✅ QuebecLayersPanel.jsx créé et intégré
   - ✅ ZoneAnalysisControlPanel intégré dans le sidebar
   - ✅ WaypointZoneAnalysis intégré dans MapContainer
+  - ✅ SpeciesSelector avec photos réalistes (Phase 52r)
+  - ✅ HabitatScoreDropdown avec icônes Lucide (Phase 52r)
   - [ ] Migrer les 61 useState vers BionicTerritoryContext (P1 futur)
   - [ ] Intégrer LayersPanelContent modulaire dans le sidebar
   - [ ] Réduire sous 2000 lignes (cible: 1500)
@@ -793,6 +796,7 @@ Fonctionnalités implémentées:
   - ✅ Carte Écoforestière (peuplements)
   - ✅ LiDAR Dendrométrique (hauteur arbres)  
   - ✅ Indice d'Humidité TWI
+- [ ] Connecter les toggles des modules thématiques aux couches de la carte
 - [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
 - [ ] Test complet du système de backup avec credentials utilisateur
 
@@ -813,17 +817,20 @@ Fonctionnalités implémentées:
 
 ## Next Tasks List
 
-1. **Poursuivre le refactoring** (Prochaine session)
+1. **Connecter les modules thématiques** (Prochaine session - P1)
+   - Les toggles du dropdown Habitat Score doivent activer/désactiver les couches correspondantes
+   - Implémenter la logique dans handleModuleToggle
+
+2. **Poursuivre le refactoring** (P1)
    - Intégrer LayersPanelContent modulaire dans le panneau latéral
    - Migrer les 61 useState vers BionicTerritoryContext
    - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes
 
-2. **Améliorer l'analyse par Waypoint** (P2)
-   - Connecter au backend pour analyse réelle (vs simulation)
+3. **Améliorer l'analyse par Waypoint** (P2)
    - Persister les résultats d'analyse
    - Export des résultats (PDF/GPX)
 
-3. **Configuration Backup Cloud** (Action utilisateur requise)
+4. **Configuration Backup Cloud** (Action utilisateur requise)
    - Créer compte MongoDB Atlas
    - Créer bucket Google Cloud Storage
    - Entrer credentials dans Admin > BACKUP
