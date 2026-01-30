@@ -65,6 +65,7 @@ import WildlifeBehaviorLayer from '@/components/territoire/WildlifeBehaviorLayer
 import TopographicOverlay, { TopographicControlPanel } from '@/components/territoire/TopographicOverlay';
 import WaypointZoneAnalysis, { ZoneAnalysisControlPanel, ANALYSIS_AREAS } from '@/components/territoire/WaypointZoneAnalysis';
 import ForestStandLegendMicro from '@/components/territoire/ForestStandLegendMicro';
+import AnalysisExportButtons from '@/components/territoire/AnalysisExportButtons';
 
 // Module Architecture - BIONIC Territory
 import { 
