@@ -99,7 +99,39 @@
 
 ## What's Been Implemented
 
-### Phase 52t (January 30, 2026 - Session 5) - Refactoring Context & Admin Urbain ✅ **NOUVEAU**
+### Phase 52u (January 30, 2026 - Session 6) - TerritorySidebar Modulaire ✅ **NOUVEAU**
+
+**Création du composant TerritorySidebar modulaire pour réduire MonTerritoireBionicPage.jsx**
+
+#### 🏗️ Nouveau Composant TerritorySidebar (455 lignes)
+- ✅ **Fichier créé** : `/app/frontend/src/modules/bionic-territory/components/sidebar/TerritorySidebar.jsx`
+- ✅ **5 sous-composants** créés et exportés :
+  - `BaseMapSelector` - Sélection fond de carte (BIONIC™, Satellite, Terrain)
+  - `BionicPipelineControl` - Contrôle Pipeline v1.0 avec 8 sous-couches
+  - `BehaviorZonesControl` - Zones comportementales (Corridor, Alimentation, Cache)
+  - `PrivacyModeControl` - Mode confidentialité ON/OFF
+  - `TerritorySidebar` - Composant principal conteneur
+
+#### 📦 Module mis à jour (v1.2.0)
+- ✅ **Index du module** : `/app/frontend/src/modules/bionic-territory/index.js` mis à jour
+- ✅ **Nouveaux exports** : TerritorySidebar, BaseMapSelector, BionicPipelineControl, BehaviorZonesControl, PrivacyModeControl
+- ✅ **Rétro-compatibilité** : Legacy LayersSidebar toujours exporté
+
+#### ✅ Tests Validés
+- Frontend : 100% (7/7 fonctionnalités)
+- Sélecteur fond de carte : WORKING
+- Pipeline v1.0 : WORKING (ON/OFF toggle)
+- Scores carte : WORKING (63, 50, 96)
+- Sélecteur espèce : WORKING (photo réaliste)
+- Dropdown Habitat Score : WORKING (6/8 modules)
+- Légende peuplements : WORKING
+
+#### ⏳ Migration Progressive
+- Le composant `TerritorySidebar` est **importé mais pas encore rendu** dans MonTerritoireBionicPage.jsx
+- L'ancien code inline est toujours utilisé (migration progressive sécurisée)
+- Prochaine étape : Remplacer le code inline par `<TerritorySidebar />` avec props
+
+### Phase 52t (January 30, 2026 - Session 5) - Refactoring Context & Admin Urbain ✅
 
 **Refactoring majeur du BionicTerritoryContext + Connexion Admin Urbain temps réel**
 
