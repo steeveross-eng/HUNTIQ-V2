@@ -1110,6 +1110,33 @@ const MonTerritoireBionicPage = () => {
   
   const rating = getScoreRating(displayScore);
   
+  // ============================================
+  // MODULES THÉMATIQUES
+  // ============================================
+  const [thematicModules, setThematicModules] = useState([
+    { id: 'habitat', name: 'Habitat Optimal', icon: '🏠', enabled: true, score: 63 },
+    { id: 'meteo', name: 'Analyse Météo', icon: '🌤️', enabled: true, score: 78 },
+    { id: 'approche', name: 'Approche Optimale', icon: '🎯', enabled: true, score: 96 },
+    { id: 'alimentation', name: 'Zones Alimentation', icon: '🍃', enabled: false, score: 73 },
+    { id: 'comportement', name: 'Comportements Gibier', icon: '🦌', enabled: true, score: 85 },
+    { id: 'hotspots', name: 'Hotspots IA', icon: '🔥', enabled: false, score: 91 },
+    { id: 'peuplements', name: 'Peuplements Forestiers', icon: '🌲', enabled: true, score: 88 },
+    { id: 'topographie', name: 'Overlay Topographique', icon: '⛰️', enabled: false, score: 75 }
+  ]);
+  
+  const handleModuleToggle = useCallback((moduleId) => {
+    setThematicModules(prev => prev.map(m => 
+      m.id === moduleId ? { ...m, enabled: !m.enabled } : m
+    ));
+    
+    const module = thematicModules.find(m => m.id === moduleId);
+    if (module) {
+      toast.info(module.enabled ? `${module.name} désactivé` : `${module.name} activé`, {
+        icon: module.icon
+      });
+    }
+  }, [thematicModules]);
+  
   // Géolocalisation
   const startWatchingPosition = useCallback(() => {
     if (!navigator.geolocation) {
