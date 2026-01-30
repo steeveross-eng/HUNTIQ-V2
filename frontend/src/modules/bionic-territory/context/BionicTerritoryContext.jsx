@@ -138,23 +138,34 @@ const initialState = {
     pipelineEnabled: true,
     pipelineCollapsed: false,
     activeEcoLayers: {
-      baseMap: null,
-      overlays: []
+      baseMap: 'terrain',
+      peuplements: false,
+      essences: false,
+      perturbations: false,
+      densite: false,
+      hauteur: false,
+      lidar_chm: false,
+      lidar_volume: false,
+      lidar_st: false,
+      courbes_niveau: false
     },
     ecoLayerOpacities: {},
-    // Couches comportementales
     showBehaviorZones: true,
-    // Overlay topographique
+    activeBehaviors: null,
     topoEnabled: false,
-    // Couches Québec WMS
+    topoHillshade: true,
+    topoHillshadeOpacity: 40,
+    topoContours: true,
+    topoContourStyle: 'highContrast',
+    topoCollapsed: false,
     quebecLayers: {
-      ecoforestry: { enabled: false, opacity: 60 },
-      lidar: { enabled: false, opacity: 50 },
-      twi: { enabled: false, opacity: 50 }
+      ecoforestry: { enabled: false, opacity: 60, loading: false },
+      lidar: { enabled: false, opacity: 50, loading: false },
+      twi: { enabled: false, opacity: 50, loading: false }
     }
   },
   
-  // Thematic Modules State (Habitat Score dropdown)
+  // Thematic Modules State
   thematicModules: [
     { id: 'habitat', name: 'Habitat Optimal', enabled: true, score: 63 },
     { id: 'meteo', name: 'Analyse Météo', enabled: true, score: 78 },
@@ -166,10 +177,24 @@ const initialState = {
     { id: 'topographie', name: 'Overlay Topographique', enabled: false, score: 75 }
   ],
   
+  // Species State
+  selectedEspece: 'ORIGNAL',
+  
+  // Zone Analysis State
+  zoneAnalysis: {
+    enabled: false,
+    waypoint: null,
+    area: '4',
+    result: null,
+    collapsed: false,
+    autoMode: true
+  },
+  
   // Waypoints State
   waypoints: {
     items: [],
     selected: null,
+    selectedForZones: null,
     loading: false
   },
   
@@ -182,12 +207,30 @@ const initialState = {
   
   // UI State
   ui: {
+    activeTab: 'carte',
     layersPanelVisible: true,
     analysisPanelVisible: true,
     privacyMode: false,
     gpsLiveEnabled: false,
     mapClickMode: false,
+    quickWaypointMode: false,
+    liveMode: false,
+    showEcoforestryPanel: false,
+    forestLegendCollapsed: true,
     showGroupDashboard: false
+  },
+  
+  // Dialog State
+  dialogs: {
+    showShareDialog: false,
+    waypointToShare: null,
+    showCreateGroupDialog: false,
+    selectedGroup: null,
+    showAddPlaceDialog: false,
+    newPlace: { name: '', type: 'autre', lat: '', lng: '', notes: '' },
+    editingPlace: null,
+    showAddWaypointDialog: false,
+    newWaypoint: { name: '', type: 'autre', lat: '', lng: '' }
   },
   
   // User Position
@@ -197,13 +240,25 @@ const initialState = {
     accuracy: null
   },
   
+  // Cursor State
+  cursor: {
+    position: null,
+    data: null,
+    elevation: null,
+    showInfo: true
+  },
+  
   // Zones State
   zones: {
     selected: null,
     microZones: [],
     filteredZones: [],
-    minPercentageFilter: 50,
-    displayMode: 'micro'
+    minPercentageFilter: 80,
+    displayMode: 'micro',
+    showConcentricCircles: true,
+    showCorridors: true,
+    waterExclusionStats: null,
+    isFilteringWater: false
   }
 };
 
