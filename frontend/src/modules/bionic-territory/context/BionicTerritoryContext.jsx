@@ -921,51 +921,131 @@ export function BionicTerritoryProvider({ children, initialOverrides = {} }) {
   // ─────────────────────────────────────────────────────────────
   
   const selectors = useMemo(() => ({
-    // Map Selectors
+    // ═══════════════════════════════════════════════════════════
+    // MAP SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getMapCenter: () => state.map.center,
     getMapZoom: () => state.map.zoom,
+    getCurrentZoom: () => state.map.currentZoom,
+    getCurrentCenter: () => state.map.currentCenter,
+    getMapBounds: () => state.map.bounds,
     getBaseMap: () => state.map.baseMap,
     isBionicMapActive: () => state.map.baseMap === 'bionic',
     
-    // Layers Selectors
+    // ═══════════════════════════════════════════════════════════
+    // LAYERS SELECTORS
+    // ═══════════════════════════════════════════════════════════
     isPipelineEnabled: () => state.layers.pipelineEnabled,
     isPipelineCollapsed: () => state.layers.pipelineCollapsed,
-    getActiveOverlays: () => state.layers.activeEcoLayers.overlays || [],
+    getActiveEcoLayers: () => state.layers.activeEcoLayers,
     getEcoLayerOpacity: (layerId) => state.layers.ecoLayerOpacities[layerId] ?? 1,
     isShowBehaviorZones: () => state.layers.showBehaviorZones,
-    isTopoEnabled: () => state.layers.topoEnabled,
+    getActiveBehaviors: () => state.layers.activeBehaviors,
     getQuebecLayers: () => state.layers.quebecLayers,
     
-    // Thematic Modules Selectors
+    // ═══════════════════════════════════════════════════════════
+    // TOPOGRAPHIC SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    isTopoEnabled: () => state.layers.topoEnabled,
+    isTopoHillshade: () => state.layers.topoHillshade,
+    getTopoHillshadeOpacity: () => state.layers.topoHillshadeOpacity,
+    isTopoContours: () => state.layers.topoContours,
+    getTopoContourStyle: () => state.layers.topoContourStyle,
+    isTopoCollapsed: () => state.layers.topoCollapsed,
+    
+    // ═══════════════════════════════════════════════════════════
+    // THEMATIC MODULES SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getThematicModules: () => state.thematicModules,
     isModuleEnabled: (moduleId) => state.thematicModules.find(m => m.id === moduleId)?.enabled ?? false,
     getActiveModulesCount: () => state.thematicModules.filter(m => m.enabled).length,
     
-    // Waypoints Selectors
+    // ═══════════════════════════════════════════════════════════
+    // SPECIES SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    getSelectedEspece: () => state.selectedEspece,
+    
+    // ═══════════════════════════════════════════════════════════
+    // ZONE ANALYSIS SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    isZoneAnalysisEnabled: () => state.zoneAnalysis.enabled,
+    getZoneAnalysisWaypoint: () => state.zoneAnalysis.waypoint,
+    getZoneAnalysisArea: () => state.zoneAnalysis.area,
+    getZoneAnalysisResult: () => state.zoneAnalysis.result,
+    isZoneAnalysisCollapsed: () => state.zoneAnalysis.collapsed,
+    isZoneAnalysisAutoMode: () => state.zoneAnalysis.autoMode,
+    
+    // ═══════════════════════════════════════════════════════════
+    // WAYPOINTS SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getWaypoints: () => state.waypoints.items,
     getSelectedWaypoint: () => state.waypoints.selected,
+    getSelectedWaypointForZones: () => state.waypoints.selectedForZones,
     getWaypointCount: () => state.waypoints.items.length,
+    isWaypointsLoading: () => state.waypoints.loading,
     
-    // Generator Selectors
+    // ═══════════════════════════════════════════════════════════
+    // GENERATOR SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getCarteBionic: () => state.generator.carteBionic,
     isGenerating: () => state.generator.isGenerating,
     hasGeneratedData: () => !!state.generator.carteBionic,
+    getLastGenerated: () => state.generator.lastGenerated,
     
-    // UI Selectors
+    // ═══════════════════════════════════════════════════════════
+    // UI SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    getActiveTab: () => state.ui.activeTab,
     isLayersPanelVisible: () => state.ui.layersPanelVisible,
+    isAnalysisPanelVisible: () => state.ui.analysisPanelVisible,
     isPrivacyMode: () => state.ui.privacyMode,
     isGpsLiveEnabled: () => state.ui.gpsLiveEnabled,
     isMapClickMode: () => state.ui.mapClickMode,
+    isQuickWaypointMode: () => state.ui.quickWaypointMode,
+    isLiveMode: () => state.ui.liveMode,
+    isShowEcoforestryPanel: () => state.ui.showEcoforestryPanel,
+    isForestLegendCollapsed: () => state.ui.forestLegendCollapsed,
+    isShowGroupDashboard: () => state.ui.showGroupDashboard,
     
-    // Position Selectors
+    // ═══════════════════════════════════════════════════════════
+    // DIALOG SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    isShowShareDialog: () => state.dialogs.showShareDialog,
+    getWaypointToShare: () => state.dialogs.waypointToShare,
+    isShowCreateGroupDialog: () => state.dialogs.showCreateGroupDialog,
+    getSelectedGroup: () => state.dialogs.selectedGroup,
+    isShowAddPlaceDialog: () => state.dialogs.showAddPlaceDialog,
+    getNewPlace: () => state.dialogs.newPlace,
+    getEditingPlace: () => state.dialogs.editingPlace,
+    isShowAddWaypointDialog: () => state.dialogs.showAddWaypointDialog,
+    getNewWaypoint: () => state.dialogs.newWaypoint,
+    
+    // ═══════════════════════════════════════════════════════════
+    // POSITION SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getUserPosition: () => state.position.current,
     isWatchingPosition: () => state.position.watching,
     
-    // Zones Selectors
+    // ═══════════════════════════════════════════════════════════
+    // CURSOR SELECTORS
+    // ═══════════════════════════════════════════════════════════
+    getCursorPosition: () => state.cursor.position,
+    getCursorData: () => state.cursor.data,
+    getCursorElevation: () => state.cursor.elevation,
+    isShowCursorInfo: () => state.cursor.showInfo,
+    
+    // ═══════════════════════════════════════════════════════════
+    // ZONES SELECTORS
+    // ═══════════════════════════════════════════════════════════
     getSelectedZone: () => state.zones.selected,
     getMicroZones: () => state.zones.microZones,
     getFilteredZones: () => state.zones.filteredZones,
-    getMinPercentageFilter: () => state.zones.minPercentageFilter
+    getMinPercentageFilter: () => state.zones.minPercentageFilter,
+    getZoneDisplayMode: () => state.zones.displayMode,
+    isShowConcentricCircles: () => state.zones.showConcentricCircles,
+    isShowCorridors: () => state.zones.showCorridors,
+    getWaterExclusionStats: () => state.zones.waterExclusionStats,
+    isFilteringWater: () => state.zones.isFilteringWater
   }), [state]);
   
   const value = useMemo(() => ({
