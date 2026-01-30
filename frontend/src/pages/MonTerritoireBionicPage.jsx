@@ -1198,6 +1198,33 @@ const MonTerritoireBionicPage = () => {
     }
   }, [thematicModules, toggleLayer, refreshWeather]);
   
+  // ============================================
+  // SYNCHRONISATION MODULES → COUCHES AU MONTAGE
+  // Met à jour l'état initial des modules selon les couches actives
+  // ============================================
+  useEffect(() => {
+    setThematicModules(prev => prev.map(m => {
+      switch (m.id) {
+        case 'habitat':
+          return { ...m, enabled: layersVisible?.habitats ?? true };
+        case 'approche':
+          return { ...m, enabled: layersVisible?.affuts ?? true };
+        case 'alimentation':
+          return { ...m, enabled: layersVisible?.alimentation ?? false };
+        case 'comportement':
+          return { ...m, enabled: showBehaviorZones };
+        case 'hotspots':
+          return { ...m, enabled: pipelineEnabled };
+        case 'peuplements':
+          return { ...m, enabled: quebecLayers?.ecoforestry?.enabled ?? false };
+        case 'topographie':
+          return { ...m, enabled: topoEnabled };
+        default:
+          return m;
+      }
+    }));
+  }, []); // Ne s'exécute qu'au montage
+
   // Géolocalisation
   const startWatchingPosition = useCallback(() => {
     if (!navigator.geolocation) {
