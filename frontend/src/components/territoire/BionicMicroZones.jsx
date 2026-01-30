@@ -880,9 +880,9 @@ const BionicMicroZones = ({
       
       {/* COUCHE 2 : LIGNES DE DÉLIMITATION AUX INTERSECTIONS */}
       {/* Style "Dany Lavoie" : lignes blanches/claires marquant les croisements */}
-      {currentZoom >= 12 && intersections.map(intersection => (
+      {currentZoom >= 12 && intersections.map((intersection, intIndex) => (
         <IntersectionLine
-          key={intersection.id}
+          key={`intersection-${intersection.id}-${intIndex}`}
           intersection={intersection}
           zoom={currentZoom}
         />
