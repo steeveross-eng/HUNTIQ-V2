@@ -835,9 +835,9 @@ Fonctionnalités implémentées:
   - ✅ Carte Écoforestière (peuplements)
   - ✅ LiDAR Dendrométrique (hauteur arbres)  
   - ✅ Indice d'Humidité TWI
-- [ ] Connecter les toggles des modules thématiques aux couches de la carte
+- [x] Connecter les toggles des modules thématiques aux couches de la carte ✅ (Phase 52s)
 - [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
-- [ ] Test complet du système de backup avec credentials utilisateur
+- [x] Test complet du système de backup avec credentials utilisateur ✅ (Phase 52s - 22/22 tests passés)
 
 ### P2 - Medium Priority
 - [ ] Import/Export GPX/KML pour les waypoints
@@ -856,14 +856,14 @@ Fonctionnalités implémentées:
 
 ## Next Tasks List
 
-1. **Connecter les modules thématiques** (Prochaine session - P1)
-   - Les toggles du dropdown Habitat Score doivent activer/désactiver les couches correspondantes
-   - Implémenter la logique dans handleModuleToggle
-
-2. **Poursuivre le refactoring** (P1)
+1. **Poursuivre le refactoring architectural** (P1)
+   - Migrer les 61 useState restants vers BionicTerritoryContext
    - Intégrer LayersPanelContent modulaire dans le panneau latéral
-   - Migrer les 61 useState vers BionicTerritoryContext
-   - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes
+   - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes (actuellement ~3000)
+
+2. **Connecter le panneau Admin Urbain** (P1)
+   - Connecter les paramètres urbains aux paramètres temps réel
+   - Activer les exclusions de zones urbaines
 
 3. **Améliorer l'analyse par Waypoint** (P2)
    - Persister les résultats d'analyse
@@ -873,16 +873,6 @@ Fonctionnalités implémentées:
    - Créer compte MongoDB Atlas
    - Créer bucket Google Cloud Storage
    - Entrer credentials dans Admin > BACKUP
-
-4. **Activer Auto Backup**
-   - Aller dans Admin > BACKUP > Auto Backup
-   - Activer le switch
-   - Vérifier les mises à jour automatiques
-
-3. **Créer dossier Bureau**
-   - Créer: `Bureau/BIONIC APPS/Backup HUNTIQ`
-   - Télécharger `HUNTIQ_BACKUP.zip` depuis l'admin
-   - Placer dans le dossier
 
 ---
 
