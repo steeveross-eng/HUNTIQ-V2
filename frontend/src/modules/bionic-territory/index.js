@@ -29,10 +29,10 @@ export {
   SpeciesSelector
 } from './components/header/TerritoryHeader';
 
-// Components - Sidebar
+// Components - Sidebar (Legacy)
 export { 
   default as LayersSidebar,
-  BaseMapSelector,
+  BaseMapSelector as LegacyBaseMapSelector,
   PipelineControlPanel,
   PercentageFilter,
   EcoforestrySection,
@@ -56,6 +56,15 @@ export {
   LayerControl
 } from './components/sidebar/QuebecLayersPanel';
 
+// Components - Sidebar (Modulaire v2)
+export {
+  TerritorySidebar,
+  BaseMapSelector,
+  BionicPipelineControl,
+  BehaviorZonesControl,
+  PrivacyModeControl
+} from './components/sidebar';
+
 // Components - Controls
 export { 
   default as MapControlButtons,
@@ -66,7 +75,7 @@ export {
 // Module metadata for micro-frontend registration
 export const MODULE_INFO = {
   name: 'bionic-territory',
-  version: '1.1.0',
+  version: '1.2.0',
   description: 'BIONIC Territory Management Module',
   routes: [
     { path: '/mon-territoire-bionic', component: 'BionicTerritoryPage' }
