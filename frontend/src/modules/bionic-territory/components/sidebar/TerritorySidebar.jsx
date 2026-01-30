@@ -25,7 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 
 // Import des sous-composants de couches
-import QuebecLayersPanel from '@/modules/bionic-territory/components/layers/QuebecLayersPanel';
+import QuebecLayersPanel from '@/modules/bionic-territory/components/sidebar/QuebecLayersPanel';
 import { TopographicControlPanel } from '@/components/territoire/TopographicOverlay';
 import { ZoneAnalysisControlPanel } from '@/components/territoire/WaypointZoneAnalysis';
 import BionicGeneratorPanel from '@/components/territoire/BionicGeneratorPanel';
