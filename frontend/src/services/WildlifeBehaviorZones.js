@@ -134,6 +134,58 @@ export const WILDLIFE_BEHAVIORS = {
       minBehaviors: 3
     },
     huntingTip: 'ZONE PREMIUM - Présence quasi garantie'
+  },
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ALIAS BACKEND (pour compatibilité avec l'API analyse avancée)
+  // ═══════════════════════════════════════════════════════════════
+  
+  // Alias pour 'shelter'
+  cover: {
+    id: 'cover',
+    name: 'Zone de cache/abri',
+    icon: '🛡️',
+    description: 'Couvert dense pour se cacher',
+    color: '#00ff44',
+    glowColor: '#44ff77',
+    pattern: 'dense',
+    huntingTip: 'Approche lente et silencieuse recommandée'
+  },
+  
+  // Alias pour 'corridor'
+  travel: {
+    id: 'travel',
+    name: 'Corridor de circulation',
+    icon: '🦌',
+    description: 'Zones de déplacement préférées',
+    color: '#ff5500',
+    glowColor: '#ff7733',
+    pattern: 'arrows',
+    huntingTip: 'Interception possible en lisière'
+  },
+  
+  // Alias pour 'bedding'
+  rest: {
+    id: 'rest',
+    name: 'Zone de repos/dortoir',
+    icon: '😴',
+    description: 'Ravages et zones de repos',
+    color: '#aa44ff',
+    glowColor: '#cc77ff',
+    pattern: 'circles',
+    huntingTip: 'Éviter de déranger avant le soir'
+  },
+  
+  // Alias pour 'feeding' (déjà présent avec le même ID)
+  browse: {
+    id: 'browse',
+    name: 'Zone d\'alimentation',
+    icon: '🍃',
+    description: 'Ressources alimentaires',
+    color: '#ffcc00',
+    glowColor: '#ffdd44',
+    pattern: 'dots',
+    huntingTip: 'Zone active au crépuscule'
   }
 };
 
