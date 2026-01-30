@@ -559,11 +559,25 @@ const TerritoryHeader = ({
 };
 
 /**
- * Composant Habitat Score avec Dropdown des Modules Thématiques
+ * Mapping des icônes Lucide par module ID
+ */
+const MODULE_ICONS = {
+  habitat: Home,
+  meteo: CloudSun,
+  approche: Crosshair,
+  alimentation: Sprout,
+  comportement: Activity,
+  hotspots: Flame,
+  peuplements: TreePine,
+  topographie: Mountain
+};
+
+/**
+ * Composant Habitat Score avec Dropdown des Modules Thématiques - Version Professionnelle
  */
 const HabitatScoreDropdown = memo(({
   score = 63,
-  rating = { label: 'Bon', color: 'bg-yellow-500', textColor: 'text-yellow-400', emoji: '👍' },
+  rating = { label: 'Bon', color: 'bg-yellow-500', textColor: 'text-yellow-400' },
   presenceProb = 95,
   bestTime = 'Crépuscule',
   modules = [],
@@ -571,40 +585,61 @@ const HabitatScoreDropdown = memo(({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Modules thématiques par défaut si non fournis
-  const defaultModules = [
-    { id: 'habitat', name: 'Habitat Optimal', icon: '🏠', enabled: true, score: 63 },
-    { id: 'meteo', name: 'Analyse Météo', icon: '🌤️', enabled: true, score: 78 },
-    { id: 'approche', name: 'Approche Optimale', icon: '🎯', enabled: true, score: 96 },
-    { id: 'alimentation', name: 'Zones Alimentation', icon: '🍃', enabled: false, score: 73 },
-    { id: 'comportement', name: 'Comportements', icon: '🦌', enabled: true, score: 85 },
-    { id: 'hotspots', name: 'Hotspots IA', icon: '🔥', enabled: false, score: 91 }
-  ];
+  // Utiliser les ratings scientifiques
+  const scientificRating = getScoreRatingScientific(score);
+  
+  // Modules thématiques configurés depuis ProfessionalAssets
+  const defaultModules = THEMATIC_MODULES_CONFIG.map((module, index) => ({
+    ...module,
+    enabled: index < 4, // Premiers 4 actifs par défaut
+    score: Math.floor(60 + Math.random() * 35)
+  }));
   
   const activeModules = modules.length > 0 ? modules : defaultModules;
+  
+  // Récupérer l'icône du rating
+  const RatingIcon = scientificRating.icon ? 
+    { TrendingUp: require('lucide-react').TrendingUp, 
+      ThumbsUp: require('lucide-react').ThumbsUp,
+      Minus: require('lucide-react').Minus,
+      TrendingDown: require('lucide-react').TrendingDown,
+      AlertTriangle: require('lucide-react').AlertTriangle
+    }[scientificRating.icon] : null;
   
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="bg-gray-900/80 hover:bg-gray-800 border border-gray-700 hover:border-[#f5a623]/50 rounded-md px-3 h-10"
+          className="bg-gray-900/80 hover:bg-gray-800 border border-gray-700 hover:border-[#f5a623]/50 rounded-md px-3 h-12 transition-all"
           data-testid="habitat-score-dropdown"
         >
           <div className="flex items-center gap-2">
-            {/* Score principal */}
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-bold text-[#f5a623]">{score}</span>
-              <span className="text-[10px] text-gray-500">/100</span>
+            {/* Score principal avec cercle de progression */}
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <svg className="absolute inset-0 w-10 h-10 -rotate-90">
+                <circle cx="20" cy="20" r="17" fill="none" stroke="#1f2937" strokeWidth="3" />
+                <circle 
+                  cx="20" cy="20" r="17" 
+                  fill="none" 
+                  stroke={scientificRating.color} 
+                  strokeWidth="3"
+                  strokeDasharray={`${score * 1.07} 107`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="text-lg font-bold text-white">{score}</span>
             </div>
             
-            {/* Emoji rating */}
-            <span className="text-lg">{rating.emoji || '👍'}</span>
-            
-            {/* Label */}
+            {/* Rating Icon & Label */}
             <div className="flex flex-col items-start">
-              <span className={`text-[10px] font-semibold ${rating.textColor}`}>{rating.label?.toUpperCase()}</span>
-              <span className="text-[8px] text-gray-500">Habitat Optimal</span>
+              <div className="flex items-center gap-1">
+                {RatingIcon && <RatingIcon className="w-3 h-3" style={{ color: scientificRating.color }} />}
+                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: scientificRating.color }}>
+                  {scientificRating.label}
+                </span>
+              </div>
+              <span className="text-[8px] text-gray-500 font-mono uppercase">Habitat Optimal</span>
             </div>
             
             {/* Flèche dropdown */}
@@ -614,7 +649,7 @@ const HabitatScoreDropdown = memo(({
       </DropdownMenuTrigger>
       
       <DropdownMenuContent 
-        className="bg-gray-900 border border-gray-700 w-72 p-0 z-[9999]" 
+        className="bg-gray-900 border border-gray-700 w-80 p-0 z-[9999]" 
         align="end"
       >
         {/* En-tête du dropdown */}
@@ -622,67 +657,86 @@ const HabitatScoreDropdown = memo(({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-[#f5a623]" />
-              <span className="text-xs font-semibold text-white">MODULES THÉMATIQUES</span>
+              <span className="text-xs font-bold text-white uppercase tracking-wider">Modules Thématiques</span>
             </div>
-            <Badge className="bg-green-500/20 text-green-400 text-[9px]">
-              {activeModules.filter(m => m.enabled).length}/{activeModules.length}
+            <Badge className="bg-green-500/20 text-green-400 text-[9px] font-mono">
+              {activeModules.filter(m => m.enabled).length}/{activeModules.length} ACTIFS
             </Badge>
           </div>
         </div>
         
         {/* Résumé Habitat Optimal */}
         <div className="px-3 py-2 bg-gray-800/50 border-b border-gray-700">
-          <div className="grid grid-cols-2 gap-2 text-[10px]">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Probabilité présence</span>
-              <span className="text-green-400 font-bold">{presenceProb}%</span>
+          <div className="grid grid-cols-2 gap-3 text-[10px]">
+            <div className="flex items-center justify-between bg-gray-900/50 rounded px-2 py-1.5">
+              <span className="text-gray-400 font-mono">Probabilité présence</span>
+              <span className="text-green-400 font-bold text-sm">{presenceProb}%</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Meilleur moment</span>
-              <span className="text-amber-400 font-medium">{bestTime}</span>
+            <div className="flex items-center justify-between bg-gray-900/50 rounded px-2 py-1.5">
+              <span className="text-gray-400 font-mono">Fenêtre optimale</span>
+              <span className="text-amber-400 font-semibold">{bestTime}</span>
             </div>
           </div>
         </div>
         
         {/* Liste des modules */}
-        <div className="max-h-[250px] overflow-y-auto">
-          {activeModules.map((module) => (
-            <div 
-              key={module.id}
-              className={`flex items-center justify-between px-3 py-2 hover:bg-gray-800/50 cursor-pointer border-b border-gray-800/50 transition-colors ${
-                module.enabled ? '' : 'opacity-50'
-              }`}
-              onClick={() => onModuleToggle && onModuleToggle(module.id)}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{module.icon}</span>
-                <div>
-                  <div className="text-[11px] text-white font-medium">{module.name}</div>
-                  <div className="text-[9px] text-gray-500">
-                    Score: <span className={module.score >= 80 ? 'text-green-400' : module.score >= 60 ? 'text-yellow-400' : 'text-orange-400'}>
-                      {module.score}%
-                    </span>
+        <div className="max-h-[280px] overflow-y-auto">
+          {activeModules.map((module) => {
+            const ModuleIcon = MODULE_ICONS[module.id] || Target;
+            const moduleRating = getScoreRatingScientific(module.score);
+            
+            return (
+              <div 
+                key={module.id}
+                className={`flex items-center justify-between px-3 py-2.5 hover:bg-gray-800/50 cursor-pointer border-b border-gray-800/50 transition-all ${
+                  module.enabled ? '' : 'opacity-40'
+                }`}
+                onClick={() => onModuleToggle && onModuleToggle(module.id)}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Icône du module */}
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                    module.enabled ? 'bg-opacity-20' : 'bg-gray-800'
+                  }`} style={{ backgroundColor: module.enabled ? `${module.color}30` : undefined }}>
+                    <ModuleIcon 
+                      className="w-4 h-4" 
+                      style={{ color: module.enabled ? module.color : '#6b7280' }}
+                    />
+                  </div>
+                  
+                  {/* Informations module */}
+                  <div>
+                    <div className="text-[11px] text-white font-semibold">{module.name}</div>
+                    <div className="text-[8px] text-gray-500 font-mono uppercase tracking-wider">
+                      {module.scientificName}
+                    </div>
                   </div>
                 </div>
+                
+                {/* Score et statut */}
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <div className="text-xs font-bold" style={{ color: moduleRating.color }}>
+                      {module.score}%
+                    </div>
+                    <div className="text-[8px] text-gray-600">{moduleRating.label}</div>
+                  </div>
+                  
+                  {/* Indicateur ON/OFF */}
+                  <div className={`w-2 h-6 rounded-full transition-all ${
+                    module.enabled ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]' : 'bg-gray-700'
+                  }`} />
+                </div>
               </div>
-              
-              <div className="flex items-center gap-2">
-                {module.enabled ? (
-                  <Badge className="bg-green-500/20 text-green-400 text-[8px]">Actif</Badge>
-                ) : (
-                  <Badge className="bg-gray-700 text-gray-400 text-[8px]">Inactif</Badge>
-                )}
-                <div className={`w-2 h-2 rounded-full ${module.enabled ? 'bg-green-500' : 'bg-gray-600'}`} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         
         {/* Footer */}
         <div className="px-3 py-2 bg-gray-800/30 border-t border-gray-700">
-          <div className="flex items-center justify-between text-[9px] text-gray-500">
-            <span>Cliquez pour activer/désactiver</span>
-            <span className="text-[#f5a623]">BIONIC™ v3.3</span>
+          <div className="flex items-center justify-between text-[8px]">
+            <span className="text-gray-500 font-mono">Cliquez pour activer/désactiver</span>
+            <span className="text-[#f5a623] font-bold tracking-wider">BIONIC™ v3.3</span>
           </div>
         </div>
       </DropdownMenuContent>
