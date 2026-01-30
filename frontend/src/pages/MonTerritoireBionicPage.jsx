@@ -1124,18 +1124,79 @@ const MonTerritoireBionicPage = () => {
     { id: 'topographie', name: 'Overlay Topographique', icon: '⛰️', enabled: false, score: 75 }
   ]);
   
+  // ============================================
+  // CONNEXION MODULES THÉMATIQUES → COUCHES CARTE
+  // Les toggles du dropdown Habitat Score activent/désactivent les couches
+  // ============================================
   const handleModuleToggle = useCallback((moduleId) => {
+    // 1. Mettre à jour l'état du module
     setThematicModules(prev => prev.map(m => 
       m.id === moduleId ? { ...m, enabled: !m.enabled } : m
     ));
     
     const module = thematicModules.find(m => m.id === moduleId);
+    const newState = module ? !module.enabled : false;
+    
+    // 2. Connecter le module à la couche de carte correspondante
+    switch (moduleId) {
+      case 'habitat':
+        // Habitat Optimal → Couche habitats BIONIC
+        toggleLayer('habitats');
+        break;
+        
+      case 'approche':
+        // Approche Optimale → Couche affûts potentiels
+        toggleLayer('affuts');
+        break;
+        
+      case 'alimentation':
+        // Zones Alimentation → Couche alimentation
+        toggleLayer('alimentation');
+        break;
+        
+      case 'comportement':
+        // Comportements Gibier → Zones comportementales
+        setShowBehaviorZones(newState);
+        break;
+        
+      case 'hotspots':
+        // Hotspots IA → Active/désactive le pipeline BIONIC
+        setPipelineEnabled(newState);
+        break;
+        
+      case 'peuplements':
+        // Peuplements Forestiers → Active/désactive les zones forestières
+        // Le peuplement est lié au fond BIONIC, on toggle les couches WMS Québec
+        setQuebecLayers(prev => ({
+          ...prev,
+          ecoforestry: { ...prev.ecoforestry, enabled: newState }
+        }));
+        break;
+        
+      case 'topographie':
+        // Overlay Topographique → Active/désactive la couche topo
+        setTopoEnabled(newState);
+        break;
+        
+      case 'meteo':
+        // Analyse Météo → Refresh des données météo (pas de couche spécifique)
+        if (newState) {
+          refreshWeather();
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    // 3. Toast de confirmation
     if (module) {
-      toast.info(module.enabled ? `${module.name} désactivé` : `${module.name} activé`, {
-        icon: module.icon
+      toast.success(newState ? `${module.name} activé sur la carte` : `${module.name} désactivé`, {
+        description: newState ? 'Couche visible' : 'Couche masquée',
+        duration: 2000
       });
     }
-  }, [thematicModules]);
+  }, [thematicModules, toggleLayer, refreshWeather]);
   
   // Géolocalisation
   const startWatchingPosition = useCallback(() => {
