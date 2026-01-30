@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Brain, ArrowLeft, Zap, Wifi, WifiOff, RefreshCw, Cloud, 
   Users, Plus, ChevronDown, Map, MapPin, BookMarked, X,
-  Navigation, Crosshair, Edit2
+  Navigation, Crosshair, Edit2, Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
