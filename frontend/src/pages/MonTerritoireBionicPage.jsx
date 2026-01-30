@@ -1650,24 +1650,77 @@ const MonTerritoireBionicPage = () => {
         {/* Onglet Carte BIONIC */}
         {activeTab === 'carte' && (
           <div className="flex h-full">
-            {/* Panneau Couches */}
-            <div className={`${showLayersPanel ? 'w-64' : 'w-10'} bg-gray-900/95 border-r border-gray-800 transition-all duration-300 flex flex-col`}>
-              <button onClick={() => setShowLayersPanel(!showLayersPanel)} className="p-2 border-b border-gray-800 flex items-center justify-between hover:bg-gray-800/50">
-                <div className="flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-[#f5a623]" />
-                  {showLayersPanel && <span className="text-white text-sm">Couches</span>}
-                </div>
-              </button>
+            {/* ═══════════════════════════════════════════════════════════
+                SIDEBAR MODULAIRE - TerritorySidebar
+                Remplace ~400 lignes de code inline
+            ═══════════════════════════════════════════════════════════ */}
+            <TerritorySidebar
+              // Visibilité
+              isVisible={showLayersPanel}
+              onToggleVisibility={() => setShowLayersPanel(!showLayersPanel)}
               
-              {showLayersPanel && (
-                <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                  
-                  {/* ═══════════════════════════════════════════════════════════
-                      SECTION FOND DE CARTE BIONIC™
-                  ═══════════════════════════════════════════════════════════ */}
-                  <div className="border-b border-gray-700 pb-3 mb-2">
-                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
-                      🗺️ Fond de carte
+              // Fond de carte
+              activeBaseMap={activeBaseMap}
+              onBaseMapChange={handleBaseMapChange}
+              
+              // Pipeline BIONIC™
+              pipelineEnabled={pipelineEnabled}
+              pipelineCollapsed={pipelineCollapsed}
+              onTogglePipeline={() => setPipelineEnabled(!pipelineEnabled)}
+              onTogglePipelineCollapse={() => setPipelineCollapsed(!pipelineCollapsed)}
+              activeEcoLayers={activeEcoLayers}
+              onToggleEcoLayer={(layerId) => handleEcoLayerToggle(layerId)}
+              
+              // Couches Québec
+              quebecLayers={quebecLayers}
+              onUpdateQuebecLayers={setQuebecLayers}
+              
+              // Zones comportementales
+              showBehaviorZones={showBehaviorZones}
+              activeBehaviors={activeBehaviors}
+              onToggleBehaviorZones={() => setShowBehaviorZones(!showBehaviorZones)}
+              onToggleBehavior={toggleBehaviorFilter}
+              
+              // Topographie
+              topoEnabled={topoEnabled}
+              topoHillshade={topoHillshade}
+              topoHillshadeOpacity={topoHillshadeOpacity}
+              topoContours={topoContours}
+              topoContourStyle={topoContourStyle}
+              topoCollapsed={topoCollapsed}
+              onToggleTopo={() => setTopoEnabled(!topoEnabled)}
+              onToggleTopoHillshade={() => setTopoHillshade(!topoHillshade)}
+              onSetTopoHillshadeOpacity={setTopoHillshadeOpacity}
+              onToggleTopoContours={() => setTopoContours(!topoContours)}
+              onSetTopoContourStyle={setTopoContourStyle}
+              onToggleTopoCollapsed={() => setTopoCollapsed(!topoCollapsed)}
+              
+              // Analyse Zone
+              zoneAnalysisEnabled={zoneAnalysisEnabled}
+              zoneAnalysisWaypoint={zoneAnalysisWaypoint}
+              zoneAnalysisArea={zoneAnalysisArea}
+              zoneAnalysisCollapsed={zoneAnalysisCollapsed}
+              zoneAnalysisAutoMode={zoneAnalysisAutoMode}
+              waypoints={waypoints}
+              onToggleZoneAnalysis={() => setZoneAnalysisEnabled(!zoneAnalysisEnabled)}
+              onSetZoneAnalysisWaypoint={setZoneAnalysisWaypoint}
+              onSetZoneAnalysisArea={setZoneAnalysisArea}
+              onToggleZoneAnalysisCollapsed={() => setZoneAnalysisCollapsed(!zoneAnalysisCollapsed)}
+              onToggleZoneAnalysisAutoMode={() => setZoneAnalysisAutoMode(!zoneAnalysisAutoMode)}
+              onAnalyzeZone={handleAnalyzeZone}
+              
+              // Générateur BIONIC
+              selectedEspece={selectedEspece}
+              selectedWaypointForZones={selectedWaypointForZones}
+              onGenerateBionic={(results) => {
+                console.log('[BIONIC Generator] Résultats générés:', results);
+                setCarteBionic(results);
+              }}
+              
+              // Confidentialité
+              privacyMode={privacyMode}
+              onTogglePrivacy={() => setPrivacyMode(!privacyMode)}
+            />
                     </div>
                     <div className="space-y-1">
                       {/* Option BIONIC™ */}
