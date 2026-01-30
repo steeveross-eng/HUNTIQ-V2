@@ -2047,6 +2047,21 @@ const MonTerritoireBionicPage = () => {
                 </Button>
               </div>
               
+              {/* BOUTONS D'EXPORT ANALYSE (en haut à droite) */}
+              {zoneAnalysisResult && (
+                <div className="absolute top-4 right-4 z-[1000]">
+                  <AnalysisExportButtons
+                    analysis={zoneAnalysisResult}
+                    waypoint={zoneAnalysisWaypoint}
+                    espece={selectedEspece}
+                    showHistory={true}
+                    onSave={(saved) => {
+                      console.log('[Export] Analysis saved:', saved.id);
+                    }}
+                  />
+                </div>
+              )}
+              
               {/* PANNEAU DE CONTRÔLE ÉCOFORESTIER */}
               {showEcoforestryPanel && (
                 <div className="absolute top-4 left-14 z-[1000] w-72">
