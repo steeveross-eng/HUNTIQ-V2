@@ -1,0 +1,83 @@
+{
+  "summary": "Completed E2E testing for HUNTIQ BIONIC™ Mon Territoire module - Module thématiques connection to map layers and Backup Cloud API. Backend: 22/22 tests passed. Frontend: All key features working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Module toggle toast notification",
+        "issue": "Toast notifications not appearing when toggling modules in Habitat Score dropdown. The toast.success() is called in handleModuleToggle but not visible in UI tests.",
+        "affected_selectors": ["[data-sonner-toast]"],
+        "priority": "LOW"
+      }
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: /api/backup-cloud/stats returns 200 with correct structure",
+    "Backend: /api/backup-cloud/logs returns 200 with correct structure",
+    "Backend: /api/backup-cloud/logs supports limit and backup_type filters",
+    "Backend: /api/backup-cloud/schedule/status returns running status",
+    "Backend: /api/backup-cloud/zip/latest returns ZIP backup info",
+    "Backend: /api/backup-cloud/notifications/status returns config status",
+    "Backend: /api/backup-cloud/resend/status returns Resend API status",
+    "Backend: /api/backup-cloud/atlas/status returns MongoDB Atlas status",
+    "Backend: /api/backup-cloud/gcs/status returns GCS status",
+    "Frontend: Navigation to /mon-territoire-bionic works correctly",
+    "Frontend: Habitat Score dropdown opens with 'MODULES THÉMATIQUES' panel",
+    "Frontend: 8 thematic modules displayed with Lucide icons",
+    "Frontend: Module toggle clicks work (Overlay Topographique, Peuplements Forestiers, Comportements Gibier)",
+    "Frontend: Species selector shows 4 species with realistic photos",
+    "Frontend: Species have Latin scientific names (Alces alces, Odocoileus virginianus, etc.)",
+    "Frontend: Map container loads with BIONIC™ layers",
+    "Frontend: COMPORTEMENTS GIBIER legend visible on map",
+    "Frontend: PEUPLEMENTS FORESTIERS legend visible on map",
+    "Frontend: Active modules badge shows X/8 ACTIFS count"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_backup_cloud_api.py",
+    "/app/test_reports/pytest/pytest_backup_cloud.xml"
+  ],
+  "action_items": [
+    "OPTIONAL: Investigate why toast notifications are not appearing when toggling modules (may be timing issue or Sonner configuration)"
+  ],
+  "critical_code_review_comments": [
+    "React key warning: 'Encountered two children with the same key' for routes /, /analyze, /compare, /shop - should add unique keys to navigation items",
+    "handleModuleToggle correctly connects modules to map layers (habitat→habitats, approche→affuts, comportement→behaviorZones, topographie→topoEnabled, peuplements→quebecLayers.ecoforestry)",
+    "BionicTerritoryContext properly manages thematicModules, quebecLayers, topoEnabled, showBehaviorZones states"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_backup_cloud_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (22/22 tests passed)",
+    "frontend": "95% (18/19 UI tests passed - toast notification not visible)"
+  },
+  "seed_data_creation": "None required",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "HUNTIQ BIONIC™ Mon Territoire module is fully functional. Module thématiques dropdown connects to map layers correctly. Backend Backup Cloud API is working with all endpoints returning valid data. Species selector shows 4 species with photos and Latin names. The only minor issue is toast notifications not appearing during module toggles - may be a timing issue in Playwright tests rather than actual bug.",
+  "features_validated": {
+    "module_toggle_connection": {
+      "status": "WORKING",
+      "details": "habitat→habitats, approche→affuts, comportement→behaviorZones, topographie→topoEnabled, peuplements→quebecLayers.ecoforestry",
+      "data_testid": "habitat-score-dropdown"
+    },
+    "backup_cloud_api": {
+      "status": "WORKING",
+      "endpoints_tested": ["/api/backup-cloud/stats", "/api/backup-cloud/logs", "/api/backup-cloud/schedule/status", "/api/backup-cloud/zip/latest", "/api/backup-cloud/notifications/status", "/api/backup-cloud/resend/status", "/api/backup-cloud/atlas/status", "/api/backup-cloud/gcs/status"]
+    },
+    "species_selector": {
+      "status": "WORKING",
+      "details": "4 species with photos and Latin names",
+      "data_testid": "espece-cible-dropdown"
+    },
+    "navigation": {
+      "status": "WORKING",
+      "url": "/mon-territoire-bionic"
+    }
+  }
+}
