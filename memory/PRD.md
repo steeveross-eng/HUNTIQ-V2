@@ -974,40 +974,30 @@ Fonctionnalités implémentées:
 
 ## Test Results
 
+**Iteration 43 - Sidebar Integration & Export Service (30 Jan 2026)**
+- Frontend: 100% (9/9 tests)
+- TerritorySidebar: INTEGRATED (line 1675 of MonTerritoireBionicPage.jsx)
+- MonTerritoireBionicPage: 3102 → 2802 lignes (-10%)
+- AnalysisExportService: 488 lignes, PDF/GPX export ready
+- AnalysisExportButtons: 251 lignes, dropdown menu
+- Status: ✅ All tests passed
+
 **Iteration 42 - TerritorySidebar Modular Component (30 Jan 2026)**
 - Frontend: 100% (7/7 tests)
-- TerritorySidebar.jsx: 455 lignes (prêt pour intégration)
-- Sous-composants: BaseMapSelector, BionicPipelineControl, BehaviorZonesControl, PrivacyModeControl
+- TerritorySidebar.jsx: 455 lignes (composant créé)
 - Status: ✅ All tests passed
 
 **Iteration 41 - Urban Admin & Context Refactoring (30 Jan 2026)**
 - Backend: 100% (12/12 tests)
-- Frontend: 100% (tous UI tests passés)
-- BionicTerritoryContext: ~40 nouveaux états ajoutés
-- Admin Urbain: 4 sliders fonctionnels, localStorage persistence
+- Frontend: 100%
+- BionicTerritoryContext: ~40 nouveaux états
+- Admin Urbain: 4 sliders, localStorage
 - Status: ✅ All tests passed
 
 **Iteration 40 - Modules Thématiques Connection (30 Jan 2026)**
 - Backend: 100% (22/22 tests)
-- Frontend: 95% (18/19 - toast timing)
-- handleModuleToggle: 8 modules connectés aux couches carte
-- Status: ✅ All tests passed
-
-**Iteration 39 - Professional UI Overhaul (30 Jan 2026)**
-- Frontend: 100% (12/12 tests)
-- SpeciesSelector: Photos réalistes 4 espèces
-- HabitatScoreDropdown: Icônes Lucide
-- Status: ✅ All tests passed
-
-**Iteration 35 - Dropdown Bug Fix (27 Jan 2026)**
-- Bug: Le dropdown "Enregistrer un Waypoint" ne s'ouvrait pas visuellement
-- Cause: Conflit de z-index avec les éléments Leaflet (carte)
-- Fix: Ajout de `z-[9999]` au DropdownMenuContent dans MonTerritoireBionicPage.jsx
-- Status: ✅ Corrigé et testé
-
-**Iteration 34 - Cloud Backup System**
-- Backend: 100% (12/12 APIs working)
-- Frontend: 100% (All UI components working)
+- Frontend: 95% (18/19)
+- handleModuleToggle: 8 modules connectés
 - Status: ✅ All tests passed
 
 ---
