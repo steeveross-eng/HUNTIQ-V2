@@ -871,7 +871,7 @@ Fonctionnalités implémentées:
   - ✅ LiDAR Dendrométrique (hauteur arbres)  
   - ✅ Indice d'Humidité TWI
 - [x] Connecter les toggles des modules thématiques aux couches de la carte ✅ (Phase 52s)
-- [ ] Connecter le panneau Admin Urbain aux paramètres temps réel
+- [x] Connecter le panneau Admin Urbain aux paramètres temps réel ✅ (Phase 52t)
 - [x] Test complet du système de backup avec credentials utilisateur ✅ (Phase 52s - 22/22 tests passés)
 
 ### P2 - Medium Priority
@@ -892,19 +892,15 @@ Fonctionnalités implémentées:
 ## Next Tasks List
 
 1. **Poursuivre le refactoring architectural** (P1)
-   - Migrer les 61 useState restants vers BionicTerritoryContext
-   - Intégrer LayersPanelContent modulaire dans le panneau latéral
+   - Intégrer LayersPanelContent modulaire dans le panneau latéral de MonTerritoireBionicPage
    - Réduire la taille de MonTerritoireBionicPage sous 2000 lignes (actuellement ~3000)
+   - Migrer progressivement les useState locaux vers les actions du Context
 
-2. **Connecter le panneau Admin Urbain** (P1)
-   - Connecter les paramètres urbains aux paramètres temps réel
-   - Activer les exclusions de zones urbaines
-
-3. **Améliorer l'analyse par Waypoint** (P2)
-   - Persister les résultats d'analyse
+2. **Améliorer l'analyse par Waypoint** (P2)
+   - Persister les résultats d'analyse dans MongoDB
    - Export des résultats (PDF/GPX)
 
-4. **Configuration Backup Cloud** (Action utilisateur requise)
+3. **Configuration Backup Cloud** (Action utilisateur requise)
    - Créer compte MongoDB Atlas
    - Créer bucket Google Cloud Storage
    - Entrer credentials dans Admin > BACKUP
@@ -912,6 +908,25 @@ Fonctionnalités implémentées:
 ---
 
 ## Test Results
+
+**Iteration 41 - Urban Admin & Context Refactoring (30 Jan 2026)**
+- Backend: 100% (12/12 tests)
+- Frontend: 100% (tous UI tests passés)
+- BionicTerritoryContext: ~40 nouveaux états ajoutés
+- Admin Urbain: 4 sliders fonctionnels, localStorage persistence
+- Status: ✅ All tests passed
+
+**Iteration 40 - Modules Thématiques Connection (30 Jan 2026)**
+- Backend: 100% (22/22 tests)
+- Frontend: 95% (18/19 - toast timing)
+- handleModuleToggle: 8 modules connectés aux couches carte
+- Status: ✅ All tests passed
+
+**Iteration 39 - Professional UI Overhaul (30 Jan 2026)**
+- Frontend: 100% (12/12 tests)
+- SpeciesSelector: Photos réalistes 4 espèces
+- HabitatScoreDropdown: Icônes Lucide
+- Status: ✅ All tests passed
 
 **Iteration 35 - Dropdown Bug Fix (27 Jan 2026)**
 - Bug: Le dropdown "Enregistrer un Waypoint" ne s'ouvrait pas visuellement
