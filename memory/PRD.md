@@ -941,6 +941,12 @@ Fonctionnalités implémentées:
 
 ## Test Results
 
+**Iteration 42 - TerritorySidebar Modular Component (30 Jan 2026)**
+- Frontend: 100% (7/7 tests)
+- TerritorySidebar.jsx: 455 lignes (prêt pour intégration)
+- Sous-composants: BaseMapSelector, BionicPipelineControl, BehaviorZonesControl, PrivacyModeControl
+- Status: ✅ All tests passed
+
 **Iteration 41 - Urban Admin & Context Refactoring (30 Jan 2026)**
 - Backend: 100% (12/12 tests)
 - Frontend: 100% (tous UI tests passés)
@@ -978,6 +984,7 @@ Fonctionnalités implémentées:
 - **Admin Password**: `Saturn5858*`
 - **Admin URL**: `/admin`
 - **API Base**: `/api`
+- **Test User**: `test@huntiq.com` / `Test1234!`
 
 ---
 
