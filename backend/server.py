@@ -553,6 +553,7 @@ class CartItemUpdate(BaseModel):
 
 class AdminLogin(BaseModel):
     password: str
+    email: Optional[str] = None  # Email optionnel pour identification
 
 class UserLogin(BaseModel):
     email: str
