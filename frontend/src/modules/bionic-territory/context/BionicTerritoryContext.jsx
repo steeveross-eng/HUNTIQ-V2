@@ -430,6 +430,13 @@ export function BionicTerritoryProvider({ children, initialOverrides = {} }) {
     toggleEcoLayer: (layerId, value) => dispatch({ type: BIONIC_ACTIONS.TOGGLE_ECO_LAYER, payload: { layerId, value } }),
     setEcoLayerOpacity: (layerId, opacity) => dispatch({ type: BIONIC_ACTIONS.SET_ECO_LAYER_OPACITY, payload: { layerId, opacity } }),
     setActiveEcoLayers: (layers) => dispatch({ type: BIONIC_ACTIONS.SET_ACTIVE_ECO_LAYERS, payload: layers }),
+    setShowBehaviorZones: (show) => dispatch({ type: BIONIC_ACTIONS.SET_SHOW_BEHAVIOR_ZONES, payload: show }),
+    setTopoEnabled: (enabled) => dispatch({ type: BIONIC_ACTIONS.SET_TOPO_ENABLED, payload: enabled }),
+    setQuebecLayers: (layers) => dispatch({ type: BIONIC_ACTIONS.SET_QUEBEC_LAYERS, payload: layers }),
+    
+    // Thematic Modules Actions
+    setThematicModules: (modules) => dispatch({ type: BIONIC_ACTIONS.SET_THEMATIC_MODULES, payload: modules }),
+    toggleThematicModule: (moduleId) => dispatch({ type: BIONIC_ACTIONS.TOGGLE_THEMATIC_MODULE, payload: moduleId }),
     
     // Waypoints Actions
     setWaypoints: (waypoints) => dispatch({ type: BIONIC_ACTIONS.SET_WAYPOINTS, payload: waypoints }),
@@ -476,6 +483,14 @@ export function BionicTerritoryProvider({ children, initialOverrides = {} }) {
     isPipelineCollapsed: () => state.layers.pipelineCollapsed,
     getActiveOverlays: () => state.layers.activeEcoLayers.overlays || [],
     getEcoLayerOpacity: (layerId) => state.layers.ecoLayerOpacities[layerId] ?? 1,
+    isShowBehaviorZones: () => state.layers.showBehaviorZones,
+    isTopoEnabled: () => state.layers.topoEnabled,
+    getQuebecLayers: () => state.layers.quebecLayers,
+    
+    // Thematic Modules Selectors
+    getThematicModules: () => state.thematicModules,
+    isModuleEnabled: (moduleId) => state.thematicModules.find(m => m.id === moduleId)?.enabled ?? false,
+    getActiveModulesCount: () => state.thematicModules.filter(m => m.enabled).length,
     
     // Waypoints Selectors
     getWaypoints: () => state.waypoints.items,
