@@ -37,7 +37,58 @@ export const URBAN_CONFIG = {
   DISTANCE_STEPS: 10,
   
   // Activer le debug
-  DEBUG: false
+  DEBUG: false,
+  
+  // Module activé/désactivé
+  ENABLED: true
+};
+
+/**
+ * Met à jour la configuration du module urbain depuis une source externe
+ * @param {Object} newConfig - Configuration partielle à appliquer
+ */
+export const updateUrbanConfig = (newConfig) => {
+  if (newConfig.bufferDistance !== undefined) {
+    URBAN_CONFIG.BUFFER_DISTANCE_M = newConfig.bufferDistance;
+  }
+  if (newConfig.searchRadius !== undefined) {
+    URBAN_CONFIG.RELOCATION_SEARCH_RADIUS_M = newConfig.searchRadius;
+  }
+  if (newConfig.minDistance !== undefined) {
+    URBAN_CONFIG.MIN_DISTANCE_FROM_URBAN_M = newConfig.minDistance;
+  }
+  if (newConfig.candidatePoints !== undefined) {
+    URBAN_CONFIG.CANDIDATE_POINTS_COUNT = newConfig.candidatePoints;
+  }
+  if (newConfig.debugMode !== undefined) {
+    URBAN_CONFIG.DEBUG = newConfig.debugMode;
+  }
+  if (newConfig.enabled !== undefined) {
+    URBAN_CONFIG.ENABLED = newConfig.enabled;
+  }
+  
+  if (URBAN_CONFIG.DEBUG) {
+    console.log('[URBAN_CONFIG] Updated:', URBAN_CONFIG);
+  }
+  
+  return URBAN_CONFIG;
+};
+
+/**
+ * Charge la configuration depuis le localStorage
+ */
+export const loadUrbanConfigFromStorage = () => {
+  try {
+    const stored = localStorage.getItem('bionic_urban_config');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      updateUrbanConfig(parsed);
+      return parsed;
+    }
+  } catch (e) {
+    console.warn('[URBAN_CONFIG] Failed to load from storage:', e);
+  }
+  return null;
 };
 
 // ============================================
