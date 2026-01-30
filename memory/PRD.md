@@ -99,7 +99,46 @@
 
 ## What's Been Implemented
 
-### Phase 52r (January 30, 2026 - Session 3) - Refonte UI Professionnelle ✅ **NOUVEAU**
+### Phase 52s (January 30, 2026 - Session 4) - Connexion Modules & Backup E2E ✅ **NOUVEAU**
+
+**Connexion des modules thématiques aux couches de la carte + Tests E2E Backup**
+
+#### 🔗 Modules Thématiques Connectés aux Couches
+- ✅ **handleModuleToggle connecte les toggles aux couches**
+  - `habitat` → `toggleLayer('habitats')` - Couche habitats BIONIC
+  - `approche` → `toggleLayer('affuts')` - Couche affûts potentiels
+  - `alimentation` → `toggleLayer('alimentation')` - Couche alimentation
+  - `comportement` → `setShowBehaviorZones()` - Zones comportementales
+  - `hotspots` → `setPipelineEnabled()` - Pipeline BIONIC
+  - `peuplements` → `setQuebecLayers().ecoforestry` - Couche WMS Québec
+  - `topographie` → `setTopoEnabled()` - Overlay topographique
+  - `meteo` → `refreshWeather()` - Refresh météo
+
+- ✅ **BionicTerritoryContext étendu**
+  - Nouveaux états: `thematicModules`, `showBehaviorZones`, `topoEnabled`, `quebecLayers`
+  - Nouvelles actions: `setThematicModules`, `toggleThematicModule`, `setShowBehaviorZones`, `setTopoEnabled`, `setQuebecLayers`
+  - Nouveaux selectors: `getThematicModules`, `isModuleEnabled`, `getActiveModulesCount`
+
+- ✅ **Synchronisation initiale des modules avec l'état des couches**
+  - `useEffect` au montage pour synchroniser l'état des modules avec les couches
+
+#### 🧪 Tests E2E Backup Cloud API
+- ✅ 22/22 tests backend passés
+- ✅ `/api/backup-cloud/stats` - Statistiques de backup
+- ✅ `/api/backup-cloud/logs` - Historique des logs
+- ✅ `/api/backup-cloud/schedule/status` - Statut du planning
+- ✅ `/api/backup-cloud/zip/latest` - Dernier ZIP backup
+- ✅ `/api/backup-cloud/notifications/status` - Statut notifications
+- ✅ `/api/backup-cloud/resend/status` - Statut Resend API
+- ✅ `/api/backup-cloud/atlas/status` - Statut MongoDB Atlas
+- ✅ `/api/backup-cloud/gcs/status` - Statut Google Cloud Storage
+
+#### ✅ Tests Validés
+- Backend: 100% (22/22 tests passés)
+- Frontend: 95% (18/19 tests - toast timing issue)
+- Test file créé: `/app/backend/tests/test_backup_cloud_api.py`
+
+### Phase 52r (January 30, 2026 - Session 3) - Refonte UI Professionnelle ✅
 
 **Refonte visuelle professionnelle et scientifique du module Mon Territoire BIONIC™**
 
