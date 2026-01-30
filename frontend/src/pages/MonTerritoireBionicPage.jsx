@@ -2306,11 +2306,13 @@ const MonTerritoireBionicPage = () => {
               
               {/* MICRO-LÉGENDE PEUPLEMENTS FORESTIERS */}
               {pipelineEnabled && (
-                <ForestStandLegendMicro
-                  collapsed={forestLegendCollapsed}
-                  onToggleCollapse={() => setForestLegendCollapsed(!forestLegendCollapsed)}
-                  position="bottomRight"
-                />
+                <div className="absolute top-[180px] right-4 z-[1000]">
+                  <ForestStandLegendMicro
+                    collapsed={forestLegendCollapsed}
+                    onToggleCollapse={() => setForestLegendCollapsed(!forestLegendCollapsed)}
+                    position="sidebar"
+                  />
+                </div>
               )}
               
               {/* Bandeau météo */}
