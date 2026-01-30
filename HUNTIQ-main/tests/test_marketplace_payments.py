@@ -375,7 +375,7 @@ class TestStripeCheckout:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "featured_7days",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                 "seller_id": test_seller["seller_id"]
             }
         )
@@ -395,7 +395,7 @@ class TestStripeCheckout:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "pro_monthly",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                 "seller_id": test_seller["seller_id"]
             }
         )
@@ -413,7 +413,7 @@ class TestStripeCheckout:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "outfitter_premium",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                 "seller_id": test_seller["seller_id"]
             }
         )
@@ -430,7 +430,7 @@ class TestStripeCheckout:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "invalid_package_id",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com"
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com"
             }
         )
         assert response.status_code == 400
@@ -449,7 +449,7 @@ class TestStripeCheckout:
                 f"{BASE_URL}/api/payments/checkout",
                 json={
                     "package_id": "featured_7days",
-                    "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                    "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                     "seller_id": test_seller["seller_id"],
                     "listing_id": listing_id
                 }
@@ -481,7 +481,7 @@ class TestPaymentStatus:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "featured_7days",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                 "seller_id": seller_id
             }
         )
@@ -538,7 +538,7 @@ class TestPaymentTransactions:
             f"{BASE_URL}/api/payments/checkout",
             json={
                 "package_id": "auto_bump_7days",
-                "origin_url": "https://bionic-terrain.preview.emergentagent.com",
+                "origin_url": "https://geo-wildlife.preview.emergentagent.com",
                 "seller_id": seller_id
             }
         )

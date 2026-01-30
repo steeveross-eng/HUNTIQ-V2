@@ -229,7 +229,7 @@ def generate_proposal_email(proposals: List[dict]) -> str:
             {proposals_html}
             
             <div style="margin-top: 30px; padding: 20px; background: #f5a623; border-radius: 8px; text-align: center;">
-                <a href="https://bionic-terrain.preview.emergentagent.com/admin" 
+                <a href="https://geo-wildlife.preview.emergentagent.com/admin" 
                    style="color: #000; text-decoration: none; font-weight: bold; font-size: 16px;">
                     ➜ Accéder au panneau d'administration
                 </a>

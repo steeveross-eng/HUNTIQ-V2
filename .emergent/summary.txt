@@ -1,31 +1,35 @@
 <analysis>**original_problem_statement:**
-The user requested the continued development of the HUNTIQ project. The initial focus was on implementing a Habitat Optimal Synthesis Module. This evolved into a series of major feature additions and UI refinements on the . The user then requested a significant visual overhaul (a 10X improvement) for the BIONIC™ map, providing a detailed specification for a new  with advanced scoring and analytics.
+The user initially requested the development of a Habitat Optimal Synthesis Module for the HUNTIQ project. This evolved into a major visual and functional overhaul of the , including a 10X improvement for the BIONIC™ map with advanced scoring. The priority then shifted to replacing simulated data with real-world data by connecting the map to official Quebec government WMS (Web Map Service) and GeoJSON ecoforestry data sources, alongside a strategic move to a modular architecture.
 
-Following this, the user asked to replace the simulated visual data with real-world data by connecting the map to official WMS (Web Map Service) and GeoJSON ecoforestry data sources from the Quebec government. A strategic shift towards a modular architecture (micro-frontends and microservices) was endorsed as the highest priority.
-
-Most recently, the user's requests have focused on enhancing the map's analytical power and visual clarity:
-1.  **Integrate high-priority data layers** (ecoforestry, LiDAR dendrometry, and humidity index) from a government portal.
-2.  **Harmonize the visual representation of animal behavior zones** by merging scattered points into large, organic polygons that follow the natural topography.
-3.  **Add a topographic overlay** with contour lines to better visualize the alignment of zones with the terrain.
-4.  **Fundamentally change the analysis trigger**: The analysis must now be activated only around a user-selected waypoint, cover a configurable area (2, 4, or 10 km²), and identify a single hotspot within that zone.
+Most recently, the user's requests focused on enhancing the map's analytical power and usability:
+1.  Integrate high-priority data layers (ecoforestry, LiDAR, humidity).
+2.  Merge scattered data points into large, organic polygons.
+3.  Add a topographic overlay.
+4.  Shift the analysis to be triggered by a user-selected waypoint over a configurable area, identifying a single hotspot.
+5.  Move the Habitat Optimal score panel into the main header and make it a dropdown for controlling thematic modules.
+6.  Generate a complete, professional cartographic palette for forest stands based on MFFP (Quebec's Ministry of Forests, Wildlife and Parks) standards.
+7.  A complete UI/UX overhaul to give the application a professional and scientific look, replacing cartoonish icons with realistic imagery.
 
 **User's preferred language**: The user communicates in **French**. The next agent MUST respond in French.
 
 **what currently exists?**
-The application is a full-stack project (React frontend, FastAPI backend, MongoDB) featuring an interactive map for hunters. A significant amount of work has been done to enhance the map's data and visualization capabilities.
+The application is a full-stack project (React frontend, FastAPI backend, MongoDB) with an interactive map for hunters.
 
--   **Backend WMS Proxy**: A robust backend proxy () has been implemented in the  microservice. This successfully resolves the previous blocker of accessing official Quebec government WMS data by bypassing CORS/IP restrictions.
--   **Quebec Data Layer Integration**: The three high-priority data layers (Ecoforestry, LiDAR, Humidity) are fully integrated via the WMS proxy. A new sidebar panel () allows users to toggle each layer and adjust its opacity, complete with real-time loading indicators.
--   **Advanced Behavior Visualization**: A sophisticated  displays powerful, color-coded Wildlife Behavior Zones (e.g., Cover, Feeding, Travel). These zones have vibrant, high-contrast visual styles with glow effects and animations.
--   **Organic Zone Fusion**: Using Turf.js, the system now merges scattered data points into large, organic polygons (), dramatically improving visual clarity and aligning zones with natural corridors.
--   **Topographic Overlay**: A new  allows users to toggle contour lines and shaded relief, providing crucial context on how behavior zones align with the terrain.
--   **Architectural Debt**: While the refactoring to a micro-frontend architecture was started, the main  component remains a massive monolith (~3000 lines) and has grown more complex by orchestrating all the new features via local  hooks, rather than migrating logic to the intended .
+-   **Backend Analysis Engine**: A new, powerful backend endpoint () has been created. It replaces the previous client-side simulation by performing real-time geospatial analysis using the official Quebec WMS data layers (ecoforestry, LiDAR, humidity) to generate behavior zones.
+-   **Waypoint-Based Analysis**: The frontend features a  component that is fully integrated with the new backend endpoint. It includes a control panel in the sidebar to select a waypoint and an analysis radius (2, 4, 10 km²).
+-   **Real-Time Mode**: An automatic analysis mode is implemented. When a user selects a waypoint, the analysis is triggered instantly, the map centers on the location, and a toast notification displays the optimal hotspot found.
+-   **Architectural Refactoring (Phase 1)**: The massive  monolith (~3192 lines) has been partially refactored. The main header (~300 lines) was extracted into a modular  component, reducing the monolith's size by over 10%.
+-   **UI/UX Improvements**:
+    -   The Habitat Optimal score panel has been moved into the main header, next to the species selector. It now functions as a dropdown menu to toggle various thematic modules (e.g., Weather Analysis, Approach, etc.).
+    -   A comprehensive, hierarchical cartographic palette for forest stands, based on MFFP standards, has been generated () and documented ().
+    -   A compact, expandable micro-legend for forest stands () has been integrated into the map UI.
+-   **Technical Debt**: HIGH. Despite the header extraction,  remains a ~2800-line monolith with over 60  hooks managing its complex state, instead of leveraging the intended .
 
 **Last working item**:
--   **Last item agent was working**: Implementing the user's latest request to shift from a map-wide analysis to a focused analysis around a selected waypoint. The agent created a new placeholder component () and was about to begin its integration.
+-   **Last item agent was working**: The agent was executing a complete UI overhaul to give the site a professional and scientific look, as requested by the user. It had already received design guidelines, sourced realistic, high-quality photos for the main animal species (moose, deer, bear, turkey), and created a configuration file () to manage these new assets. The agent was about to update the  component within the  to use these new professional images.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?** Frontend testing agent (due to the significance of the change to the core analysis logic).
+-   **Which testing method agent to use?** Frontend testing agent
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
@@ -35,56 +39,61 @@ The application is a full-stack project (React frontend, FastAPI backend, MongoD
 
 **Issues Detail**:
 -   **Issue 1**: Massive component complexity in .
-    -   **Attempted fixes**: New features (, , ) were correctly built as modular components. However, they were then integrated back into the monolithic page and are controlled by its local state. The core technical debt of the monolith was not addressed; it was compounded. The migration of state to  has not progressed.
+    -   **Attempted fixes**: The header was successfully extracted into a modular component. However, the core issue—the page's reliance on dozens of local  hooks instead of the central —has not been addressed. The monolith still orchestrates almost all page logic.
     -   **Next debug checklist**:
-        1.  Complete the integration of  to wrap the entire page content.
-        2.  Systematically migrate the ~50+  hooks from  into the reducer and actions of .
-        3.  Replace the inline JSX for the header and various sidebar panels with the existing modular components.
+        1.  Wrap the main page component with the .
+        2.  Systematically migrate the remaining  hooks from  into the reducer and actions of .
+        3.  Refactor the various sidebar panels (e.g., ) to be modular components that consume the central context.
         4.  Refactor  into a lean container that primarily consumes the context and arranges the modules.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the user's core architectural mandate. Completing it is critical for application maintainability, scalability, and performance.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the user's primary architectural mandate and is critical for application maintainability, scalability, and performance.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Frontend (requires thorough regression testing).
     -   **Blocked on other issue**: None.
 
 **In progress Task List**:
--   **Task 1**: Implement Waypoint-Based Analysis. (P0)
+-   **Task 1**: Complete Professional/Scientific UI Overhaul. (P0)
 -   **Task 2**: Complete the architectural refactoring of . (P0)
 
 **Task Detail**:
--   **Task 1**: Implement Waypoint-Based Analysis.
-    -   **Where to resume**: Integrate the newly created . This involves adding UI controls for selecting a waypoint and analysis radius (2, 4, 10 km²). Then, modify  and  to accept the waypoint and radius as parameters, restricting all calculations to this defined circular area and generating a single hotspot.
-    -   **What will be achieved with this?** A user-driven, focused, and performant analysis feature that directly matches the user's request.
+-   **Task 1**: Complete Professional/Scientific UI Overhaul.
+    -   **Where to resume**: Update the  sub-component inside  to use the new realistic animal images from . Then, propagate this professional style (icons, fonts, colors from ) across the entire application, replacing all cartoonish elements.
+    -   **What will be achieved with this?** A visually cohesive, professional, and scientific user interface that aligns with the user's explicit request.
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Frontend.
     -   **Blocked on something**: None.
 
 -   **Task 2**: Complete the architectural refactoring of .
-    -   **Where to resume**: Follow the Next debug checklist for Issue #1. Start by migrating state management from  hooks into the  reducer.
-    -   **What will be achieved with this?** A clean, scalable, and maintainable codebase that aligns with the user's strategic vision for a micro-frontend architecture.
+    -   **Where to resume**: Follow the Next debug checklist for Issue #1. The highest priority is migrating the local state ( hooks) to the  reducer.
+    -   **What will be achieved with this?** A clean, scalable, and maintainable codebase that fulfills the user's strategic vision for a micro-frontend architecture.
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Frontend.
     -   **Blocked on something**: None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
+    -   **P1**: Connect the thematic module toggles in the new header dropdown to actually activate/deactivate the corresponding map layers.
     -   **P1**: Connect the Urban Admin Panel settings to .
     -   **P1**: Perform full End-to-End Testing of the Backup System (GCS, Atlas, Resend).
-    -   **P2**: Add an Export Styles button to the UI that utilizes .
-    -   **P2**: Implement dynamic behavior zones based on the time of day (Corridor → Alimentation → Cache).
+    -   **P2**: Add an Export Styles button that utilizes .
 -   **Future Tasks**:
+    -   **P2**: Implement dynamic behavior zones based on the time of day (Corridor → Alimentation → Cache).
     -   **P2**: Implement GPX/KML Import/Export functionality for waypoints.
     -   **P3**: Add a statistics dashboard for backups in the admin panel.
     -   **P3**: Finalize the GPS LIVE arrow UI.
     -   **P3**: Fix all unescaped apostrophe warnings in JSX.
 
 **Completed work in this session**
--   **Backend WMS Proxy**: Successfully created a backend proxy to bypass CORS/IP blocks, enabling the use of official Quebec government WMS data layers. (Issue #2 from previous handoff is RESOLVED).
--   **Quebec Data Layer Integration**: Integrated Ecoforestry, LiDAR, and Humidity WMS layers with a dedicated UI control panel for toggling and adjusting opacity, including real-time loading indicators.
--   **Advanced Behavior Visualization**: Implemented a  with powerful, high-contrast visual styles (glow, animations) to represent different animal behaviors.
--   **Organic Zone Fusion**: Integrated Turf.js to merge scattered data points into large, meaningful, organic polygons, significantly improving map clarity.
--   **Topographic Overlay**: Added a  component to display contour lines and shaded relief, allowing users to analyze zone placement against terrain.
--   **Popup Positioning Fix**: Corrected Leaflet popups to ensure they do not get hidden underneath the main header by using .
+-   **Backend Analysis Engine**: Created a new  endpoint that performs real-time analysis using WMS data, replacing the previous client-side simulation.
+-   **Frontend/Backend Integration**: Fully connected the  component to the new backend analysis engine.
+-   **Real-Time Analysis Mode**: Implemented an automatic analysis mode triggered by waypoint selection, providing instant feedback via a toast notification.
+-   **Architectural Refactoring (Phase 1)**: Extracted the header from  into a modular  component, reducing the monolith's line count by over 10%.
+-   **UI Refactor (Header Score)**: Moved the Habitat Optimal score into the main header and converted it into a dropdown menu to control thematic modules.
+-   **Forest Stand Palette**: Generated a complete, hierarchical cartographic palette and reference table for forest stands based on MFFP standards.
+-   **Micro-Legend**: Created and integrated a compact, expandable micro-legend for forest stands on the map.
+-   **Bug Fix (Coordinates)**: Corrected a GeoJSON  vs  mismatch in .
+-   **Bug Fix (React Keys)**: Resolved  warnings in  by creating more unique keys.
+-   **Initiated UI Overhaul**: Began the professional/scientific UI redesign by generating design guidelines and sourcing high-quality image assets.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1**: GPS LIVE arrow UI is incomplete.
@@ -97,58 +106,64 @@ The application is a full-stack project (React frontend, FastAPI backend, MongoD
 
 
 **Key Technical Concepts**
--   **Micro-Frontends & Microservices**: This remains the core architectural strategy, but progress on the refactoring itself has stalled. The monolith continues to grow, increasing technical debt.
--   **Backend WMS Proxy**: A critical piece of infrastructure that acts as an intermediary between the frontend and external WMS services to bypass access restrictions.
--   **Client-Side Geospatial Analysis (Turf.js)**: A new key technology used to perform complex geospatial operations (merging, simplification) directly in the browser.
--   **Dynamic Leaflet Layers**: The application is now orchestrating multiple, complex, and overlapping Leaflet layers: WMS tiles via proxy, dynamically generated GeoJSON with advanced styling, and third-party tile layers for topography.
+-   **Micro-Frontends & Microservices**: The core architectural strategy. Progress was made by extracting the header, but the main page remains monolithic.
+-   **Advanced Backend Geospatial Analysis**: The application's core logic has shifted from client-side simulation to a powerful backend service that queries external WMS data sources in real-time to perform analysis.
+-   **Hierarchical Cartographic Design System**: A structured system was created for generating map colors based on multiple data dimensions (type, species, height, density), ensuring a consistent and readable map.
+-   **Client-Side Geospatial Analysis (Turf.js)**: Still used for rendering and client-side interactions, but no longer for the primary analysis.
 
 **key DB schema**
 -   No changes to the database schema in this session.
 
 **changes in tech stack**
--   **Turf.js**: The  library was added to the frontend for client-side geospatial analysis.
+-   No new libraries added. The significant change is the architectural shift of the analysis logic to the backend.
 
 **All files of reference**
--   : The monolithic component that urgently needs to be refactored.
--   : The new component for rendering fused, styled behavior zones.
--   : The service using Turf.js to merge zones.
--   : The new component for displaying contour lines.
--   : The new UI for controlling Quebec data layers.
--   : The backend file containing the WMS proxy endpoint.
--   : The placeholder for the next P0 task.
+-   : The monolithic component that still urgently needs refactoring.
+-   : The refactored header, which now contains the Habitat Score dropdown.
+-   : The component driving the new waypoint analysis, now connected to the backend.
+-   : Contains the new  endpoint.
+-   : The new config file for the professional UI overhaul.
+-   : The new logic for the forest stand color palette.
+-   : The design system specifications for the UI overhaul.
 
 **Areas that need refactoring**:
--   ****: This is the absolute highest priority (P0). It has become even more bloated and complex, acting as a central orchestrator for all new features via a massive list of  hooks. The migration to the  must be completed.
--   **Client-Side Processing**: The intensive computations in  and  are good candidates for future migration to the backend  microservice to improve frontend performance, especially once the analysis is tied to specific waypoints.
+-   ****: This remains the absolute P0 refactoring priority. The component's state must be migrated from its ~60  hooks to the  to resolve the massive technical debt.
 
 **key api endpoints**
--   ****: The new, critical endpoint that proxies requests to external WMS map servers.
+-   ****: The new, critical endpoint that performs real-time geospatial analysis using WMS data.
+-   ****: The existing proxy for fetching map tiles.
 
 **Critical Info for New Agent**
--   **Prioritize Waypoint Analysis**: Your immediate task is to implement the user's latest P0 request: shifting the analysis to be centered on a selected waypoint with a configurable radius. This is a fundamental change to the application's core logic. Start by fleshing out .
--   **Tackle the Monolith Next**: As soon as the waypoint feature is complete, you must pivot to the architectural refactoring of . This is the user's other P0 task and a major source of technical debt. Do not add more features to the monolith; focus on migrating its existing state and logic to the .
+-   **Immediate Task is UI Overhaul**: Your first task is to continue the professional/scientific UI overhaul. Start by replacing the species icons in the header with the realistic photos that have already been sourced.
+-   **Tackle the Monolith Next**: As soon as the UI task reaches a good checkpoint, you must pivot to the P0 architectural refactoring of . Migrating its state to the  is paramount.
+-   **Backend is the Brain**: The core analysis is no longer simulated on the client. It is now handled by the  endpoint. All analysis logic changes should be made there.
 -   **Language is French**: All communication with the user must be in French.
--   **Turf.js is Key**: Understand that Turf.js is now a core dependency for client-side geospatial processing.
 
 **documents and test reports created in this job**
+-   
+-   
+-   
+-   
+-   
+-   
 -    (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User Request**: The analysis must be triggered only around a selected waypoint, for a configurable area (2, 4, 10 km²), and produce a single hotspot. (IN PROGRESS)
-9.  **Agent Confirmation**: Agent confirms it will implement the topographic overlay. (COMPLETED)
-8.  **User Confirmation**: User agrees to add the topographic overlay. (COMPLETED)
-7.  **Agent Suggestion**: Agent suggests adding a topographic overlay to visualize how the merged zones align with the real terrain. (COMPLETED)
-6.  **Agent Confirmation**: Agent confirms it will implement the zone fusion. (COMPLETED)
-5.  **User Request**: User points out that multiple zones of the same color are confusing and asks for a way to harmonize and merge them into larger, single zones that follow topographic curves. (IN PROGRESS, now COMPLETED)
-4.  **Agent Confirmation**: Agent confirms it will fix the popup positioning. (COMPLETED)
-3.  **User Request**: User reports that popups are getting hidden under the header and must be fully visible. (IN PROGRESS, now COMPLETED)
-2.  **Agent Suggestion**: Agent asks if user wants to add dynamic behavior based on time of day. (FUTURE TASK)
-1.  **User Confirmation**: User praises the powerful visuals and asks the agent to proceed with testing and optimization. (COMPLETED)
+10. **User Request**: Move the Habitat Optimal table into the header and add a dropdown to it for thematic modules. (COMPLETED)
+9.  **User Request**: Replace the old forest legend with the new micro-version. (COMPLETED)
+8.  **User Request**: Generate a complete, professional cartographic palette for forest stands based on MFFP standards. (COMPLETED)
+7.  **Agent Confirmation**: Agent confirms the system is 100% functional after fixing the duplicate key warning. (COMPLETED)
+6.  **User Request**: Test the system and fix any errors. (COMPLETED, one minor warning fixed)
+5.  **User Request**: Explain the green zones and connect the analysis to the backend using real WMS data. (COMPLETED)
+4.  **Agent Confirmation**: Agent confirms real-time analysis is fully functional after fixing a coordinate bug. (COMPLETED)
+3.  **User Request**: Enable the real-time analysis mode automatically when a waypoint is selected. (COMPLETED)
+2.  **Agent Confirmation**: Agent confirms P0-P1 tasks are completed and documented. (COMPLETED)
+1.  **User Request**: Start working on the next P0-P1 actions from the plan. (COMPLETED)
 
 **Project Health Check:**
--   **Broken**: No features are outright broken.
--   **Mocked**: The base data for generating BIONIC™ scores and behavior zones is still from the client-side  simulation, not from a real analysis of the new WMS layers.
--   **Technical Debt**: HIGH. The  monolith is a critical liability. Each new feature, while modular in its own file, increases the complexity and state management burden of this single component, making the mandated refactoring more difficult.
+-   **Broken**: No features are broken.
+-   **Mocked**: The core BIONIC™ analysis is no longer mocked. It uses real WMS data via the new backend endpoint (). The system's health has significantly improved.
+-   **Technical Debt**: HIGH. While the header extraction was a good first step, the core problem of the  monolith managing all state locally persists and remains a critical liability.
 
 **3rd Party Integrations**
 -   MongoDB Atlas
@@ -156,11 +171,11 @@ The application is a full-stack project (React frontend, FastAPI backend, MongoD
 -   Resend
 -   Open-Meteo Elevation API
 -   **WMS Services**:  and  (via a custom backend proxy).
--   **OpenTopoMap**: Used for the new topographic overlay.
--   **Turf.js**: New frontend library for client-side geospatial analysis.
+-   **OpenTopoMap**: Used for the topographic overlay.
+-   **Turf.js**: Used for client-side geospatial rendering and minor operations.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES. The agent was used multiple times to validate the backend connection, UI changes, and bug fixes. All test suites passed with 100% success in the final run.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None
 -   **Known regressions**: None
@@ -172,4 +187,4 @@ The application is a full-stack project (React frontend, FastAPI backend, MongoD
 -   **Admin Password**: 
 
 **What agent forgot to execute**
--   The agent did not make progress on the P0 architectural refactoring of . Instead of migrating existing state and logic out of the monolith and into the , it continued to add more state and orchestration logic *into* the monolith to support the new features. This defers the core problem and increases technical debt.</analysis>
+-   The agent successfully created the thematic modules dropdown in the header but did not implement the functionality for the toggles. The user asked if the toggles would activate/deactivate layers on the map, but this logic was never connected. The  function in  only updates the state of the dropdown menu itself, it does not affect the map layers.</analysis>
