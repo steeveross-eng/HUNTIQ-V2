@@ -8,7 +8,14 @@
  * OBJECTIF: Transformer les cercles individuels en zones cohérentes
  */
 
-import * as turf from '@turf/turf';
+// Import turf avec fallback
+let turf;
+try {
+  turf = require('@turf/turf');
+} catch (e) {
+  console.warn('Turf.js not available, using fallback');
+  turf = null;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
