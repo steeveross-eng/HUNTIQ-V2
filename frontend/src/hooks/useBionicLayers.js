@@ -3,15 +3,19 @@
  * Gère l'état des couches BIONIC (on/off)
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { BIONIC_LAYERS } from '@/core/bionic';
 
 const useBionicLayers = (initialState = {}) => {
+  // Utiliser useRef pour capturer initialState une seule fois
+  const initialStateRef = useRef(initialState);
+  
   // État initial : toutes les couches désactivées par défaut
   const defaultState = useMemo(() => {
     const state = {};
+    const init = initialStateRef.current;
     BIONIC_LAYERS.forEach(layer => {
-      state[layer.id] = initialState[layer.id] ?? false;
+      state[layer.id] = init[layer.id] ?? false;
     });
     return state;
   }, []);
