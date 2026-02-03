@@ -50,6 +50,32 @@ export const useLiveTracking = (userId, groupId, options = {}) => {
   const intervalRef = useRef(null);
   const wsRef = useRef(null);
 
+  // Fonctions internes pour éviter les dépendances circulaires
+  const sendPositionInternal = async (position) => {
+    if (!userId || !groupId) return;
+    try {
+      await apiRequest(`/api/tracking/position/${userId}?group_id=${groupId}`, {
+        method: 'POST',
+        body: JSON.stringify(position)
+      });
+    } catch (e) {
+      console.error('Error sending position:', e);
+    }
+  };
+  
+  const fetchMembersPositionsInternal = async () => {
+    if (!userId || !groupId) return;
+    try {
+      const result = await apiRequest(`/api/tracking/group/${groupId}/positions?user_id=${userId}`);
+      setMembersPositions(result.members || []);
+      if (onMemberUpdate) {
+        onMemberUpdate(result.members);
+      }
+    } catch (e) {
+      console.error('Error fetching positions:', e);
+    }
+  };
+
   // Démarrer la session de tracking
   const startTracking = useCallback(async () => {
     if (!userId || !groupId) {
