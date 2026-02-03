@@ -207,6 +207,7 @@ const HabitatSynthesePanel = memo(function HabitatSynthesePanel({
     if (zones && zones.length > 0) {
       genererCarte();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [espece, zones.length]);
   
   // Stats
