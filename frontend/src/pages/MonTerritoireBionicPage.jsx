@@ -1,0 +1,3011 @@
+/**
+ * MonTerritoireBionicPage - Page dédiée Mon Territoire BIONIC™
+ * Avec sous-onglets : Carte BIONIC, Waypoints actifs, Lieux enregistrés
+ * 
+ * REFACTORED: Utilise des composants modulaires pour une meilleure performance
+ */
+
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, WMSTileLayer, Marker, Popup, useMap, useMapEvents, Circle, Tooltip, Polygon } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Brain, Map, Crosshair, Wind, Thermometer, Droplets, TrendingUp, 
+  ChevronRight, Layers, Activity, Target, Navigation, Settings,
+  Sun, Moon, ArrowRight, Zap, Eye, EyeOff, RefreshCw, MapPin,
+  Compass, TreePine, Mountain, Waves, Home, Heart, Footprints,
+  AlertTriangle, Clock, Calendar, Info, ChevronDown, ChevronUp,
+  Play, Pause, BarChart3, PieChart, ArrowLeft, Plus, Trash2,
+  Edit2, Save, X, LocateFixed, Building, Trees, Tent, Star,
+  BookMarked, List, MapPinned, User, Navigation2, Cloud, Wifi, WifiOff,
+  Share2, Users, Bell, Lock, Unlock, Leaf, CheckCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+
+// Hooks BIONIC
+import useBionicLayers from '@/hooks/useBionicLayers';
+import useBionicWeather from '@/hooks/useBionicWeather';
+import useBionicScoring from '@/hooks/useBionicScoring';
+import { useUserData } from '@/hooks/useUserData';
+import { useNotifications, useHuntingGroups } from '@/hooks/useSharing';
+
+// Composants territoire (REFACTORED)
+import { ShareWaypointDialog, CreateGroupDialog, NotificationBell } from '@/components/territoire/ShareComponents';
+import { GroupDashboard } from '@/components/territoire/GroupDashboard';
+import BionicMicroZones, { generateMicroZones, generateMicroZonesForBounds, BIONIC_MODULES } from '@/components/territoire/BionicMicroZones';
+import { useZoneFavorites, AddToFavoritesButton, AlertsPanel, FavoritesList } from '@/components/territoire/ZoneFavorites';
+import EcoforestryLayers, { 
+  EcoforestryLayerControl, 
+  EcoMapFallbackNotification,
+  useEcoMapFallback,
+  BASE_MAPS, 
+  ECOFORESTRY_LAYERS,
+  EcoMapStatus 
+} from '@/components/territoire/EcoforestryLayers';
+
+// Nouveaux composants modulaires pour optimisation mémoire
+import GPSLiveDisplay from '@/components/territoire/GPSLiveDisplay';
+import WaterMaskStats from '@/components/territoire/WaterMaskStats';
+import ZoneControlPanel from '@/components/territoire/ZoneControlPanel';
+import MapToolbar from '@/components/territoire/MapToolbar';
+import HabitatSynthesePanel from '@/components/territoire/HabitatSynthesePanel';
+import BionicGeneratorPanel from '@/components/territoire/BionicGeneratorPanel';
+import BionicHotspotsLayer from '@/components/territoire/BionicHotspotsLayer';
+import BionicMapOverlay from '@/components/territoire/BionicMapOverlay';
+import BionicForestZonesLayer from '@/components/territoire/BionicForestZonesLayer';
+import WildlifeBehaviorLayer from '@/components/territoire/WildlifeBehaviorLayer';
+import TopographicOverlay, { TopographicControlPanel } from '@/components/territoire/TopographicOverlay';
+import WaypointZoneAnalysis, { ZoneAnalysisControlPanel, ANALYSIS_AREAS } from '@/components/territoire/WaypointZoneAnalysis';
+import ForestStandLegendMicro from '@/components/territoire/ForestStandLegendMicro';
+
+// Module Architecture - BIONIC Territory
+import { 
+  BionicTerritoryProvider,
+  LayersSidebar,
+  LayersPanelContent,
+  MapControlButtons,
+  WaypointModeIndicator,
+  TerritoryHeader,
+  QuebecLayersPanel,
+  BASE_MAPS as MODULE_BASE_MAPS,
+  PIPELINE_LAYERS as MODULE_PIPELINE_LAYERS
+} from '@/modules/bionic-territory';
+
+import { 
+  BIONIC_LAYERS, 
+  SCORE_CATEGORIES,
+  getScoresForWaypoint, 
+  adaptWaypointData,
+  getWindDirectionText,
+  getWeatherDescription
+} from '@/core/bionic';
+import L from 'leaflet';
+import { toast } from 'sonner';
+
+// Fix for default markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom icons
+const createCustomIcon = (color, iconType = 'default') => {
+  const iconHtml = `
+    <div style="
+      background-color: ${color};
+      width: 32px;
+      height: 32px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 3px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="transform: rotate(45deg); color: white; font-size: 14px;">
+        ${iconType === 'user' ? '👤' : iconType === 'waypoint' ? '📍' : '⭐'}
+      </div>
+    </div>
+  `;
+  return L.divIcon({
+    html: iconHtml,
+    className: 'custom-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+};
+
+// Composant pour centrer la carte
+const MapController = ({ center, zoom }) => {
+  const map = useMap();
+  const prevCenterRef = useRef(null);
+  const prevZoomRef = useRef(null);
+  
+  useEffect(() => {
+    if (!center) return;
+    
+    const currentMapCenter = map.getCenter();
+    const currentMapZoom = map.getZoom();
+    
+    // Détecter si le centre a changé significativement
+    const centerChanged = !prevCenterRef.current || (
+      Math.abs(center[0] - prevCenterRef.current[0]) > 0.0005 ||
+      Math.abs(center[1] - prevCenterRef.current[1]) > 0.0005
+    );
+    
+    // Détecter si le zoom a changé
+    const zoomChanged = prevZoomRef.current !== null && zoom !== prevZoomRef.current;
+    
+    if (centerChanged && zoomChanged) {
+      // Les deux ont changé - faire setView
+      map.setView(center, zoom, { animate: true });
+    } else if (centerChanged) {
+      // Seulement le centre - garder le zoom actuel
+      map.setView(center, currentMapZoom, { animate: true });
+    } else if (zoomChanged) {
+      // Seulement le zoom - garder le centre actuel
+      map.setZoom(zoom, { animate: true });
+    }
+    
+    prevCenterRef.current = center;
+    prevZoomRef.current = zoom;
+  }, [center, zoom, map]);
+  
+  return null;
+};
+
+// Types de lieux disponibles
+const PLACE_TYPES = [
+  { id: 'zec', name: 'ZEC', icon: '🏕️', color: '#22c55e' },
+  { id: 'pourvoirie', name: 'Pourvoirie', icon: '🏠', color: '#3b82f6' },
+  { id: 'prive', name: 'Territoire privé', icon: '🔒', color: '#f59e0b' },
+  { id: 'sepaq', name: 'Réserve faunique (Sépaq)', icon: '🦌', color: '#8b5cf6' },
+  { id: 'affut', name: 'Affût / Cache', icon: '🎯', color: '#ef4444' },
+  { id: 'saline', name: 'Saline', icon: '🧂', color: '#06b6d4' },
+  { id: 'observation', name: 'Point d\'observation', icon: '👁️', color: '#ec4899' },
+  { id: 'stationnement', name: 'Stationnement', icon: '🅿️', color: '#6b7280' },
+  { id: 'camp', name: 'Camp de chasse', icon: '🏕️', color: '#84cc16' },
+  { id: 'autre', name: 'Autre lieu', icon: '📌', color: '#a855f7' },
+];
+
+// ============================================
+// SYSTÈME DE ZONES ADAPTATIVES AU ZOOM
+// Limite max: 1 km² par zone
+// ============================================
+
+// Constantes pour le calcul des zones
+const ZONE_CONFIG = {
+  MAX_AREA_KM2: 1.0,           // Superficie max par zone en km²
+  MAX_RADIUS_KM: 0.564,        // Rayon max pour 1 km² (√(1/π))
+  MIN_RADIUS_KM: 0.05,         // Rayon min (50m)
+  EARTH_RADIUS_KM: 6371,       // Rayon terrestre
+};
+
+// Convertit le niveau de zoom en rayon de zone (en km)
+const getZoneRadiusForZoom = (zoom) => {
+  // Plus le zoom est élevé, plus les zones sont petites et détaillées
+  // Zoom 8 = grandes zones (~1km), Zoom 18 = petites zones (~50m)
+  const zoomFactor = Math.pow(2, 15 - zoom);
+  const radius = Math.min(
+    ZONE_CONFIG.MAX_RADIUS_KM,
+    Math.max(ZONE_CONFIG.MIN_RADIUS_KM, 0.5 * zoomFactor)
+  );
+  return radius;
+};
+
+// Convertit km en degrés de latitude
+const kmToLatDegrees = (km) => km / 111.32;
+
+// Convertit km en degrés de longitude (dépend de la latitude)
+const kmToLngDegrees = (km, lat) => km / (111.32 * Math.cos(lat * Math.PI / 180));
+
+// Calcule le nombre de zones selon le zoom et l'étendue visible
+const getZoneDensityForZoom = (zoom) => {
+  // Plus de zones quand on zoome (plus de détails)
+  if (zoom >= 16) return { gridSize: 12, subdivisions: 3 };
+  if (zoom >= 14) return { gridSize: 10, subdivisions: 2 };
+  if (zoom >= 12) return { gridSize: 8, subdivisions: 1 };
+  if (zoom >= 10) return { gridSize: 6, subdivisions: 1 };
+  return { gridSize: 4, subdivisions: 1 };
+};
+
+// Génère un hexagone autour d'un point central
+const generateHexagon = (centerLat, centerLng, radiusKm) => {
+  const points = [];
+  const latRadius = kmToLatDegrees(radiusKm);
+  const lngRadius = kmToLngDegrees(radiusKm, centerLat);
+  
+  for (let i = 0; i < 6; i++) {
+    const angle = (60 * i - 30) * Math.PI / 180;
+    points.push([
+      centerLat + latRadius * Math.sin(angle) * 0.92,
+      centerLng + lngRadius * Math.cos(angle) * 0.92
+    ]);
+  }
+  return points;
+};
+
+// Calcule un score BIONIC simulé basé sur la position et le type de couche
+const calculateZoneScore = (lat, lng, layerType, baseScore = null) => {
+  // Utilise une fonction de bruit simplifié pour créer des variations naturelles
+  const noise = (x, y) => {
+    const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+    return n - Math.floor(n);
+  };
+  
+  // Score de base avec variation spatiale
+  const spatialVariation = noise(lat * 100, lng * 100);
+  
+  // Différents facteurs selon le type de couche
+  const layerFactors = {
+    habitats: { base: 70, variance: 25, threshold: 0.45 },
+    rut: { base: 65, variance: 30, threshold: 0.50 },
+    affuts: { base: 75, variance: 20, threshold: 0.55 },
+    corridors: { base: 60, variance: 30, threshold: 0.40 },
+    alimentation: { base: 70, variance: 25, threshold: 0.45 },
+    repos: { base: 65, variance: 25, threshold: 0.50 },
+    salines: { base: 55, variance: 35, threshold: 0.60 },
+  };
+  
+  const factor = layerFactors[layerType] || { base: 60, variance: 25, threshold: 0.50 };
+  
+  // Seulement générer des zones au-dessus d'un certain seuil
+  if (spatialVariation < factor.threshold) return null;
+  
+  const score = Math.round(
+    factor.base + (spatialVariation - factor.threshold) * factor.variance * 2
+  );
+  
+  return Math.min(100, Math.max(0, score));
+};
+
+// Types de couches avec configuration (utilisant les modules BIONIC)
+const LAYER_TYPES = Object.entries(BIONIC_MODULES).map(([id, config], index) => ({
+  id,
+  color: config.color,
+  label: config.label,
+  icon: config.icon,
+  priority: index + 1
+}));
+
+/**
+ * Génère des zones BIONIC adaptatives au zoom
+ * @param {number} centerLat - Latitude du centre
+ * @param {number} centerLng - Longitude du centre
+ * @param {number} zoom - Niveau de zoom actuel
+ * @param {Object} layersVisible - État de visibilité des couches
+ * @param {Object} targetWaypoint - Waypoint cible optionnel
+ */
+const generateAdaptiveBionicZones = (centerLat, centerLng, zoom, layersVisible, targetWaypoint = null) => {
+  const zones = [];
+  
+  // Obtenir la configuration pour ce niveau de zoom
+  const radiusKm = getZoneRadiusForZoom(zoom);
+  const { gridSize, subdivisions } = getZoneDensityForZoom(zoom);
+  
+  // Centre effectif (waypoint si sélectionné, sinon centre de carte)
+  const effectiveCenter = targetWaypoint 
+    ? { lat: targetWaypoint.lat, lng: targetWaypoint.lng }
+    : { lat: centerLat, lng: centerLng };
+  
+  // Calculer l'étendue de la grille basée sur le zoom
+  const gridExtentKm = radiusKm * gridSize * 2;
+  const latStep = kmToLatDegrees(radiusKm * 1.8);
+  const lngStep = kmToLngDegrees(radiusKm * 1.8, effectiveCenter.lat);
+  
+  // Générer une grille hexagonale
+  const halfGrid = Math.floor(gridSize / 2);
+  let zoneIndex = 0;
+  
+  for (let row = -halfGrid; row <= halfGrid; row++) {
+    for (let col = -halfGrid; col <= halfGrid; col++) {
+      // Offset hexagonal (décalage des lignes impaires)
+      const hexOffset = (row % 2) * (lngStep / 2);
+      
+      const zoneLat = effectiveCenter.lat + row * latStep * 0.866; // cos(30°)
+      const zoneLng = effectiveCenter.lng + col * lngStep + hexOffset;
+      
+      // Distance du centre pour limiter la zone circulaire
+      const distFromCenter = Math.sqrt(
+        Math.pow((zoneLat - effectiveCenter.lat) / latStep, 2) +
+        Math.pow((zoneLng - effectiveCenter.lng) / lngStep, 2)
+      );
+      
+      if (distFromCenter > halfGrid) continue;
+      
+      // Générer les zones pour chaque couche visible
+      LAYER_TYPES.forEach((layerType) => {
+        if (!layersVisible[layerType.id]) return;
+        
+        // Calculer le score pour cette position et ce type
+        const score = calculateZoneScore(zoneLat, zoneLng, layerType.id);
+        
+        // Ignorer si score trop bas ou null
+        if (score === null || score < 55) return;
+        
+        // Générer l'hexagone
+        const hexPoints = generateHexagon(zoneLat, zoneLng, radiusKm);
+        
+        // Calculer la superficie réelle (vérification)
+        const areaKm2 = Math.PI * radiusKm * radiusKm;
+        
+        zones.push({
+          id: `${layerType.id}-${zoneIndex}-${row}-${col}`,
+          layerId: layerType.id,
+          positions: hexPoints,
+          color: layerType.color,
+          score,
+          label: layerType.label,
+          center: [zoneLat, zoneLng],
+          radiusKm,
+          areaKm2: Math.min(areaKm2, ZONE_CONFIG.MAX_AREA_KM2),
+          zoom,
+          priority: layerType.priority
+        });
+        
+        zoneIndex++;
+      });
+    }
+  }
+  
+  // Trier par score décroissant pour affichage correct (z-index)
+  zones.sort((a, b) => b.score - a.score);
+  
+  // Limiter le nombre total de zones pour les performances
+  const maxZones = zoom >= 14 ? 150 : zoom >= 12 ? 100 : 60;
+  return zones.slice(0, maxZones);
+};
+
+/**
+ * Génère des zones autour d'un waypoint spécifique
+ */
+const generateWaypointZones = (waypoint, zoom, layersVisible) => {
+  return generateAdaptiveBionicZones(
+    waypoint.lat,
+    waypoint.lng,
+    Math.max(zoom, 13), // Au moins zoom 13 pour les waypoints
+    layersVisible,
+    waypoint
+  );
+};
+
+/**
+ * Génère des zones BIONIC qui couvrent TOUTE l'étendue visible de la carte
+ * @param {Object} bounds - Limites de la carte { north, south, east, west }
+ * @param {number} zoom - Niveau de zoom actuel
+ * @param {Object} layersVisible - Couches actives
+ */
+const generateAdaptiveBionicZonesForBounds = (bounds, zoom, layersVisible) => {
+  const zones = [];
+  
+  if (!bounds) return zones;
+  
+  // Obtenir la configuration pour ce niveau de zoom
+  const radiusKm = getZoneRadiusForZoom(zoom);
+  
+  // Calculer l'espacement de la grille en degrés
+  const latStep = kmToLatDegrees(radiusKm * 1.8);
+  const centerLat = (bounds.north + bounds.south) / 2;
+  const lngStep = kmToLngDegrees(radiusKm * 1.8, centerLat);
+  
+  // Calculer le nombre de cellules nécessaires pour couvrir la zone visible
+  const latRange = bounds.north - bounds.south;
+  const lngRange = bounds.east - bounds.west;
+  
+  const numRows = Math.ceil(latRange / latStep) + 2; // +2 pour marge
+  const numCols = Math.ceil(lngRange / lngStep) + 2;
+  
+  // Limiter pour les performances
+  const maxCells = zoom >= 14 ? 20 : zoom >= 12 ? 15 : 10;
+  const effectiveRows = Math.min(numRows, maxCells);
+  const effectiveCols = Math.min(numCols, maxCells);
+  
+  let zoneIndex = 0;
+  
+  // Parcourir toute la zone visible
+  for (let row = 0; row < effectiveRows; row++) {
+    for (let col = 0; col < effectiveCols; col++) {
+      // Offset hexagonal (décalage des lignes impaires)
+      const hexOffset = (row % 2) * (lngStep / 2);
+      
+      // Position dans la zone visible
+      const zoneLat = bounds.south + (row + 0.5) * (latRange / effectiveRows);
+      const zoneLng = bounds.west + (col + 0.5) * (lngRange / effectiveCols) + hexOffset;
+      
+      // Vérifier que le point est dans les limites
+      if (zoneLat < bounds.south || zoneLat > bounds.north) continue;
+      if (zoneLng < bounds.west || zoneLng > bounds.east) continue;
+      
+      // Générer les zones pour chaque couche visible
+      LAYER_TYPES.forEach((layerType) => {
+        if (!layersVisible[layerType.id]) return;
+        
+        // Calculer le score pour cette position et ce type
+        const score = calculateZoneScore(zoneLat, zoneLng, layerType.id);
+        
+        // Ignorer si score trop bas ou null
+        if (score === null || score < 50) return;
+        
+        // Générer l'hexagone
+        const hexPoints = generateHexagon(zoneLat, zoneLng, radiusKm);
+        
+        // Calculer la superficie réelle
+        const areaKm2 = Math.PI * radiusKm * radiusKm;
+        
+        zones.push({
+          id: `bounds-${layerType.id}-${zoneIndex}-${row}-${col}`,
+          layerId: layerType.id,
+          positions: hexPoints,
+          color: layerType.color,
+          score,
+          label: layerType.label,
+          center: [zoneLat, zoneLng],
+          radiusKm,
+          areaKm2: Math.min(areaKm2, ZONE_CONFIG.MAX_AREA_KM2),
+          zoom,
+          priority: layerType.priority
+        });
+        
+        zoneIndex++;
+      });
+    }
+  }
+  
+  // Trier par score décroissant
+  zones.sort((a, b) => b.score - a.score);
+  
+  // Limiter le nombre total de zones pour les performances
+  const maxZones = zoom >= 14 ? 200 : zoom >= 12 ? 150 : 100;
+  return zones.slice(0, maxZones);
+};
+
+// Composant pour détecter les changements de zoom et position
+const ZoomHandler = ({ onZoomChange, onMapMove, onBoundsChange }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    const handleZoomEnd = () => {
+      const center = map.getCenter();
+      const bounds = map.getBounds();
+      onZoomChange(map.getZoom());
+      if (onMapMove) {
+        onMapMove({ lat: center.lat, lng: center.lng });
+      }
+      if (onBoundsChange) {
+        onBoundsChange({
+          north: bounds.getNorth(),
+          south: bounds.getSouth(),
+          east: bounds.getEast(),
+          west: bounds.getWest()
+        });
+      }
+    };
+    
+    const handleMoveEnd = () => {
+      const center = map.getCenter();
+      const bounds = map.getBounds();
+      if (onMapMove) {
+        onMapMove({ lat: center.lat, lng: center.lng });
+      }
+      if (onBoundsChange) {
+        onBoundsChange({
+          north: bounds.getNorth(),
+          south: bounds.getSouth(),
+          east: bounds.getEast(),
+          west: bounds.getWest()
+        });
+      }
+    };
+    
+    map.on('zoomend', handleZoomEnd);
+    map.on('moveend', handleMoveEnd);
+    
+    // Initial call
+    handleZoomEnd();
+    
+    return () => {
+      map.off('zoomend', handleZoomEnd);
+      map.off('moveend', handleMoveEnd);
+    };
+  }, [map, onZoomChange, onMapMove, onBoundsChange]);
+  
+  return null;
+};
+
+// Composant pour capturer les clics sur la carte et créer des waypoints
+// Rendu conditionnel: ce composant n'existe que quand mapClickMode est actif
+const MapClickHandler = ({ onMapClick }) => {
+  useMapEvents({
+    click: (e) => {
+      console.log('[MapClickHandler] Click detected at:', e.latlng.lat, e.latlng.lng);
+      if (onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    }
+  });
+  return null;
+};
+
+// Composant pour suivre la position du curseur sur la carte
+const CursorTracker = ({ onCursorMove, onCursorLeave }) => {
+  useMapEvents({
+    mousemove: (e) => {
+      if (onCursorMove) {
+        onCursorMove({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+          pixel: { x: e.containerPoint.x, y: e.containerPoint.y }
+        });
+      }
+    },
+    mouseout: () => {
+      if (onCursorLeave) {
+        onCursorLeave();
+      }
+    }
+  });
+  return null;
+};
+
+const MonTerritoireBionicPage = () => {
+  const navigate = useNavigate();
+  
+  // Onglet actif
+  const [activeTab, setActiveTab] = useState('carte');
+  
+  // État de la carte
+  const [mapCenter, setMapCenter] = useState([46.8139, -71.2080]);
+  const [mapZoom, setMapZoom] = useState(12);
+  const [currentZoom, setCurrentZoom] = useState(12); // Zoom actuel pour les zones adaptatives
+  const [currentMapCenter, setCurrentMapCenter] = useState({ lat: 46.8139, lng: -71.2080 }); // Centre actuel
+  const [currentMapBounds, setCurrentMapBounds] = useState(null); // Limites visibles de la carte
+  const [selectedZone, setSelectedZone] = useState(null);
+  const [selectedWaypointForZones, setSelectedWaypointForZones] = useState(null); // Waypoint cible pour les zones
+  
+  // Position de l'utilisateur
+  const [userPosition, setUserPosition] = useState(null);
+  const [watchingPosition, setWatchingPosition] = useState(false);
+  const watchIdRef = useRef(null);
+  
+  // Récupérer l'utilisateur connecté (si disponible)
+  // On utilise un userId stable basé sur localStorage ou "anonymous"
+  const getUserId = useCallback(() => {
+    try {
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        return user.id || user.email || 'anonymous';
+      }
+    } catch (e) {
+      console.log('No stored user');
+    }
+    return 'anonymous';
+  }, []);
+  
+  const userId = useMemo(() => getUserId(), [getUserId]);
+  
+  // Hook pour les waypoints et lieux avec sync backend
+  const {
+    waypoints,
+    places: savedPlaces,
+    activeWaypoints,
+    stats: userDataStats,
+    loading: userDataLoading,
+    syncing,
+    isOnline,
+    addWaypoint,
+    updateWaypoint,
+    deleteWaypoint,
+    toggleWaypointActive,
+    addPlace,
+    updatePlace,
+    deletePlace,
+    syncToBackend
+  } = useUserData(userId, { autoSync: true });
+  
+  // Notifications
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId);
+  
+  // Groupes de chasse
+  const { allGroups: myGroups, loading: groupsLoading, refresh: refreshGroups } = useHuntingGroups(userId);
+  
+  // Dialog de partage
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [waypointToShare, setWaypointToShare] = useState(null);
+  const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
+  
+  // Tableau de bord de groupe (tracking live + chat)
+  const [showGroupDashboard, setShowGroupDashboard] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  
+  // Dialog pour ajouter un lieu
+  const [showAddPlaceDialog, setShowAddPlaceDialog] = useState(false);
+  const [newPlace, setNewPlace] = useState({ name: '', type: 'autre', lat: '', lng: '', notes: '' });
+  const [editingPlace, setEditingPlace] = useState(null);
+  
+  // Dialog pour ajouter un waypoint (contrôlé pour accès depuis le bouton rapide)
+  const [showAddWaypointDialog, setShowAddWaypointDialog] = useState(false);
+  const [newWaypoint, setNewWaypoint] = useState({ name: '', type: 'autre', lat: '', lng: '' });
+  
+  // Mode création de waypoint par clic sur la carte
+  const [mapClickMode, setMapClickMode] = useState(false);
+  
+  // Curseur sur la carte - données au "bout de la flèche"
+  const [cursorPosition, setCursorPosition] = useState(null);
+  const [cursorData, setCursorData] = useState(null);
+  const [showCursorInfo, setShowCursorInfo] = useState(true);
+  const [cursorElevation, setCursorElevation] = useState(null);
+  const [gpsLiveEnabled, setGpsLiveEnabled] = useState(false); // GPS LIVE désactivé par défaut
+  const elevationCacheRef = useRef({});
+  const elevationTimeoutRef = useRef(null);
+  
+  // Quick waypoint - enregistrement instantané en un clic
+  const [quickWaypointMode, setQuickWaypointMode] = useState(false);
+  
+  // Panneaux
+  const [showLayersPanel, setShowLayersPanel] = useState(true);
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState(true);
+  const [liveMode, setLiveMode] = useState(false);
+  
+  // Mode d'affichage des zones BIONIC
+  const [zoneDisplayMode, setZoneDisplayMode] = useState('micro'); // 'micro' ou 'classic'
+  const [showConcentricCircles, setShowConcentricCircles] = useState(true);
+  const [showCorridors, setShowCorridors] = useState(true);
+  const [minPercentageFilter, setMinPercentageFilter] = useState(80); // Fixé à 80-100% uniquement
+  
+  // ============================================
+  // FOND DE CARTE ACTIF (BIONIC / Satellite / Terrain)
+  // ============================================
+  const [activeBaseMap, setActiveBaseMap] = useState('bionic'); // 'bionic', 'satellite', 'terrain'
+  
+  const handleBaseMapChange = useCallback((mapId) => {
+    setActiveBaseMap(mapId);
+    console.log('[BIONIC] Fond de carte changé:', mapId);
+  }, []);
+  
+  // ============================================
+  // CARTE ÉCOFORESTIÈRE - État des couches
+  // ============================================
+  const [showEcoforestryPanel, setShowEcoforestryPanel] = useState(false);
+  const [activeEcoLayers, setActiveEcoLayers] = useState({
+    baseMap: 'terrain', // Fond de carte terrain (topographique HD) par défaut
+    peuplements: false,
+    essences: false,
+    perturbations: false,
+    densite: false,
+    hauteur: false,
+    lidar_chm: false,
+    lidar_volume: false,
+    lidar_st: false,
+    courbes_niveau: false
+  });
+  const [ecoLayerOpacities, setEcoLayerOpacities] = useState({});
+  const [forestLegendCollapsed, setForestLegendCollapsed] = useState(true); // Légende micro peuplements
+  
+  // ============================================
+  // SYSTÈME DE FALLBACK - Carte écoforestière
+  // ============================================
+  const isEcoMapSelected = activeEcoLayers.baseMap === 'ecoforestry';
+  const {
+    status: ecoMapStatus,
+    activeFallback,
+    retryCount,
+    lastCheck,
+    isAvailable: isEcoMapAvailable,
+    isUnavailable: isEcoMapUnavailable,
+    forceCheck: forceEcoMapCheck,
+    setFallbackMap
+  } = useEcoMapFallback(isEcoMapSelected);
+  
+  // Gestionnaire de toggle des couches écoforestières
+  const handleEcoLayerToggle = useCallback((layerId, value) => {
+    if (layerId === 'baseMap') {
+      setActiveEcoLayers(prev => ({ ...prev, baseMap: value }));
+    } else {
+      setActiveEcoLayers(prev => ({ ...prev, [layerId]: !prev[layerId] }));
+    }
+  }, []);
+  
+  // Gestionnaire d'opacité des couches
+  const handleEcoOpacityChange = useCallback((layerId, opacity) => {
+    setEcoLayerOpacities(prev => ({ ...prev, [layerId]: opacity }));
+  }, []);
+  
+  // Mode confidentialité (seul l'utilisateur et l'admin peuvent voir les données privées)
+  const [privacyMode, setPrivacyMode] = useState(false);
+  const isPrivateDataVisible = !privacyMode; // Les waypoints, recherches, annotations sont visibles
+  
+  // ============================================
+  // EXCLUSION PERMANENTE DES ZONES AQUATIQUES
+  // Service TOUJOURS ACTIF - Impossible à désactiver
+  // ============================================
+  const [waterExclusionStats, setWaterExclusionStats] = useState(null);
+  const [filteredMicroZones, setFilteredMicroZones] = useState([]);
+  const [isFilteringWater, setIsFilteringWater] = useState(false);
+  
+  // ============================================
+  // HABITAT_OPTIMAL_SYNTHÈSE - Espèce cible
+  // ============================================
+  const [selectedEspece, setSelectedEspece] = useState('ORIGNAL');
+  const [carteBionic, setCarteBionic] = useState(null);
+  const [pipelineEnabled, setPipelineEnabled] = useState(true); // Toggle ON-OFF Pipeline BIONIC
+  const [pipelineCollapsed, setPipelineCollapsed] = useState(false); // Réduire/Étendre Pipeline
+  
+  // ============================================
+  // COUCHES WMS QUÉBEC (via proxy backend)
+  // ============================================
+  const [quebecLayers, setQuebecLayers] = useState({
+    ecoforestry: { enabled: false, opacity: 60, loading: false },
+    lidar: { enabled: false, opacity: 50, loading: false },
+    twi: { enabled: false, opacity: 50, loading: false }
+  });
+  
+  const toggleQuebecLayer = useCallback((layerId) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      [layerId]: { ...prev[layerId], enabled: !prev[layerId].enabled }
+    }));
+  }, []);
+  
+  const setQuebecLayerOpacity = useCallback((layerId, opacity) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      [layerId]: { ...prev[layerId], opacity }
+    }));
+  }, []);
+  
+  // Callback pour mettre à jour le statut de chargement des couches WMS Québec
+  const handleQuebecLoadingStatus = useCallback((wmsStatus) => {
+    setQuebecLayers(prev => ({
+      ...prev,
+      ecoforestry: { 
+        ...prev.ecoforestry, 
+        loading: wmsStatus.quebec_eco === 'loading' 
+      },
+      lidar: { 
+        ...prev.lidar, 
+        loading: wmsStatus.quebec_lidar === 'loading' 
+      },
+      twi: { 
+        ...prev.twi, 
+        loading: wmsStatus.quebec_twi === 'loading' 
+      }
+    }));
+  }, []);
+  
+  // ============================================
+  // ZONES COMPORTEMENTALES DU GIBIER
+  // ============================================
+  const [showBehaviorZones, setShowBehaviorZones] = useState(true);
+  const [activeBehaviors, setActiveBehaviors] = useState(null); // null = tous actifs
+  
+  const toggleBehaviorFilter = useCallback((behaviorId) => {
+    setActiveBehaviors(prev => {
+      if (prev === null) {
+        // Premier clic: activer seulement ce comportement
+        return [behaviorId];
+      }
+      if (prev.includes(behaviorId)) {
+        // Désactiver ce comportement
+        const newBehaviors = prev.filter(b => b !== behaviorId);
+        return newBehaviors.length === 0 ? null : newBehaviors;
+      } else {
+        // Activer ce comportement
+        return [...prev, behaviorId];
+      }
+    });
+  }, []);
+  
+  // Import du service d'exclusion permanent
+  const filterWaterZonesRef = useRef(null);
+  
+  useEffect(() => {
+    // Charger le service d'exclusion d'eau (toujours actif)
+    import('@/services/WaterExclusionService').then(module => {
+      filterWaterZonesRef.current = module.filterZonesViaAPI;
+      console.log('[BIONIC] Water exclusion service loaded - PERMANENT ACTIVE');
+    });
+  }, []);
+  
+  // ============================================
+  // OVERLAY TOPOGRAPHIQUE
+  // ============================================
+  const [topoEnabled, setTopoEnabled] = useState(false);
+  const [topoHillshade, setTopoHillshade] = useState(true);
+  const [topoHillshadeOpacity, setTopoHillshadeOpacity] = useState(40);
+  const [topoContours, setTopoContours] = useState(true);
+  const [topoContourStyle, setTopoContourStyle] = useState('highContrast');
+  const [topoCollapsed, setTopoCollapsed] = useState(false);
+  
+  // ============================================
+  // ANALYSE PAR WAYPOINT (Zone d'analyse focalisée)
+  // ============================================
+  const [zoneAnalysisEnabled, setZoneAnalysisEnabled] = useState(false);
+  const [zoneAnalysisWaypoint, setZoneAnalysisWaypoint] = useState(null);
+  const [zoneAnalysisArea, setZoneAnalysisArea] = useState('4'); // '2', '4', '10' km²
+  const [zoneAnalysisResult, setZoneAnalysisResult] = useState(null);
+  const [zoneAnalysisCollapsed, setZoneAnalysisCollapsed] = useState(false);
+  const [zoneAnalysisAutoMode, setZoneAnalysisAutoMode] = useState(true); // Mode temps réel activé par défaut
+  
+  // Callback quand l'analyse est complète
+  const handleZoneAnalysisComplete = useCallback((result) => {
+    setZoneAnalysisResult(result);
+    if (result && result.score) {
+      toast.success(`🎯 Hotspot optimal identifié: ${result.score}%`, {
+        description: `${result.distanceFromCenter || 0}m du waypoint • Zone ${zoneAnalysisArea} km²`
+      });
+    }
+  }, [zoneAnalysisArea]);
+  
+  // Sélection d'un waypoint avec activation automatique
+  const handleSelectZoneWaypoint = useCallback((wp) => {
+    setZoneAnalysisWaypoint(wp);
+    if (wp) {
+      // Centrer la carte sur le waypoint
+      setMapCenter([wp.lat, wp.lng]);
+      setMapZoom(14);
+      
+      // Activation automatique en mode temps réel
+      if (zoneAnalysisAutoMode) {
+        setZoneAnalysisEnabled(true);
+        setZoneAnalysisResult(null); // Reset le résultat précédent
+        toast.info(`🔍 Analyse en cours...`, {
+          description: `Zone de ${zoneAnalysisArea} km² autour de "${wp.name || 'Waypoint'}"`
+        });
+      }
+    } else {
+      setZoneAnalysisEnabled(false);
+      setZoneAnalysisResult(null);
+    }
+  }, [zoneAnalysisAutoMode, zoneAnalysisArea]);
+  
+  // Changement de zone avec re-analyse automatique
+  const handleZoneAreaChange = useCallback((newArea) => {
+    setZoneAnalysisArea(newArea);
+    // Re-déclencher l'analyse si un waypoint est sélectionné
+    if (zoneAnalysisWaypoint && zoneAnalysisAutoMode) {
+      setZoneAnalysisResult(null);
+      toast.info(`🔄 Mise à jour de la zone...`, {
+        description: `Nouvelle zone: ${newArea} km²`
+      });
+    }
+  }, [zoneAnalysisWaypoint, zoneAnalysisAutoMode]);
+  
+  // Toggle l'analyse de zone (mode manuel)
+  const toggleZoneAnalysis = useCallback(() => {
+    if (!zoneAnalysisEnabled && !zoneAnalysisWaypoint) {
+      toast.warning('Sélectionnez un waypoint d\'abord');
+      return;
+    }
+    setZoneAnalysisEnabled(!zoneAnalysisEnabled);
+    if (zoneAnalysisEnabled) {
+      setZoneAnalysisResult(null);
+    }
+  }, [zoneAnalysisEnabled, zoneAnalysisWaypoint]);
+  
+  // Hooks BIONIC
+  const { 
+    layersVisible, 
+    toggleLayer, 
+    showAllLayers, 
+    hideAllLayers,
+    activeCount,
+    allLayers
+  } = useBionicLayers({ habitats: true, affuts: true, corridors: true, alimentation: true });
+  
+  const { 
+    weather, 
+    isLoading: weatherLoading,
+    temperature,
+    windInfo,
+    thermalInfo,
+    huntingScore,
+    nextOptimalWindow,
+    sunrise,
+    sunset,
+    refresh: refreshWeather
+  } = useBionicWeather(mapCenter[0], mapCenter[1], { autoFetch: true, pollInterval: liveMode ? 60000 : 600000 });
+  
+  const { scores, calculateHybridScores, globalScore } = useBionicScoring();
+  
+  // Hook pour les zones favorites et alertes
+  const {
+    favorites,
+    alerts,
+    unreadAlertCount,
+    loading: favoritesLoading,
+    addFavorite,
+    removeFavorite,
+    updateAlertSettings,
+    markAlertRead,
+    markAllAlertsRead,
+    checkOptimalConditions,
+    getZoneConditions,
+    refresh: refreshFavorites
+  } = useZoneFavorites(userId);
+  
+  // Vérifier si une zone est favorite
+  const isZoneFavorite = useCallback((zone) => {
+    return favorites.some(f => 
+      Math.abs(f.location.lat - zone.center[0]) < 0.0001 &&
+      Math.abs(f.location.lng - zone.center[1]) < 0.0001 &&
+      f.module_id === zone.moduleId
+    );
+  }, [favorites]);
+  
+  // Trouver l'ID du favori pour une zone
+  const getFavoriteId = useCallback((zone) => {
+    const fav = favorites.find(f => 
+      Math.abs(f.location.lat - zone.center[0]) < 0.0001 &&
+      Math.abs(f.location.lng - zone.center[1]) < 0.0001 &&
+      f.module_id === zone.moduleId
+    );
+    return fav?.id;
+  }, [favorites]);
+  
+  // Callback pour le changement de zoom
+  const handleZoomChange = useCallback((newZoom) => {
+    setCurrentZoom(newZoom);
+    // Ne PAS synchroniser mapZoom ici pour éviter les conflits
+    // mapZoom est contrôlé par les boutons +/- uniquement
+  }, []);
+  
+  // Callback pour le déplacement de la carte
+  const handleMapMove = useCallback((newCenter) => {
+    setCurrentMapCenter(newCenter);
+  }, []);
+  
+  // Callback pour le changement des limites visibles
+  const handleBoundsChange = useCallback((newBounds) => {
+    setCurrentMapBounds(newBounds);
+  }, []);
+  
+  // ============================================
+  // ZONES BIONIC - GÉNÉRÉES UNIQUEMENT AUTOUR DES WAYPOINTS ACTIFS
+  // Performance optimisée: pas de zones si aucun waypoint
+  // ============================================
+  const bionicZonesData = useMemo(() => {
+    // Si aucun waypoint actif, ne pas générer de zones
+    if (!activeWaypoints || activeWaypoints.length === 0) {
+      return { microZones: [], corridors: [], bufferZones: [], classicZones: [] };
+    }
+    
+    const zoom = selectedWaypointForZones ? Math.max(currentZoom, 13) : currentZoom;
+    
+    // Générer des zones autour de chaque waypoint actif
+    let allMicroZones = [];
+    let allClassicZones = [];
+    
+    // Liste des waypoints à analyser (soit le sélectionné, soit tous les actifs)
+    const waypointsToAnalyze = selectedWaypointForZones 
+      ? [selectedWaypointForZones]
+      : activeWaypoints;
+    
+    for (const wp of waypointsToAnalyze) {
+      if (zoneDisplayMode === 'micro') {
+        // Générer des micro-zones autour de ce waypoint
+        const wpZones = generateMicroZones(wp.lat || wp.latitude, wp.lng || wp.longitude, zoom, layersVisible);
+        allMicroZones = [...allMicroZones, ...wpZones.microZones];
+      } else {
+        // Mode classique - zones hexagonales autour du waypoint
+        const wpZones = generateAdaptiveBionicZones(
+          wp.lat || wp.latitude,
+          wp.lng || wp.longitude,
+          zoom,
+          layersVisible,
+          wp
+        );
+        allClassicZones = [...allClassicZones, ...wpZones];
+      }
+    }
+    
+    return { 
+      microZones: allMicroZones, 
+      corridors: [], 
+      bufferZones: [], 
+      classicZones: allClassicZones 
+    };
+  }, [activeWaypoints, selectedWaypointForZones, currentZoom, layersVisible, zoneDisplayMode]);
+  
+  // ============================================
+  // FILTRAGE PERMANENT DES ZONES AQUATIQUES
+  // TOUJOURS ACTIF - Appliqué automatiquement à chaque génération
+  // ============================================
+  useEffect(() => {
+    const applyWaterExclusion = async () => {
+      // EXCLUSION TOUJOURS ACTIVE - Pas de condition de désactivation
+      const zonesToFilter = bionicZonesData.microZones || [];
+      
+      if (zonesToFilter.length === 0) {
+        setFilteredMicroZones([]);
+        setWaterExclusionStats(null);
+        return;
+      }
+      
+      if (!currentMapBounds) {
+        // Pas de bounds - appliquer filtrage local simple
+        setFilteredMicroZones(zonesToFilter);
+        return;
+      }
+      
+      setIsFilteringWater(true);
+      
+      try {
+        // Utiliser le MODULE BIONIC™ COMPLET v7 (EAU 5m + URBAIN 2000m + QA)
+        const { filterAndRelocateZones } = await import('@/services/WaterExclusionService');
+        const { filteredZones, stats, qaReport } = await filterAndRelocateZones(
+          zonesToFilter, 
+          currentMapBounds,
+          { enableQA: true }
+        );
+        
+        console.log(`[BIONIC_v7] Résultat: ${stats.kept}/${stats.total} zones (Eau: ${stats.fromWater || 0}, Urbain: ${stats.fromUrban || 0})`);
+        
+        setFilteredMicroZones(filteredZones);
+        setWaterExclusionStats(stats);
+        
+        // Log QA si disponible
+        if (qaReport) {
+          console.log(`[BIONIC_v7] QA: ${qaReport.passedCount}/${qaReport.totalZones} validées`);
+          if (qaReport.failedCount > 0) {
+            console.warn(`[BIONIC_v7] ⚠️ ${qaReport.failedCount} zones non conformes`);
+          }
+        }
+        
+        if (stats && (stats.fromWater > 0 || stats.fromUrban > 0)) {
+          console.log(`[BIONIC_v7] Règles appliquées:`, stats.rules_applied);
+        }
+      } catch (err) {
+        console.error('[BIONIC_v7] Erreur filtrage/relocalisation:', err);
+        // En cas d'erreur, ne PAS afficher les zones non filtrées
+        // Pour sécurité, on exclut tout
+        setFilteredMicroZones([]);
+        setWaterExclusionStats({ error: true, message: err.message });
+      } finally {
+        setIsFilteringWater(false);
+      }
+    };
+    
+    applyWaterExclusion();
+  }, [bionicZonesData.microZones, currentMapBounds]);
+  
+  // Extraire les données pour le rendu (TOUJOURS utiliser les zones filtrées)
+  const { corridors = [], bufferZones = [], classicZones = [] } = bionicZonesData;
+  const microZones = filteredMicroZones; // EXCLUSION PERMANENTE - Toujours les zones filtrées
+  
+  // Compter les zones visibles (pour l'affichage du badge)
+  const visibleZonesCount = useMemo(() => {
+    if (zoneDisplayMode === 'micro') {
+      return microZones.filter(z => z.percentage >= minPercentageFilter).length;
+    }
+    return classicZones.length;
+  }, [zoneDisplayMode, microZones, classicZones, minPercentageFilter]);
+  
+  // Score global (valeur stable basée sur position)
+  const displayScore = useMemo(() => {
+    if (globalScore) return globalScore;
+    // Score déterministe basé sur la position de la carte
+    const seed = (currentMapCenter.lat * 1000 + currentMapCenter.lng * 100) % 100;
+    return Math.round(65 + (seed % 25));
+  }, [globalScore, currentMapCenter.lat, currentMapCenter.lng]);
+  
+  const getScoreRating = (score) => {
+    if (score >= 85) return { label: 'Exceptionnel', color: 'bg-green-500', textColor: 'text-green-400' };
+    if (score >= 70) return { label: 'Excellent', color: 'bg-lime-500', textColor: 'text-lime-400' };
+    if (score >= 55) return { label: 'Bon', color: 'bg-yellow-500', textColor: 'text-yellow-400' };
+    return { label: 'Modéré', color: 'bg-orange-500', textColor: 'text-orange-400' };
+  };
+  
+  const rating = getScoreRating(displayScore);
+  
+  // ============================================
+  // MODULES THÉMATIQUES
+  // ============================================
+  const [thematicModules, setThematicModules] = useState([
+    { id: 'habitat', name: 'Habitat Optimal', icon: '🏠', enabled: true, score: 63 },
+    { id: 'meteo', name: 'Analyse Météo', icon: '🌤️', enabled: true, score: 78 },
+    { id: 'approche', name: 'Approche Optimale', icon: '🎯', enabled: true, score: 96 },
+    { id: 'alimentation', name: 'Zones Alimentation', icon: '🍃', enabled: false, score: 73 },
+    { id: 'comportement', name: 'Comportements Gibier', icon: '🦌', enabled: true, score: 85 },
+    { id: 'hotspots', name: 'Hotspots IA', icon: '🔥', enabled: false, score: 91 },
+    { id: 'peuplements', name: 'Peuplements Forestiers', icon: '🌲', enabled: true, score: 88 },
+    { id: 'topographie', name: 'Overlay Topographique', icon: '⛰️', enabled: false, score: 75 }
+  ]);
+  
+  const handleModuleToggle = useCallback((moduleId) => {
+    setThematicModules(prev => prev.map(m => 
+      m.id === moduleId ? { ...m, enabled: !m.enabled } : m
+    ));
+    
+    const module = thematicModules.find(m => m.id === moduleId);
+    if (module) {
+      toast.info(module.enabled ? `${module.name} désactivé` : `${module.name} activé`, {
+        icon: module.icon
+      });
+    }
+  }, [thematicModules]);
+  
+  // Géolocalisation
+  const startWatchingPosition = useCallback(() => {
+    if (!navigator.geolocation) {
+      toast.error('Géolocalisation non supportée');
+      return;
+    }
+    
+    setWatchingPosition(true);
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        setUserPosition({ lat: latitude, lng: longitude, accuracy });
+        toast.success('Position mise à jour', { description: `Précision: ${Math.round(accuracy)}m` });
+      },
+      (error) => {
+        toast.error('Erreur de géolocalisation', { description: error.message });
+        setWatchingPosition(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+    );
+  }, []);
+  
+  const stopWatchingPosition = useCallback(() => {
+    if (watchIdRef.current) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setWatchingPosition(false);
+  }, []);
+  
+  const centerOnUser = useCallback(() => {
+    if (userPosition) {
+      setMapCenter([userPosition.lat, userPosition.lng]);
+      setMapZoom(14);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserPosition({ lat: latitude, lng: longitude });
+          setMapCenter([latitude, longitude]);
+          setMapZoom(14);
+          toast.success('Centré sur votre position');
+        },
+        () => toast.error('Impossible d\'obtenir votre position')
+      );
+    }
+  }, [userPosition]);
+  
+  // Sélectionner un waypoint comme cible pour les zones BIONIC
+  const selectWaypointAsTarget = useCallback((waypoint) => {
+    setSelectedWaypointForZones(waypoint);
+    setMapCenter([waypoint.lat, waypoint.lng]);
+    setMapZoom(14);
+    toast.success(`Zones BIONIC centrées sur ${waypoint.name}`, { 
+      description: 'Les zones s\'adaptent autour de ce waypoint' 
+    });
+  }, []);
+  
+  // Effacer la cible waypoint
+  const clearWaypointTarget = useCallback(() => {
+    setSelectedWaypointForZones(null);
+    toast.info('Zones BIONIC en mode libre');
+  }, []);
+  
+  // Wrapper pour supprimer waypoint (gère aussi la cible)
+  const handleDeleteWaypoint = useCallback((id) => {
+    if (selectedWaypointForZones?.id === id) {
+      setSelectedWaypointForZones(null);
+    }
+    deleteWaypoint(id);
+  }, [selectedWaypointForZones, deleteWaypoint]);
+  
+  // Wrapper pour ajouter un waypoint avec coordonnées par défaut
+  const handleAddWaypoint = useCallback((data) => {
+    addWaypoint({
+      name: data.name || 'Nouveau waypoint',
+      lat: parseFloat(data.lat) || mapCenter[0],
+      lng: parseFloat(data.lng) || mapCenter[1],
+      type: data.type || 'autre',
+      active: true
+    });
+  }, [mapCenter, addWaypoint]);
+  
+  // Gestion des lieux
+  const handleAddPlace = useCallback(() => {
+    if (!newPlace.name) {
+      toast.error('Veuillez entrer un nom');
+      return;
+    }
+    
+    addPlace({
+      name: newPlace.name,
+      lat: parseFloat(newPlace.lat) || mapCenter[0],
+      lng: parseFloat(newPlace.lng) || mapCenter[1],
+      type: newPlace.type,
+      notes: newPlace.notes
+    });
+    
+    setNewPlace({ name: '', type: 'autre', lat: '', lng: '', notes: '' });
+    setShowAddPlaceDialog(false);
+  }, [newPlace, mapCenter, addPlace]);
+  
+  const handleUpdatePlace = useCallback(() => {
+    if (!editingPlace) return;
+    
+    updatePlace(editingPlace.id, {
+      name: editingPlace.name,
+      type: editingPlace.type,
+      notes: editingPlace.notes
+    });
+    setEditingPlace(null);
+  }, [editingPlace, updatePlace]);
+  
+  // Ouvrir le dialog de partage pour un waypoint
+  const openShareDialog = useCallback((waypoint) => {
+    setWaypointToShare(waypoint);
+    setShowShareDialog(true);
+  }, []);
+  
+  const useCurrentPositionForNewPlace = useCallback(() => {
+    if (userPosition) {
+      setNewPlace(prev => ({ ...prev, lat: userPosition.lat.toFixed(6), lng: userPosition.lng.toFixed(6) }));
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setNewPlace(prev => ({ 
+            ...prev, 
+            lat: position.coords.latitude.toFixed(6), 
+            lng: position.coords.longitude.toFixed(6) 
+          }));
+        },
+        () => toast.error('Impossible d\'obtenir votre position')
+      );
+    }
+  }, [userPosition]);
+  
+  // Utiliser la position actuelle pour le nouveau waypoint
+  const useCurrentPositionForNewWaypoint = useCallback(() => {
+    if (userPosition) {
+      setNewWaypoint(prev => ({ ...prev, lat: userPosition.lat.toFixed(6), lng: userPosition.lng.toFixed(6) }));
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setNewWaypoint(prev => ({ 
+            ...prev, 
+            lat: position.coords.latitude.toFixed(6), 
+            lng: position.coords.longitude.toFixed(6) 
+          }));
+        },
+        () => toast.error('Impossible d\'obtenir votre position')
+      );
+    }
+  }, [userPosition]);
+  
+  // Fonction pour ajouter un waypoint depuis le dialog contrôlé
+  const handleAddWaypointFromDialog = useCallback(() => {
+    if (!newWaypoint.name) {
+      toast.error('Veuillez entrer un nom');
+      return;
+    }
+    
+    addWaypoint({
+      name: newWaypoint.name,
+      lat: parseFloat(newWaypoint.lat) || mapCenter[0],
+      lng: parseFloat(newWaypoint.lng) || mapCenter[1],
+      type: newWaypoint.type || 'autre',
+      active: true
+    });
+    
+    setNewWaypoint({ name: '', type: 'autre', lat: '', lng: '' });
+    setShowAddWaypointDialog(false);
+    toast.success('Waypoint créé avec succès !');
+  }, [newWaypoint, mapCenter, addWaypoint]);
+  
+  // Fonction pour récupérer l'altitude depuis Open-Meteo API
+  const fetchElevation = useCallback(async (lat, lng) => {
+    // Arrondir les coordonnées pour le cache (précision ~100m)
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+    
+    // Vérifier le cache
+    if (elevationCacheRef.current[cacheKey]) {
+      setCursorElevation(elevationCacheRef.current[cacheKey]);
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const elevation = data.elevation?.[0] || null;
+        if (elevation !== null) {
+          elevationCacheRef.current[cacheKey] = Math.round(elevation);
+          setCursorElevation(Math.round(elevation));
+        }
+      }
+    } catch (error) {
+      console.log('[GPS LIVE] Erreur élévation:', error);
+    }
+  }, []);
+  
+  // Gestion du curseur sur la carte - données au "bout de la flèche"
+  const handleCursorMove = useCallback((position) => {
+    setCursorPosition(position);
+    
+    // Calculer les données pour cette position
+    const lat = position.lat;
+    const lng = position.lng;
+    
+    // Récupérer l'altitude avec debounce (éviter trop de requêtes)
+    if (elevationTimeoutRef.current) {
+      clearTimeout(elevationTimeoutRef.current);
+    }
+    elevationTimeoutRef.current = setTimeout(() => {
+      fetchElevation(lat, lng);
+    }, 300); // Attendre 300ms avant de faire la requête
+    
+    // Distance depuis la position utilisateur
+    let distanceFromUser = null;
+    if (userPosition) {
+      const R = 6371; // km
+      const dLat = (lat - userPosition.lat) * Math.PI / 180;
+      const dLng = (lng - userPosition.lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(userPosition.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      distanceFromUser = R * c;
+    }
+    
+    // Trouver le waypoint le plus proche
+    let nearestWaypoint = null;
+    let nearestDistance = Infinity;
+    activeWaypoints.forEach(wp => {
+      const d = Math.sqrt(Math.pow(wp.lat - lat, 2) + Math.pow(wp.lng - lng, 2));
+      if (d < nearestDistance) {
+        nearestDistance = d;
+        nearestWaypoint = wp;
+      }
+    });
+    
+    // Trouver le lieu enregistré le plus proche
+    let nearestPlace = null;
+    let nearestPlaceDistance = Infinity;
+    savedPlaces.forEach(place => {
+      const d = Math.sqrt(Math.pow(place.lat - lat, 2) + Math.pow(place.lng - lng, 2));
+      if (d < nearestPlaceDistance) {
+        nearestPlaceDistance = d;
+        nearestPlace = place;
+      }
+    });
+    
+    setCursorData({
+      lat,
+      lng,
+      distanceFromUser,
+      nearestWaypoint: nearestDistance < 0.01 ? nearestWaypoint : null,
+      nearestPlace: nearestPlaceDistance < 0.01 ? nearestPlace : null
+    });
+  }, [userPosition, activeWaypoints, savedPlaces]);
+  
+  const handleCursorLeave = useCallback(() => {
+    setCursorPosition(null);
+    setCursorData(null);
+  }, []);
+  
+  // Enregistrement instantané d'un waypoint en un clic (Quick Mode)
+  const handleQuickWaypointSave = useCallback(() => {
+    if (!cursorPosition) {
+      toast.error('Déplacez votre curseur sur la carte');
+      return;
+    }
+    
+    const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+    const wpName = `Point ${timestamp}`;
+    
+    addWaypoint({
+      name: wpName,
+      lat: cursorPosition.lat,
+      lng: cursorPosition.lng,
+      type: 'observation',
+      active: true,
+      quickSave: true,
+      timestamp: new Date().toISOString()
+    });
+    
+    toast.success(`Waypoint "${wpName}" enregistré !`);
+  }, [cursorPosition, addWaypoint]);
+  
+  // Enregistrement instantané depuis position GPS
+  const handleQuickWaypointFromGPS = useCallback(() => {
+    if (userPosition) {
+      const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+      const wpName = `Ma position ${timestamp}`;
+      
+      addWaypoint({
+        name: wpName,
+        lat: userPosition.lat,
+        lng: userPosition.lng,
+        type: 'observation',
+        active: true,
+        quickSave: true,
+        fromGPS: true,
+        timestamp: new Date().toISOString()
+      });
+      
+      toast.success(`Position GPS enregistrée !`);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+          const wpName = `Ma position ${timestamp}`;
+          
+          addWaypoint({
+            name: wpName,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            type: 'observation',
+            active: true,
+            quickSave: true,
+            fromGPS: true,
+            timestamp: new Date().toISOString()
+          });
+          
+          toast.success(`Position GPS enregistrée !`);
+        },
+        () => toast.error('Impossible d\'obtenir votre position GPS')
+      );
+    }
+  }, [userPosition, addWaypoint]);
+
+  // Callback pour créer un waypoint en cliquant sur la carte
+  const handleMapClickForWaypoint = useCallback((lat, lng) => {
+    // Pré-remplir les coordonnées et ouvrir le dialog
+    setNewWaypoint(prev => ({
+      ...prev,
+      lat: lat.toFixed(6),
+      lng: lng.toFixed(6)
+    }));
+    setShowAddWaypointDialog(true);
+    setMapClickMode(false); // Désactiver le mode après le clic
+    toast.info('Coordonnées capturées !', {
+      description: `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`
+    });
+  }, []);
+  
+  // Scores par catégorie (valeurs stables basées sur la position)
+  const categoryScores = useMemo(() => {
+    if (scores?.breakdown) return scores.breakdown;
+    // Scores déterministes basés sur la position
+    const baseSeed = Math.abs(Math.round(currentMapCenter.lat * 100 + currentMapCenter.lng * 50));
+    return {
+      habitat: 75 + (baseSeed % 15),
+      rut: 68 + ((baseSeed + 1) % 20),
+      salines: 60 + ((baseSeed + 2) % 25),
+      affuts: 80 + ((baseSeed + 3) % 15),
+      trajets: 65 + ((baseSeed + 4) % 20),
+      peuplements: 70 + ((baseSeed + 5) % 15)
+    };
+  }, [scores?.breakdown, currentMapCenter.lat, currentMapCenter.lng]);
+
+  // Callbacks pour le header modulaire
+  const handleCancelWaypointMode = useCallback(() => {
+    setMapClickMode(false);
+    setQuickWaypointMode(false);
+    toast.info('Mode création désactivé');
+  }, []);
+
+  const handleEnableMapClickMode = useCallback(() => {
+    setQuickWaypointMode(true);
+    setMapClickMode(true);
+    toast.info('Mode création activé', {
+      description: 'Cliquez sur la carte pour placer votre waypoint'
+    });
+  }, []);
+
+  const handleSelectGroup = useCallback((group) => {
+    setSelectedGroup(group);
+    setShowGroupDashboard(true);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-black pt-16" data-testid="mon-territoire-bionic-page">
+      {/* Header modulaire BIONIC™ */}
+      <TerritoryHeader
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        liveMode={liveMode}
+        onLiveModeChange={setLiveMode}
+        isOnline={isOnline}
+        syncing={syncing}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+        groups={myGroups}
+        onCreateGroup={() => setShowCreateGroupDialog(true)}
+        onSelectGroup={handleSelectGroup}
+        activeWaypointsCount={activeWaypoints.length}
+        savedPlacesCount={savedPlaces.length}
+        mapClickMode={mapClickMode}
+        quickWaypointMode={quickWaypointMode}
+        onQuickWaypointFromGPS={handleQuickWaypointFromGPS}
+        onEnableMapClickMode={handleEnableMapClickMode}
+        onShowAddWaypointDialog={() => setShowAddWaypointDialog(true)}
+        onCancelWaypointMode={handleCancelWaypointMode}
+        selectedEspece={selectedEspece}
+        onSelectEspece={setSelectedEspece}
+        habitatScore={displayScore}
+        habitatRating={rating}
+        presenceProb={Math.round(65 + (displayScore * 0.35))}
+        bestTime={displayScore >= 70 ? 'Crépuscule' : displayScore >= 50 ? 'Aube' : 'Midi'}
+        thematicModules={thematicModules}
+        onModuleToggle={handleModuleToggle}
+      />
+      
+      {/* Contenu des onglets */}
+      <div className="h-[calc(100vh-180px)]">
+        {/* Onglet Carte BIONIC */}
+        {activeTab === 'carte' && (
+          <div className="flex h-full">
+            {/* Panneau Couches */}
+            <div className={`${showLayersPanel ? 'w-64' : 'w-10'} bg-gray-900/95 border-r border-gray-800 transition-all duration-300 flex flex-col`}>
+              <button onClick={() => setShowLayersPanel(!showLayersPanel)} className="p-2 border-b border-gray-800 flex items-center justify-between hover:bg-gray-800/50">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-[#f5a623]" />
+                  {showLayersPanel && <span className="text-white text-sm">Couches</span>}
+                </div>
+              </button>
+              
+              {showLayersPanel && (
+                <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      SECTION FOND DE CARTE BIONIC™
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-b border-gray-700 pb-3 mb-2">
+                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                      🗺️ Fond de carte
+                    </div>
+                    <div className="space-y-1">
+                      {/* Option BIONIC™ */}
+                      <button
+                        onClick={() => handleBaseMapChange('bionic')}
+                        className={`w-full flex items-center gap-2 px-2 py-2 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'bionic' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🎯</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">BIONIC™</div>
+                          <div className="text-[9px] text-gray-500">Terrain + Hydro + Score</div>
+                        </div>
+                        {activeBaseMap === 'bionic' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                      
+                      {/* Option Satellite */}
+                      <button
+                        onClick={() => handleBaseMapChange('satellite')}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'satellite' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🛰️</span>
+                        <span className="flex-1 text-left">Satellite</span>
+                        {activeBaseMap === 'satellite' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                      
+                      {/* Option Terrain */}
+                      <button
+                        onClick={() => handleBaseMapChange('terrain')}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] transition-all ${
+                          activeBaseMap === 'terrain' 
+                            ? 'bg-[#f5a623]/20 text-white border border-[#f5a623]/50' 
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <span>🏔️</span>
+                        <span className="flex-1 text-left">Terrain</span>
+                        {activeBaseMap === 'terrain' && <Badge className="bg-[#f5a623] text-black text-[8px]">Actif</Badge>}
+                      </button>
+                    </div>
+                    
+                    {/* Sous-couches BIONIC™ - Architecture pan-canadienne fusionnée */}
+                    {activeBaseMap === 'bionic' && (
+                      <div className={`mt-2 rounded border transition-all ${
+                        pipelineEnabled 
+                          ? 'bg-[#f5a623]/10 border-[#f5a623]/30' 
+                          : 'bg-gray-800/30 border-gray-700/30 opacity-60'
+                      }`}>
+                        {/* Header avec toggle ON-OFF et bouton réduire */}
+                        <div 
+                          className="flex items-center justify-between p-2 cursor-pointer hover:bg-white/5 rounded-t transition-colors"
+                          onClick={() => setPipelineCollapsed(!pipelineCollapsed)}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {/* Chevron pour expand/collapse */}
+                            <ChevronDown 
+                              className={`h-3 w-3 transition-transform duration-200 ${
+                                pipelineCollapsed ? '-rotate-90' : 'rotate-0'
+                              } ${pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}`}
+                            />
+                            <span className={pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}>🎯</span>
+                            <span className={`text-[9px] uppercase ${pipelineEnabled ? 'text-[#f5a623]' : 'text-gray-500'}`}>
+                              Pipeline v1.0
+                            </span>
+                            {pipelineCollapsed && pipelineEnabled && (
+                              <span className="text-[8px] text-gray-500 ml-1">
+                                (8 couches)
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPipelineEnabled(!pipelineEnabled);
+                            }}
+                            className={`px-2 py-0.5 rounded text-[8px] font-bold transition-all ${
+                              pipelineEnabled 
+                                ? 'bg-[#f5a623] text-black shadow-lg shadow-[#f5a623]/30' 
+                                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                            }`}
+                          >
+                            {pipelineEnabled ? 'ON' : 'OFF'}
+                          </button>
+                        </div>
+                        
+                        {/* Contenu - affiché seulement si non réduit ET pipeline activé */}
+                        {!pipelineCollapsed && pipelineEnabled && (
+                          <div className="px-2 pb-2">
+                            <div className="space-y-1 text-[9px]">
+                              <div className="flex items-center justify-between">
+                                <span className="text-amber-400">⛰️ Topographie</span>
+                                <span className="text-amber-400">50%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400">🪨 Géologie</span>
+                                <span className="text-gray-500">OFF</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-blue-400">💧 Hydrologie</span>
+                                <span className="text-blue-400">70%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-green-400">🌲 Écoforestier</span>
+                                <span className="text-green-400">60%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-purple-400">🏛️ Administratif</span>
+                                <span className="text-purple-400">80%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-300">🛣️ Routes</span>
+                                <span className="text-gray-300">90%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-red-400">🏙️ Urbain</span>
+                                <span className="text-red-400">40%</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[#f5a623]">🎯 Score Faunique</span>
+                                <span className="text-[#f5a623]">80%</span>
+                              </div>
+                            </div>
+                            {/* Info niveaux de zoom */}
+                            <div className="mt-2 pt-2 border-t border-[#f5a623]/30">
+                              <div className="text-[8px] text-gray-500 mb-1">Niveaux de zoom adaptatifs</div>
+                              <div className="grid grid-cols-5 gap-0.5 text-[7px]">
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">0-4</div>
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">5-7</div>
+                                <div className="text-center p-0.5 rounded bg-gray-700/50 text-gray-400">8-10</div>
+                                <div className="text-center p-0.5 rounded bg-blue-700/50 text-blue-300">11-14</div>
+                                <div className="text-center p-0.5 rounded bg-green-700/50 text-green-300">15-18</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Message si désactivé (affiché même si réduit) */}
+                        {!pipelineCollapsed && !pipelineEnabled && (
+                          <div className="px-2 pb-2">
+                            <div className="text-[9px] text-gray-500 text-center py-2">
+                              Pipeline désactivé - Hotspots et simulation masqués
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Couches BIONIC */}
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" onClick={showAllLayers} className="flex-1 text-[10px] h-7 border-gray-700">Tout</Button>
+                    <Button size="sm" variant="outline" onClick={hideAllLayers} className="flex-1 text-[10px] h-7 border-gray-700">Aucun</Button>
+                  </div>
+                  <div className="text-[10px] text-gray-500">{activeCount}/{allLayers.length} actives</div>
+                  <div className="space-y-1">
+                    {allLayers.slice(0, 10).map(layer => (
+                      <button
+                        key={layer.id}
+                        onClick={() => toggleLayer(layer.id)}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] transition-all ${
+                          layersVisible[layer.id] ? 'bg-[#f5a623]/10 text-white border border-[#f5a623]/30' : 'bg-gray-800/50 text-gray-400'
+                        }`}
+                      >
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: layersVisible[layer.id] ? layer.color : '#4b5563' }} />
+                        <span className="flex-1 text-left truncate">{layer.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Séparateur */}
+                  <div className="border-t border-gray-700 pt-2 mt-3">
+                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                      <Settings className="h-3 w-3" />
+                      Affichage zones
+                    </div>
+                    
+                    {/* Mode d'affichage */}
+                    <div className="flex gap-1 mb-2">
+                      <Button 
+                        size="sm" 
+                        variant={zoneDisplayMode === 'micro' ? 'default' : 'outline'} 
+                        onClick={() => setZoneDisplayMode('micro')} 
+                        className={`flex-1 text-[9px] h-6 ${zoneDisplayMode === 'micro' ? 'bg-[#f5a623] text-black' : 'border-gray-700 text-gray-400'}`}
+                      >
+                        Micro
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant={zoneDisplayMode === 'classic' ? 'default' : 'outline'} 
+                        onClick={() => setZoneDisplayMode('classic')} 
+                        className={`flex-1 text-[9px] h-6 ${zoneDisplayMode === 'classic' ? 'bg-[#f5a623] text-black' : 'border-gray-700 text-gray-400'}`}
+                      >
+                        Classique
+                      </Button>
+                    </div>
+                    
+                    {/* Options micro-zones */}
+                    {zoneDisplayMode === 'micro' && (
+                      <div className="space-y-2">
+                        {/* Cercles concentriques */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-gray-400">Cercles concentriques</span>
+                          <Switch 
+                            checked={showConcentricCircles} 
+                            onCheckedChange={setShowConcentricCircles}
+                            className="scale-75"
+                          />
+                        </div>
+                        
+                        {/* Corridors */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-gray-400">Corridors & Tampons</span>
+                          <Switch 
+                            checked={showCorridors} 
+                            onCheckedChange={setShowCorridors}
+                            className="scale-75"
+                          />
+                        </div>
+                        
+                        {/* Indicateur seuil fixé à 80-100% */}
+                        <div className="text-[9px] text-gray-500 text-center py-1 border-t border-gray-700/50 mt-1">
+                          Affichage: zones 80-100% uniquement
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      COUCHES DONNÉES QUÉBEC (WMS via Proxy)
+                  ═══════════════════════════════════════════════════════════ */}
+                  <QuebecLayersPanel
+                    layers={quebecLayers}
+                    onToggleLayer={toggleQuebecLayer}
+                    onSetOpacity={setQuebecLayerOpacity}
+                    collapsed={false}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      ZONES COMPORTEMENTALES DU GIBIER
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-b border-gray-700 pb-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[10px] text-[#f5a623] uppercase flex items-center gap-1.5">
+                        <span className="text-base">🦌</span>
+                        <span>Zones Comportementales</span>
+                      </div>
+                      <Switch
+                        checked={showBehaviorZones}
+                        onCheckedChange={setShowBehaviorZones}
+                        className="data-[state=checked]:bg-[#f5a623]"
+                      />
+                    </div>
+                    {showBehaviorZones && (
+                      <div className="space-y-1.5">
+                        <div className="text-[9px] text-gray-400">
+                          Visualisation des comportements du gibier basée sur l'habitat
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 mt-2">
+                          {[
+                            { id: 'corridor', icon: '🦌', label: 'Circulation', color: '#ff6b35' },
+                            { id: 'shelter', icon: '🌲', label: 'Cache/Abri', color: '#00ff88' },
+                            { id: 'feeding', icon: '🍂', label: 'Alimentation', color: '#ffd93d' },
+                            { id: 'bedding', icon: '🛏️', label: 'Repos/Dortoir', color: '#c084fc' },
+                            { id: 'water', icon: '💧', label: 'Point d\'eau', color: '#00d4ff' },
+                            { id: 'hotspot', icon: '🔥', label: 'Hotspot', color: '#ff0066' }
+                          ].map(behavior => (
+                            <button
+                              key={behavior.id}
+                              onClick={() => toggleBehaviorFilter(behavior.id)}
+                              className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-[10px] transition-all ${
+                                activeBehaviors === null || activeBehaviors.includes(behavior.id)
+                                  ? 'bg-gray-800 text-white border border-gray-600'
+                                  : 'bg-gray-900/50 text-gray-500 border border-gray-800'
+                              }`}
+                            >
+                              <span 
+                                className="w-2 h-2 rounded-full"
+                                style={{ 
+                                  backgroundColor: activeBehaviors === null || activeBehaviors.includes(behavior.id) 
+                                    ? behavior.color 
+                                    : '#4b5563'
+                                }}
+                              />
+                              <span>{behavior.icon}</span>
+                              <span className="truncate">{behavior.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setActiveBehaviors(null)}
+                          className="w-full mt-2 py-1 text-[9px] text-gray-400 hover:text-[#f5a623] transition-colors"
+                        >
+                          Afficher tous les comportements
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      OVERLAY TOPOGRAPHIQUE
+                  ═══════════════════════════════════════════════════════════ */}
+                  <TopographicControlPanel
+                    enabled={topoEnabled}
+                    onToggle={setTopoEnabled}
+                    showHillshade={topoHillshade}
+                    onHillshadeToggle={setTopoHillshade}
+                    hillshadeOpacity={topoHillshadeOpacity}
+                    onHillshadeOpacityChange={setTopoHillshadeOpacity}
+                    showContours={topoContours}
+                    onContoursToggle={setTopoContours}
+                    contourStyle={topoContourStyle}
+                    onContourStyleChange={setTopoContourStyle}
+                    collapsed={topoCollapsed}
+                    onToggleCollapse={() => setTopoCollapsed(!topoCollapsed)}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      ANALYSE PAR WAYPOINT - Zone Focalisée
+                  ═══════════════════════════════════════════════════════════ */}
+                  <ZoneAnalysisControlPanel
+                    enabled={zoneAnalysisEnabled}
+                    onToggle={toggleZoneAnalysis}
+                    selectedWaypoint={zoneAnalysisWaypoint}
+                    waypoints={activeWaypoints}
+                    onSelectWaypoint={handleSelectZoneWaypoint}
+                    analysisArea={zoneAnalysisArea}
+                    onAreaChange={handleZoneAreaChange}
+                    analysisResult={zoneAnalysisResult}
+                    collapsed={zoneAnalysisCollapsed}
+                    onToggleCollapse={() => setZoneAnalysisCollapsed(!zoneAnalysisCollapsed)}
+                    autoMode={zoneAnalysisAutoMode}
+                    onAutoModeChange={setZoneAnalysisAutoMode}
+                  />
+                  
+                  {/* ═══════════════════════════════════════════════════════════
+                      GÉNÉRATEUR CARTE BIONIC™ v3.1
+                  ═══════════════════════════════════════════════════════════ */}
+                  <div className="border-t border-gray-700 pt-2 mt-2">
+                    <div className="text-[10px] text-[#f5a623] uppercase mb-2 flex items-center gap-1">
+                      <Brain className="h-3 w-3" />
+                      Intelligence BIONIC™
+                    </div>
+                    <BionicGeneratorPanel 
+                      espece={selectedEspece?.toLowerCase() || 'orignal'}
+                      meteo={{
+                        temperature: weather?.temperature || 12,
+                        vent_direction: weather?.windDirection || 'NO',
+                        vent_force: weather?.windSpeed || 15,
+                        pression: weather?.pressure || 1015,
+                        precipitations: weather?.precipitations || 0
+                      }}
+                      compact={true}
+                      onResultsGenerated={(results) => {
+                        console.log('[BIONIC Generator] Résultats générés:', results);
+                        setCarteBionic(results);
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Mode confidentialité */}
+                  <div className="border-t border-gray-700 pt-2 mt-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        {privacyMode ? <Lock className="h-3 w-3 text-red-400" /> : <Unlock className="h-3 w-3 text-green-400" />}
+                        <span className="text-[10px] text-gray-400">Mode privé</span>
+                      </div>
+                      <Switch 
+                        checked={privacyMode} 
+                        onCheckedChange={setPrivacyMode}
+                        className="scale-75"
+                      />
+                    </div>
+                    <div className="text-[9px] text-gray-500 mt-1">
+                      {privacyMode ? 'Données personnelles masquées' : 'Waypoints et lieux visibles'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Carte */}
+            <div className={`flex-1 relative ${pipelineEnabled ? 'bionic-map-active' : ''}`}>
+              {/* Indicateur du mode création de waypoint */}
+              {mapClickMode && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-green-500 text-black px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-pulse">
+                  <Crosshair className="h-5 w-5" />
+                  <span className="font-medium">Cliquez sur la carte pour placer votre waypoint</span>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-6 w-6 p-0 hover:bg-green-600 ml-2"
+                    onClick={() => setMapClickMode(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <MapContainer center={mapCenter} zoom={mapZoom} className={`h-full w-full ${mapClickMode ? 'cursor-crosshair' : ''}`} zoomControl={false}>
+                {/* COUCHES ÉCOFORESTIÈRES DYNAMIQUES avec FALLBACK */}
+                <EcoforestryLayers 
+                  activeLayers={activeEcoLayers}
+                  layerOpacities={ecoLayerOpacities}
+                  baseMapId={activeEcoLayers.baseMap}
+                  fallbackStatus={ecoMapStatus}
+                  activeFallback={activeFallback}
+                />
+                
+                <MapController center={mapCenter} zoom={mapZoom} />
+                <ZoomHandler onZoomChange={handleZoomChange} onMapMove={handleMapMove} onBoundsChange={handleBoundsChange} />
+                
+                {/* Gestionnaire de clic pour créer des waypoints */}
+                {mapClickMode && (
+                  <MapClickHandler onMapClick={handleMapClickForWaypoint} enabled={true} />
+                )}
+                
+                {/* Tracker de position du curseur pour GPS LIVE */}
+                <CursorTracker onCursorMove={handleCursorMove} onCursorLeave={handleCursorLeave} />
+                
+                {/* Zones BIONIC - Mode Micro-délimitation (cercles fins) */}
+                {zoneDisplayMode === 'micro' && (
+                  <BionicMicroZones
+                    zones={microZones}
+                    corridors={corridors}
+                    bufferZones={bufferZones}
+                    minPercentage={minPercentageFilter}
+                    showConcentricCircles={showConcentricCircles}
+                    showCorridors={showCorridors}
+                    showBufferZones={showCorridors}
+                    onZoneClick={setSelectedZone}
+                    isZoneFavorite={isZoneFavorite}
+                    selectedEspece={selectedEspece}
+                    onAddFavorite={async (zone) => {
+                      // Ouvrir un dialog pour nommer la zone
+                      const name = prompt(`Nom pour cette zone ${BIONIC_MODULES[zone.moduleId]?.label || zone.moduleId} (${zone.percentage}%) ?`, `Zone ${BIONIC_MODULES[zone.moduleId]?.label}`);
+                      if (name) {
+                        await addFavorite({
+                          name,
+                          module_id: zone.moduleId,
+                          location: {
+                            lat: zone.center[0],
+                            lng: zone.center[1],
+                            radius_meters: zone.radiusMeters
+                          },
+                          notes: null,
+                          alert_enabled: true,
+                          alert_days_before: 3
+                        });
+                      }
+                    }}
+                    onRemoveFavorite={(zone) => {
+                      const favId = getFavoriteId(zone);
+                      if (favId) removeFavorite(favId);
+                    }}
+                  />
+                )}
+                
+                {/* Zones BIONIC - Mode Classique (hexagones) */}
+                {zoneDisplayMode === 'classic' && classicZones.map(zone => (
+                  <Polygon
+                    key={zone.id}
+                    positions={zone.positions}
+                    pathOptions={{ 
+                      color: zone.color, 
+                      fillColor: zone.color, 
+                      fillOpacity: zone.score >= 80 ? 0.35 : zone.score >= 65 ? 0.25 : 0.18, 
+                      weight: zone.score >= 80 ? 2 : 1.5, 
+                      opacity: 0.9 
+                    }}
+                    eventHandlers={{
+                      click: () => setSelectedZone(zone)
+                    }}
+                  >
+                    <Tooltip sticky>
+                      <div className="text-center">
+                        <div className="font-bold">{zone.label}</div>
+                        <div className="text-sm">Score: {zone.score}%</div>
+                        <div className="text-xs text-gray-500">≈{zone.areaKm2.toFixed(2)} km²</div>
+                      </div>
+                    </Tooltip>
+                  </Polygon>
+                ))}
+                
+                {/* Cercle indiquant le waypoint cible */}
+                {selectedWaypointForZones && (
+                  <Circle
+                    center={[selectedWaypointForZones.lat, selectedWaypointForZones.lng]}
+                    radius={100}
+                    pathOptions={{ color: '#f5a623', fillColor: '#f5a623', fillOpacity: 0.3, weight: 2, dashArray: '5, 5' }}
+                  />
+                )}
+                
+                {/* Position utilisateur */}
+                {userPosition && (
+                  <Marker position={[userPosition.lat, userPosition.lng]} icon={createCustomIcon('#3b82f6', 'user')}>
+                    <Popup><div className="text-center font-bold">Ma position</div></Popup>
+                  </Marker>
+                )}
+                
+                {/* Waypoints actifs (visibles selon mode confidentialité) */}
+                {isPrivateDataVisible && activeWaypoints.map(wp => (
+                  <React.Fragment key={wp.id}>
+                    {/* Cercle de couverture 2000 pieds de diamètre (rayon = 305m) */}
+                    <Circle
+                      center={[wp.lat, wp.lng]}
+                      radius={305}
+                      pathOptions={{ 
+                        color: selectedWaypointForZones?.id === wp.id ? '#22c55e' : '#f5a623', 
+                        fillColor: selectedWaypointForZones?.id === wp.id ? '#22c55e' : '#f5a623', 
+                        fillOpacity: 0.15, 
+                        weight: 2 
+                      }}
+                    />
+                    <Marker 
+                      position={[wp.lat, wp.lng]} 
+                      icon={createCustomIcon(selectedWaypointForZones?.id === wp.id ? '#22c55e' : '#f5a623', 'waypoint')}
+                      eventHandlers={{
+                        click: () => selectWaypointAsTarget(wp)
+                      }}
+                    >
+                      <Popup>
+                        <div className="text-center">
+                          <div className="font-bold">{wp.name}</div>
+                          <div className="text-xs text-gray-500">{PLACE_TYPES.find(t => t.id === wp.type)?.name}</div>
+                          <div className="text-xs text-gray-400 mt-1">Couverture: 2000 pi</div>
+                          <button 
+                            className="mt-2 px-2 py-1 bg-[#f5a623] text-black text-xs rounded"
+                            onClick={() => selectWaypointAsTarget(wp)}
+                          >
+                            Cibler pour analyse
+                          </button>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </React.Fragment>
+                ))}
+                
+                {/* Lieux enregistrés (visibles selon mode confidentialité) */}
+                {isPrivateDataVisible && savedPlaces.map(place => (
+                  <Marker key={place.id} position={[place.lat, place.lng]} icon={createCustomIcon(PLACE_TYPES.find(t => t.id === place.type)?.color || '#6b7280', 'place')}>
+                    <Popup><div className="text-center"><div className="font-bold">{place.name}</div><div className="text-xs">{PLACE_TYPES.find(t => t.id === place.type)?.icon} {PLACE_TYPES.find(t => t.id === place.type)?.name}</div></div></Popup>
+                  </Marker>
+                ))}
+                
+                {/* Overlay de confidentialité activé */}
+                {privacyMode && (
+                  <div className="bionic-private-overlay" />
+                )}
+                
+                {/* BIONIC™ COUCHES ÉCOFORESTIÈRES - Données réelles GeoJSON + WMS Québec/Canada */}
+                {pipelineEnabled && (
+                  <BionicForestZonesLayer
+                    mapCenter={mapCenter}
+                    enabled={true}
+                    opacity={0.75}
+                    showLegend={true}
+                    showCanadaWMS={true}
+                    // Couches WMS Québec via proxy backend
+                    showQuebecEco={quebecLayers.ecoforestry.enabled}
+                    showQuebecLidar={quebecLayers.lidar.enabled}
+                    showQuebecTWI={quebecLayers.twi.enabled}
+                    quebecOpacities={{
+                      eco: quebecLayers.ecoforestry.opacity / 100,
+                      lidar: quebecLayers.lidar.opacity / 100,
+                      twi: quebecLayers.twi.opacity / 100
+                    }}
+                    // Callback pour le statut de chargement
+                    onLoadingStatusChange={handleQuebecLoadingStatus}
+                    onFeatureClick={(feature) => {
+                      console.log('[BIONIC] Zone forestière cliquée:', feature.properties);
+                    }}
+                  />
+                )}
+                
+                {/* ZONES COMPORTEMENTALES DU GIBIER - Circulation, Cache, Alimentation, Repos */}
+                {pipelineEnabled && showBehaviorZones && (
+                  <WildlifeBehaviorLayer
+                    mapCenter={mapCenter}
+                    enabled={true}
+                    targetSpecies={selectedEspece}
+                    showLegend={true}
+                    minScore={60}
+                    activeBehaviors={activeBehaviors}
+                    onZoneClick={(zoneProps) => {
+                      console.log('[BIONIC] Zone comportementale cliquée:', zoneProps);
+                    }}
+                  />
+                )}
+                
+                {/* OVERLAY TOPOGRAPHIQUE - Courbes de niveau et relief */}
+                <TopographicOverlay
+                  enabled={topoEnabled}
+                  showHillshade={topoHillshade}
+                  hillshadeOpacity={topoHillshadeOpacity}
+                  showContours={topoContours}
+                  contourStyle={topoContourStyle}
+                  showElevationIndicator={topoEnabled}
+                  showLegend={topoEnabled && topoContours}
+                />
+                
+                {/* ANALYSE PAR WAYPOINT - Zone focalisée avec hotspot unique */}
+                <WaypointZoneAnalysis
+                  enabled={zoneAnalysisEnabled}
+                  waypoint={zoneAnalysisWaypoint}
+                  analysisArea={zoneAnalysisArea}
+                  targetSpecies={selectedEspece}
+                  onAnalysisComplete={handleZoneAnalysisComplete}
+                  showBoundary={true}
+                  showZones={true}
+                  showHotspot={true}
+                />
+                
+                {/* Hotspots et trajets d'approche BIONIC - Toujours actif sur tous les fonds de carte */}
+                {carteBionic && pipelineEnabled && (
+                  <BionicHotspotsLayer
+                    generatorResults={carteBionic}
+                    mapCenter={mapCenter}
+                    showHotspots={true}
+                    showApproach={true}
+                    showSimulation={true}
+                    onHotspotClick={(hotspot) => {
+                      console.log('[BIONIC] Hotspot cliqué:', hotspot);
+                    }}
+                  />
+                )}
+              </MapContainer>
+              
+              {/* BIONIC™ MAP OVERLAY - Toujours actif sur tous les fonds de carte */}
+              {pipelineEnabled && (
+                <BionicMapOverlay
+                  active={true}
+                  showBorder={true}
+                  showLegend={false}
+                  showScoring={!!carteBionic}
+                  score={carteBionic ? {
+                    habitat_optimal: carteBionic.habitat_optimal?.score_final || 0,
+                    meteo: carteBionic.analyse_meteo?.score_meteo || 0,
+                    approche: carteBionic.approche_optimale?.score_approche || 0
+                  } : null}
+                  intensity="high"
+                  version="3.3"
+                />
+              )}
+              
+              {/* GPS LIVE - Composant modulaire optimisé */}
+              {gpsLiveEnabled && (
+                <GPSLiveDisplay 
+                  cursorPosition={cursorPosition}
+                  cursorData={cursorData}
+                  cursorElevation={cursorElevation}
+                />
+              )}
+              
+              {/* Contrôles carte */}
+              <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
+                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => {
+                  // Zoom IN sur le centre actuel - utiliser setZoom directement
+                  setMapZoom(z => Math.min(18, z + 1));
+                }}>+</Button>
+                <Button size="sm" className="bg-black/80 text-white border border-gray-700 h-8 w-8 p-0" onClick={() => {
+                  // Zoom OUT sur le centre actuel
+                  setMapZoom(z => Math.max(5, z - 1));
+                }}>-</Button>
+                <Button size="sm" className={`${userPosition ? 'bg-blue-600' : 'bg-black/80'} text-white border border-gray-700 h-8 w-8 p-0`} onClick={centerOnUser}>
+                  <LocateFixed className="h-4 w-4" />
+                </Button>
+                <div className="h-px bg-gray-700 my-1" />
+                {/* Toggle panneau écoforestier */}
+                <Button 
+                  size="sm" 
+                  className={`${showEcoforestryPanel ? 'bg-green-600' : 'bg-black/80'} text-white border border-gray-700 h-8 w-8 p-0`}
+                  onClick={() => setShowEcoforestryPanel(!showEcoforestryPanel)}
+                  title="Carte écoforestière"
+                >
+                  <Leaf className="h-4 w-4" />
+                </Button>
+                {/* Bouton GPS LIVE */}
+                <Button 
+                  size="sm" 
+                  className={`${gpsLiveEnabled ? 'bg-[#f5a623] text-black' : 'bg-black/80 text-white'} border border-gray-700 h-8 w-8 p-0`}
+                  onClick={() => setGpsLiveEnabled(!gpsLiveEnabled)}
+                  title={gpsLiveEnabled ? 'Désactiver GPS LIVE' : 'Activer GPS LIVE'}
+                >
+                  <Crosshair className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* PANNEAU DE CONTRÔLE ÉCOFORESTIER */}
+              {showEcoforestryPanel && (
+                <div className="absolute top-4 left-14 z-[1000] w-72">
+                  <EcoforestryLayerControl
+                    activeLayers={activeEcoLayers}
+                    onToggleLayer={handleEcoLayerToggle}
+                    layerOpacities={ecoLayerOpacities}
+                    onOpacityChange={handleEcoOpacityChange}
+                    expanded={showEcoforestryPanel}
+                    onToggleExpand={() => setShowEcoforestryPanel(!showEcoforestryPanel)}
+                    // Props du système de fallback
+                    fallbackStatus={ecoMapStatus}
+                    activeFallback={activeFallback}
+                    retryCount={retryCount}
+                    onForceCheck={forceEcoMapCheck}
+                    onChangeFallback={setFallbackMap}
+                  />
+                </div>
+              )}
+              
+              {/* NOTIFICATION DE FALLBACK (non intrusive) */}
+              {isEcoMapSelected && (
+                <EcoMapFallbackNotification
+                  status={ecoMapStatus}
+                  activeFallback={activeFallback}
+                  retryCount={retryCount}
+                  onForceCheck={forceEcoMapCheck}
+                  onChangeFallback={setFallbackMap}
+                />
+              )}
+              
+              {/* Indicateur de zoom et cible */}
+              <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+                {/* Badge niveau de zoom */}
+                <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-gray-700">
+                  <div className="text-[10px] text-gray-400 uppercase">Zoom</div>
+                  <div className="text-lg font-bold text-white text-center">{currentZoom}</div>
+                </div>
+                
+                {/* Nombre de zones */}
+                <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-gray-700">
+                  <div className="text-[10px] text-gray-400 uppercase">Zones</div>
+                  <div className="text-lg font-bold text-[#f5a623] text-center">{visibleZonesCount}</div>
+                  <div className="text-[9px] text-gray-500 text-center">
+                    {zoneDisplayMode === 'micro' ? 'Micro' : 'Classique'}
+                  </div>
+                </div>
+                
+                {/* Waypoint cible */}
+                {selectedWaypointForZones && (
+                  <div className="bg-green-900/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-green-500/50">
+                    <div className="text-[10px] text-green-400 uppercase flex items-center gap-1">
+                      <Target className="h-3 w-3" />
+                      Cible
+                    </div>
+                    <div className="text-xs font-medium text-white truncate max-w-[100px]">{selectedWaypointForZones.name}</div>
+                    <button 
+                      onClick={clearWaypointTarget}
+                      className="mt-1 text-[10px] text-red-400 hover:text-red-300 flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" /> Effacer cible
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* MICRO-LÉGENDE PEUPLEMENTS FORESTIERS */}
+              {pipelineEnabled && (
+                <div className="absolute top-[180px] right-4 z-[1000]">
+                  <ForestStandLegendMicro
+                    collapsed={forestLegendCollapsed}
+                    onToggleCollapse={() => setForestLegendCollapsed(!forestLegendCollapsed)}
+                    position="sidebar"
+                  />
+                </div>
+              )}
+              
+              {/* Bandeau météo */}
+              {weather && (
+                <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-black/90 backdrop-blur-sm rounded-lg border border-gray-700 p-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1"><Thermometer className="h-4 w-4 text-blue-400" /><span className="text-white">{Math.round(temperature)}°C</span></div>
+                      <div className="flex items-center gap-1"><Wind className="h-4 w-4 text-gray-400" /><span className="text-white">{windInfo?.direction} {Math.round(windInfo?.speed)} km/h</span></div>
+                      <div className="flex items-center gap-1"><Target className="h-4 w-4 text-[#f5a623]" /><span className="text-white">Chasse: {huntingScore}/100</span></div>
+                    </div>
+                    {liveMode && <Badge className="bg-green-500/20 text-green-400 animate-pulse"><Zap className="h-3 w-3 mr-1" />LIVE</Badge>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Onglet Waypoints actifs */}
+        {activeTab === 'waypoints' && (
+          <div className="flex h-full">
+            {/* Liste des waypoints */}
+            <div className="w-96 bg-gray-900/95 border-r border-gray-800 flex flex-col">
+              <div className="p-4 border-b border-gray-800">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-white font-semibold flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-[#f5a623]" />
+                    Waypoints actifs
+                    <Badge className={`${activeWaypoints.length >= 2 ? 'bg-orange-500' : 'bg-[#f5a623]'} text-black`}>
+                      {activeWaypoints.length}/2
+                    </Badge>
+                  </h2>
+                </div>
+                
+                {/* Avertissement limite de waypoints */}
+                <div className="bg-amber-900/20 rounded-lg p-2 border border-amber-500/30 mb-3">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-amber-300">
+                      <span className="font-medium">Limite: 2 waypoints actifs max</span>
+                      <p className="text-amber-400/70 mt-0.5">Pour optimiser les performances et éviter les ralentissements.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Position actuelle de l'utilisateur */}
+                <div className="bg-blue-900/20 rounded-lg p-3 border border-blue-500/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                      <span className="text-blue-400 text-sm font-medium">Ma position actuelle</span>
+                    </div>
+                    <Switch checked={watchingPosition} onCheckedChange={(checked) => checked ? startWatchingPosition() : stopWatchingPosition()} className="data-[state=checked]:bg-blue-500" />
+                  </div>
+                  {userPosition ? (
+                    <div className="mt-2 text-xs text-gray-400 flex items-center justify-between">
+                      <span>{userPosition.lat.toFixed(6)}, {userPosition.lng.toFixed(6)}</span>
+                      {userPosition.accuracy && <span className="text-blue-400">±{Math.round(userPosition.accuracy)}m</span>}
+                    </div>
+                  ) : (
+                    <div className="mt-2 text-xs text-gray-500">Position non disponible - activez le GPS</div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Liste des waypoints */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {waypoints.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    <MapPin className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>Aucun waypoint</p>
+                    <p className="text-xs mt-1">Utilisez le bouton &quot;Enregistrer un Waypoint&quot;</p>
+                  </div>
+                ) : (
+                  waypoints.map(wp => {
+                    const typeInfo = PLACE_TYPES.find(t => t.id === wp.type);
+                    const distanceFromUser = userPosition ? 
+                      Math.sqrt(Math.pow((wp.lat - userPosition.lat) * 111, 2) + Math.pow((wp.lng - userPosition.lng) * 111 * Math.cos(userPosition.lat * Math.PI / 180), 2)) : null;
+                    const canActivate = wp.active || activeWaypoints.length < 2;
+                    
+                    return (
+                      <div 
+                        key={wp.id} 
+                        className={`bg-gray-800/50 rounded-lg p-3 border ${wp.active ? 'border-[#f5a623]/50' : 'border-gray-700'} ${!canActivate ? 'opacity-60' : ''} transition-all hover:bg-gray-800 cursor-pointer`}
+                        onClick={() => { setMapCenter([wp.lat, wp.lng]); setMapZoom(15); }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl" style={{ backgroundColor: `${typeInfo?.color}20` }}>
+                              {typeInfo?.icon || '📍'}
+                            </div>
+                            <div>
+                              <div className="text-white font-medium flex items-center gap-2">
+                                {wp.name}
+                                {wp.quickSave && <Badge className="bg-green-500/20 text-green-400 text-[8px]">Rapide</Badge>}
+                              </div>
+                              <div className="text-xs text-gray-400 mt-0.5">{typeInfo?.name}</div>
+                              <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                                <span>{wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}</span>
+                                {distanceFromUser && (
+                                  <span className="text-blue-400">
+                                    {distanceFromUser < 1 ? `${(distanceFromUser * 1000).toFixed(0)}m` : `${distanceFromUser.toFixed(1)}km`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => { e.stopPropagation(); openShareDialog(wp); }} 
+                              className="text-[#f5a623] hover:text-[#f5a623]/80 h-8 w-8 p-0"
+                              title="Partager"
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                            <Switch 
+                              checked={wp.active} 
+                              onCheckedChange={() => toggleWaypointActive(wp.id)} 
+                              className="data-[state=checked]:bg-[#f5a623]" 
+                              onClick={(e) => e.stopPropagation()}
+                              disabled={!wp.active && activeWaypoints.length >= 2}
+                              title={!wp.active && activeWaypoints.length >= 2 ? "Limite de 2 waypoints actifs atteinte" : ""}
+                            />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => { e.stopPropagation(); handleDeleteWaypoint(wp.id); }} 
+                              className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+            
+            {/* Carte des waypoints avec affichage du curseur */}
+            <div className="flex-1 relative">
+              <MapContainer center={mapCenter} zoom={mapZoom} className="h-full w-full" zoomControl={false}>
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                <MapController center={mapCenter} zoom={mapZoom} />
+                <CursorTracker onCursorMove={handleCursorMove} onCursorLeave={handleCursorLeave} />
+                
+                {/* Handler pour le mode clic rapide */}
+                {quickWaypointMode && (
+                  <MapClickHandler onMapClick={(lat, lng) => {
+                    const timestamp = new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+                    addWaypoint({
+                      name: `Point ${timestamp}`,
+                      lat, lng,
+                      type: 'observation',
+                      active: true,
+                      quickSave: true
+                    });
+                    toast.success('Waypoint enregistré !');
+                  }} />
+                )}
+                
+                {userPosition && (
+                  <Marker position={[userPosition.lat, userPosition.lng]} icon={createCustomIcon('#3b82f6', 'user')}>
+                    <Popup><b>Ma position</b></Popup>
+                  </Marker>
+                )}
+                
+                {waypoints.map(wp => {
+                  const typeInfo = PLACE_TYPES.find(t => t.id === wp.type);
+                  return (
+                    <React.Fragment key={wp.id}>
+                      {/* Cercle de couverture 2000 pieds de diamètre */}
+                      <Circle
+                        center={[wp.lat, wp.lng]}
+                        radius={305}
+                        pathOptions={{ 
+                          color: wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 
+                          fillColor: wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 
+                          fillOpacity: 0.15, 
+                          weight: 2 
+                        }}
+                      />
+                      <Marker 
+                        position={[wp.lat, wp.lng]} 
+                        icon={createCustomIcon(wp.active ? (typeInfo?.color || '#f5a623') : '#6b7280', 'waypoint')}
+                        opacity={wp.active ? 1 : 0.5}
+                      >
+                        <Popup>
+                          <div className="text-center">
+                            <div className="font-bold">{wp.name}</div>
+                            <div className="text-xs">{typeInfo?.icon} {typeInfo?.name}</div>
+                            <div className="text-xs text-gray-500 mt-1">Couverture: 2000 pi</div>
+                            <Badge className={wp.active ? 'bg-green-500' : 'bg-gray-500'}>{wp.active ? 'Actif' : 'Inactif'}</Badge>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    </React.Fragment>
+                  );
+                })}
+              </MapContainer>
+              
+              {/* Info curseur - "Bout de la flèche" */}
+              {showCursorInfo && cursorData && (
+                <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-gray-700 max-w-xs z-[1000]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crosshair className="h-4 w-4 text-[#f5a623]" />
+                    <span className="text-white text-sm font-medium">Position curseur</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto h-6 w-6 p-0 text-gray-400"
+                      onClick={() => setShowCursorInfo(false)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Coordonnées:</span>
+                      <span className="text-white font-mono">{cursorData.lat.toFixed(5)}, {cursorData.lng.toFixed(5)}</span>
+                    </div>
+                    {cursorData.distanceFromUser && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Distance:</span>
+                        <span className="text-blue-400">
+                          {cursorData.distanceFromUser < 1 
+                            ? `${(cursorData.distanceFromUser * 1000).toFixed(0)} m` 
+                            : `${cursorData.distanceFromUser.toFixed(2)} km`}
+                        </span>
+                      </div>
+                    )}
+                    {cursorData.nearestWaypoint && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Proche de:</span>
+                        <span className="text-[#f5a623]">{cursorData.nearestWaypoint.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  {quickWaypointMode && (
+                    <Button 
+                      className="w-full mt-2 bg-[#f5a623] hover:bg-[#f5a623]/80 text-black h-8 text-xs"
+                      onClick={handleQuickWaypointSave}
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Enregistrer ici
+                    </Button>
+                  )}
+                </div>
+              )}
+              
+              {/* Indicateur mode rapide */}
+              {quickWaypointMode && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 z-[1000]">
+                  <Crosshair className="h-4 w-4 animate-pulse" />
+                  Mode enregistrement rapide - Cliquez sur la carte
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white hover:bg-orange-600" onClick={() => setQuickWaypointMode(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Onglet Lieux enregistrés */}
+        {activeTab === 'lieux' && (
+          <div className="flex h-full">
+            {/* Liste des lieux */}
+            <div className="w-96 bg-gray-900/95 border-r border-gray-800 flex flex-col">
+              <div className="p-4 border-b border-gray-800">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-white font-semibold flex items-center gap-2">
+                    <BookMarked className="h-5 w-5 text-blue-400" />
+                    Lieux enregistrés
+                  </h2>
+                  <Dialog open={showAddPlaceDialog} onOpenChange={setShowAddPlaceDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Plus className="h-4 w-4 mr-1" /> Ajouter un lieu
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-900 border-gray-700">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">Ajouter un lieu</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div>
+                          <Label className="text-gray-300">Nom du lieu *</Label>
+                          <Input 
+                            placeholder="Ex: ZEC Batiscan-Neilson" 
+                            className="bg-gray-800 border-gray-700 text-white"
+                            value={newPlace.name}
+                            onChange={(e) => setNewPlace(p => ({ ...p, name: e.target.value }))} 
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-300">Type de lieu</Label>
+                          <Select value={newPlace.type} onValueChange={(v) => setNewPlace(p => ({ ...p, type: v }))}>
+                            <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700">
+                              {PLACE_TYPES.map(type => (
+                                <SelectItem key={type.id} value={type.id} className="text-white">
+                                  <span className="flex items-center gap-2">{type.icon} {type.name}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-gray-300">Latitude</Label>
+                            <Input 
+                              placeholder="46.8139" 
+                              className="bg-gray-800 border-gray-700 text-white"
+                              value={newPlace.lat}
+                              onChange={(e) => setNewPlace(p => ({ ...p, lat: e.target.value }))} 
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-gray-300">Longitude</Label>
+                            <Input 
+                              placeholder="-71.2080" 
+                              className="bg-gray-800 border-gray-700 text-white"
+                              value={newPlace.lng}
+                              onChange={(e) => setNewPlace(p => ({ ...p, lng: e.target.value }))} 
+                            />
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={useCurrentPositionForNewPlace} className="w-full border-gray-700 text-gray-300">
+                          <LocateFixed className="h-4 w-4 mr-2" /> Utiliser ma position actuelle
+                        </Button>
+                        <div>
+                          <Label className="text-gray-300">Notes (optionnel)</Label>
+                          <Input 
+                            placeholder="Ex: Zone 15, secteur lac Blanc" 
+                            className="bg-gray-800 border-gray-700 text-white"
+                            value={newPlace.notes}
+                            onChange={(e) => setNewPlace(p => ({ ...p, notes: e.target.value }))} 
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAddPlaceDialog(false)} className="border-gray-700">Annuler</Button>
+                        <Button onClick={handleAddPlace} className="bg-blue-600 hover:bg-blue-700 text-white">Enregistrer</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                
+                {/* Types rapides */}
+                <div className="flex flex-wrap gap-1">
+                  {PLACE_TYPES.slice(0, 5).map(type => (
+                    <button
+                      key={type.id}
+                      onClick={() => { setNewPlace({ name: '', type: type.id, lat: '', lng: '', notes: '' }); setShowAddPlaceDialog(true); }}
+                      className="px-2 py-1 rounded text-[10px] bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                    >
+                      {type.icon} {type.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Liste des lieux */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {savedPlaces.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    <BookMarked className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>Aucun lieu enregistré</p>
+                    <p className="text-xs mt-1">Ajoutez vos ZEC, pourvoiries et territoires</p>
+                  </div>
+                ) : (
+                  savedPlaces.map(place => {
+                    const typeInfo = PLACE_TYPES.find(t => t.id === place.type);
+                    return (
+                      <div 
+                        key={place.id} 
+                        className="bg-gray-800/50 rounded-lg p-3 border border-gray-700 hover:border-gray-600 transition-all"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+                              style={{ backgroundColor: `${typeInfo?.color}20` }}
+                            >
+                              {typeInfo?.icon || '📌'}
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-white font-medium">{place.name}</div>
+                              <div className="text-xs text-gray-400 mt-0.5">{typeInfo?.name}</div>
+                              {place.notes && (
+                                <div className="text-[10px] text-gray-500 mt-1 italic">"{place.notes}"</div>
+                              )}
+                              <div className="text-[10px] text-gray-500 mt-1">
+                                {place.lat.toFixed(4)}, {place.lng.toFixed(4)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => { setMapCenter([place.lat, place.lng]); setMapZoom(13); }}
+                              className="text-gray-400 hover:text-white h-8 w-8 p-0"
+                            >
+                              <Navigation2 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => setEditingPlace(place)}
+                              className="text-blue-400 hover:text-blue-300 h-8 w-8 p-0"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => deletePlace(place.id)}
+                              className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+            
+            {/* Carte des lieux */}
+            <div className="flex-1 relative">
+              <MapContainer center={mapCenter} zoom={8} className="h-full w-full" zoomControl={false}>
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                <MapController center={mapCenter} zoom={mapZoom} />
+                
+                {userPosition && (
+                  <Marker position={[userPosition.lat, userPosition.lng]} icon={createCustomIcon('#3b82f6', 'user')}>
+                    <Popup><b>Ma position</b></Popup>
+                  </Marker>
+                )}
+                
+                {savedPlaces.map(place => {
+                  const typeInfo = PLACE_TYPES.find(t => t.id === place.type);
+                  return (
+                    <Marker 
+                      key={place.id} 
+                      position={[place.lat, place.lng]} 
+                      icon={createCustomIcon(typeInfo?.color || '#6b7280', 'place')}
+                    >
+                      <Popup>
+                        <div className="text-center min-w-[150px]">
+                          <div className="text-lg mb-1">{typeInfo?.icon}</div>
+                          <div className="font-bold">{place.name}</div>
+                          <div className="text-xs text-gray-500">{typeInfo?.name}</div>
+                          {place.notes && <div className="text-xs mt-1 italic">"{place.notes}"</div>}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+              </MapContainer>
+              
+              {/* Légende */}
+              <div className="absolute bottom-4 left-4 z-[1000] bg-black/90 backdrop-blur-sm rounded-lg border border-gray-700 p-3">
+                <div className="text-[10px] text-gray-400 uppercase mb-2">Types de lieux</div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {PLACE_TYPES.slice(0, 6).map(type => (
+                    <div key={type.id} className="flex items-center gap-2 text-xs">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: type.color }} />
+                      <span className="text-gray-300">{type.icon} {type.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Dialog d'édition de lieu */}
+      {editingPlace && (
+        <Dialog open={!!editingPlace} onOpenChange={() => setEditingPlace(null)}>
+          <DialogContent className="bg-gray-900 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Modifier le lieu</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-gray-300">Nom du lieu</Label>
+                <Input 
+                  value={editingPlace.name}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  onChange={(e) => setEditingPlace(p => ({ ...p, name: e.target.value }))} 
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Type</Label>
+                <Select value={editingPlace.type} onValueChange={(v) => setEditingPlace(p => ({ ...p, type: v }))}>
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {PLACE_TYPES.map(type => (
+                      <SelectItem key={type.id} value={type.id} className="text-white">{type.icon} {type.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-gray-300">Notes</Label>
+                <Input 
+                  value={editingPlace.notes || ''}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  onChange={(e) => setEditingPlace(p => ({ ...p, notes: e.target.value }))} 
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingPlace(null)} className="border-gray-700">Annuler</Button>
+              <Button onClick={handleUpdatePlace} className="bg-blue-600 hover:bg-blue-700 text-white">Sauvegarder</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {/* Dialog contrôlé pour ajouter un waypoint (accessible depuis le bouton rapide) */}
+      <Dialog open={showAddWaypointDialog} onOpenChange={setShowAddWaypointDialog}>
+        <DialogContent className="bg-gray-900 border-gray-700 z-[9999]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-[#f5a623]" />
+              Nouveau waypoint
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Créez un point d'intérêt pour générer automatiquement des zones d'analyse BIONIC™
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-gray-300">Nom du waypoint</Label>
+              <Input 
+                placeholder="Ex: Affût secteur nord" 
+                className="bg-gray-800 border-gray-700 text-white mt-1" 
+                value={newWaypoint.name}
+                onChange={(e) => setNewWaypoint(p => ({ ...p, name: e.target.value }))} 
+              />
+            </div>
+            <div>
+              <Label className="text-gray-300">Type</Label>
+              <Select value={newWaypoint.type} onValueChange={(v) => setNewWaypoint(p => ({ ...p, type: v }))}>
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white mt-1">
+                  <SelectValue placeholder="Sélectionner un type" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {PLACE_TYPES.map(type => (
+                    <SelectItem key={type.id} value={type.id} className="text-white">{type.icon} {type.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-gray-300">Latitude</Label>
+                <Input 
+                  placeholder="46.8139" 
+                  className="bg-gray-800 border-gray-700 text-white mt-1" 
+                  value={newWaypoint.lat}
+                  onChange={(e) => setNewWaypoint(p => ({ ...p, lat: e.target.value }))} 
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Longitude</Label>
+                <Input 
+                  placeholder="-71.2080" 
+                  className="bg-gray-800 border-gray-700 text-white mt-1" 
+                  value={newWaypoint.lng}
+                  onChange={(e) => setNewWaypoint(p => ({ ...p, lng: e.target.value }))} 
+                />
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={useCurrentPositionForNewWaypoint} 
+              className="w-full border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              <LocateFixed className="h-4 w-4 mr-2" /> Utiliser ma position actuelle
+            </Button>
+            <div className="bg-[#f5a623]/10 border border-[#f5a623]/30 rounded-lg p-3">
+              <p className="text-xs text-[#f5a623]">
+                💡 Astuce : Un waypoint actif génère automatiquement des zones d'analyse BIONIC™ autour de sa position.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="border-gray-700" onClick={() => setShowAddWaypointDialog(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleAddWaypointFromDialog} 
+              className="bg-[#f5a623] hover:bg-[#f5a623]/90 text-black"
+              data-testid="confirm-add-waypoint-btn"
+            >
+              <Plus className="h-4 w-4 mr-1" /> Ajouter le waypoint
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog de partage de waypoint */}
+      <ShareWaypointDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        waypoint={waypointToShare}
+        userId={userId}
+        onShared={() => {
+          setShowShareDialog(false);
+          setWaypointToShare(null);
+        }}
+      />
+      
+      {/* Dialog de création de groupe */}
+      <CreateGroupDialog
+        open={showCreateGroupDialog}
+        onOpenChange={setShowCreateGroupDialog}
+        userId={userId}
+        onCreated={(group) => {
+          toast.success(`Groupe "${group.name}" créé !`, {
+            description: `Code d'invitation: ${group.invite_code}`
+          });
+          refreshGroups(); // Rafraîchir la liste des groupes
+        }}
+      />
+      
+      {/* Tableau de bord du groupe (tracking live + chat) */}
+      {showGroupDashboard && selectedGroup && (
+        <Dialog open={showGroupDashboard} onOpenChange={setShowGroupDashboard}>
+          <DialogContent className="bg-gray-900 border-gray-700 max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+            <GroupDashboard 
+              group={selectedGroup}
+              userId={userId}
+              onClose={() => {
+                setShowGroupDashboard(false);
+                setSelectedGroup(null);
+              }}
+              initialTab="map"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+};
+
+export default MonTerritoireBionicPage;
