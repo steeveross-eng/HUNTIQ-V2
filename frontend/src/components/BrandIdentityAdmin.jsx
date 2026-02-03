@@ -67,20 +67,20 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const LOGO_VARIANTS = {
   main: {
     name: "Logo Principal BIONIC™", 
-    url: "/logos/bionic-logo-main.png",
+    url: "/logos/bionic-logo-main.webp",
     description: "Logo unifié Chasse Bionic™ / Bionic Hunt™"
   },
   fr: {
     full: { 
       name: "Logo Complet FR", 
-      url: "/logos/bionic-logo-main.png",
+      url: "/logos/bionic-logo-main.webp",
       description: "Logo Chasse Bionic™"
     }
   },
   en: {
     full: { 
       name: "Full Logo EN", 
-      url: "/logos/bionic-logo-main.png",
+      url: "/logos/bionic-logo-main.webp",
       description: "Bionic Hunt™ logo"
     }
   }
