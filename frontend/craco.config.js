@@ -1,10 +1,13 @@
 // craco.config.js
 const path = require("path");
 require("dotenv").config();
+const CompressionPlugin = require("compression-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 // Check if we're in development/preview mode (not production build)
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
 const isDevServer = process.env.NODE_ENV !== "production";
+const isProduction = process.env.NODE_ENV === "production";
 
 // Environment variable overrides
 const config = {
@@ -60,6 +63,78 @@ const webpackConfig = {
             '**/public/**',
         ],
       };
+
+      // ═══════════════════════════════════════════════════════════════
+      // OPTIMIZATIONS DE PRODUCTION
+      // ═══════════════════════════════════════════════════════════════
+      if (isProduction) {
+        // Code splitting optimisé
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          splitChunks: {
+            chunks: 'all',
+            minSize: 20000,
+            maxSize: 244000,
+            cacheGroups: {
+              // Vendor chunks séparés
+              vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name(module) {
+                  const packageName = module.context.match(
+                    /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+                  )[1];
+                  return `npm.${packageName.replace('@', '')}`;
+                },
+                priority: 10,
+              },
+              // Leaflet séparé (gros module)
+              leaflet: {
+                test: /[\\/]node_modules[\\/](leaflet|react-leaflet)[\\/]/,
+                name: 'leaflet',
+                priority: 20,
+              },
+              // Recharts séparé
+              recharts: {
+                test: /[\\/]node_modules[\\/]recharts[\\/]/,
+                name: 'recharts',
+                priority: 20,
+              },
+              // Lucide icons séparé
+              icons: {
+                test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+                name: 'icons',
+                priority: 20,
+              },
+            },
+          },
+          // Minification agressive
+          minimize: true,
+          minimizer: [
+            new TerserPlugin({
+              terserOptions: {
+                compress: {
+                  drop_console: true,
+                  drop_debugger: true,
+                },
+                output: {
+                  comments: false,
+                },
+              },
+              extractComments: false,
+            }),
+          ],
+        };
+
+        // Compression gzip/brotli
+        webpackConfig.plugins.push(
+          new CompressionPlugin({
+            algorithm: 'gzip',
+            test: /\.(js|css|html|svg)$/,
+            threshold: 10240,
+            minRatio: 0.8,
+          })
+        );
+      }
 
       // Add health check plugin to webpack if enabled
       if (config.enableHealthCheck && healthPluginInstance) {
