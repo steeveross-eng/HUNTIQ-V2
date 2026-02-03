@@ -176,6 +176,18 @@ export const useHuntingGroups = (userId) => {
   const [myGroups, setMyGroups] = useState({ owned_groups: [], member_groups: [] });
   const [publicGroups, setPublicGroups] = useState([]);
 
+  // Récupérer mes groupes - défini d'abord
+  const fetchMyGroups = useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      const result = await apiRequest(`/api/groups/${userId}/my-groups`);
+      setMyGroups(result);
+    } catch (e) {
+      console.error('Error fetching groups:', e);
+    }
+  }, [userId]);
+
   // Créer un groupe
   const createGroup = useCallback(async (name, description = '', isPublic = false) => {
     if (!userId) {
@@ -207,11 +219,7 @@ export const useHuntingGroups = (userId) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
-
-  // Récupérer mes groupes
-  const fetchMyGroups = useCallback(async () => {
-    if (!userId) return;
+  }, [userId, fetchMyGroups]);
     
     try {
       const result = await apiRequest(`/api/groups/${userId}/my-groups`);
