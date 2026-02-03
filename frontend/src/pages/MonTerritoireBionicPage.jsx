@@ -1352,7 +1352,22 @@ const MonTerritoireBionicPage = () => {
       clearTimeout(elevationTimeoutRef.current);
     }
     elevationTimeoutRef.current = setTimeout(() => {
-      fetchElevation(lat, lng);
+      // Fetch elevation inline pour éviter la dépendance circulaire
+      const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+      if (elevationCacheRef.current[cacheKey]) {
+        setCursorElevation(elevationCacheRef.current[cacheKey]);
+        return;
+      }
+      fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`)
+        .then(response => response.ok ? response.json() : null)
+        .then(data => {
+          const elevation = data?.elevation?.[0];
+          if (elevation !== null && elevation !== undefined) {
+            elevationCacheRef.current[cacheKey] = Math.round(elevation);
+            setCursorElevation(Math.round(elevation));
+          }
+        })
+        .catch(() => {});
     }, 300); // Attendre 300ms avant de faire la requête
     
     // Distance depuis la position utilisateur
