@@ -88,9 +88,9 @@ export const useLiveTracking = (userId, groupId, options = {}) => {
             };
             setMyPosition(pos);
             
-            // Envoyer la position si mode auto
+            // Envoyer la position si mode auto - utilise sendPositionInternal
             if (trackingMode === 'auto') {
-              sendPosition(pos);
+              sendPositionInternal(pos);
             }
           },
           (error) => {
@@ -106,8 +106,8 @@ export const useLiveTracking = (userId, groupId, options = {}) => {
       }
       
       // Polling des positions des membres
-      intervalRef.current = setInterval(fetchMembersPositions, updateInterval);
-      fetchMembersPositions();
+      intervalRef.current = setInterval(fetchMembersPositionsInternal, updateInterval);
+      fetchMembersPositionsInternal();
       
       toast.success('Tracking démarré', {
         description: 'Votre position est partagée avec le groupe'
@@ -120,6 +120,7 @@ export const useLiveTracking = (userId, groupId, options = {}) => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, groupId, trackingMode, shareExactPosition, updateInterval]);
 
   // Arrêter le tracking
