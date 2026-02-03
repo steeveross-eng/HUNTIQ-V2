@@ -1288,24 +1288,28 @@ function App() {
             <SEOHead />
             <Navigation cartCount={cartCount} onCartOpen={() => setIsCartOpen(true)} />
             <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemoveItem={handleRemoveItem} />
-            <Routes>
-              <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} onAffiliateClick={handleAffiliateClick} />} />
-              <Route path="/analyze" element={<AnalyzerModule />} />
-              <Route path="/compare" element={<ComparePage products={products} />} />
-              <Route path="/shop" element={<ShopPage products={products} onAddToCart={handleAddToCart} onAffiliateClick={handleAffiliateClick} />} />
-              <Route path="/mon-territoire-bionic" element={<MonTerritoireBionicPage />} />
-              <Route path="/admin" element={<AdminPage onProductsUpdate={fetchProducts} />} />
-              <Route path="/territory" element={<TerritoryPage />} />
-              <Route path="/marketplace" element={<MarketplacePage />} />
-              <Route path="/network" element={<NetworkingHub />} />
-              <Route path="/formations" element={<FormationsPage />} />
-              <Route path="/terres" element={<LandsRental />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/become-partner" element={<BecomePartner />} />
-              <Route path="/partner/dashboard" element={<PartnerDashboard />} />
-              <Route path="/referral" element={<ReferralModule />} />
-            </Routes>
-            <DynamicReferralWidget />
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} onAffiliateClick={handleAffiliateClick} />} />
+                <Route path="/analyze" element={<AnalyzerModule />} />
+                <Route path="/compare" element={<ComparePage products={products} />} />
+                <Route path="/shop" element={<ShopPage products={products} onAddToCart={handleAddToCart} onAffiliateClick={handleAffiliateClick} />} />
+                <Route path="/mon-territoire-bionic" element={<MonTerritoireBionicPage />} />
+                <Route path="/admin" element={<AdminPage onProductsUpdate={fetchProducts} />} />
+                <Route path="/territory" element={<TerritoryPage />} />
+                <Route path="/marketplace" element={<MarketplacePage />} />
+                <Route path="/network" element={<NetworkingHub />} />
+                <Route path="/formations" element={<FormationsPage />} />
+                <Route path="/terres" element={<LandsRental />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/become-partner" element={<BecomePartner />} />
+                <Route path="/partner/dashboard" element={<PartnerDashboard />} />
+                <Route path="/referral" element={<ReferralModule />} />
+              </Routes>
+            </Suspense>
+            <Suspense fallback={null}>
+              <DynamicReferralWidget />
+            </Suspense>
             <Footer />
             <ScrollNavigator />
             <Toaster position="bottom-right" richColors />
