@@ -13,7 +13,9 @@
 import { useEffect, useRef, useMemo } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet.vectorgrid';
+
+// Note: leaflet.vectorgrid désactivé temporairement - utilisation de TileLayer standard
+// import 'leaflet.vectorgrid';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION DES SOURCES DE TUILES VECTORIELLES
