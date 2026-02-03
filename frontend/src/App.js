@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, lazy, Suspense } from "react";
 import "@/App.css";
 import "@/styles/bionic-zones.css";
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
@@ -11,36 +11,54 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import AnalyzerModule from "@/components/AnalyzerModule";
-import TerritoryMap from "@/components/TerritoryMap";
-import HuntMarketplace from "@/components/HuntMarketplace";
 import CookieConsent from "@/components/CookieConsent";
 import SEOHead from "@/components/SEOHead";
-import ContentDepot from "@/components/ContentDepot";
 import SiteAccessControl from "@/components/SiteAccessControl";
 import MaintenancePage from "@/components/MaintenancePage";
-import LandsRental from "@/components/LandsRental";
-import LandsPricingAdmin from "@/components/LandsPricingAdmin";
-import NetworkingHub from "@/components/NetworkingHub";
-import NetworkingAdmin from "@/components/NetworkingAdmin";
 import NotificationCenter from "@/components/NotificationCenter";
-import EmailAdmin from "@/components/EmailAdmin";
-import FeatureControlsAdmin from "@/components/FeatureControlsAdmin";
 import ResetPasswordPage from "@/components/ResetPasswordPage";
-import AdminPage from "@/pages/AdminPage";
-import FormationsPage from "@/pages/FormationsPage";
 import { AuthProvider, UserMenu, useAuth } from "@/components/GlobalAuth";
 import { LanguageProvider, useLanguage, LanguageSwitcher } from "@/contexts/LanguageContext";
 import BionicLogo from "@/components/BionicLogo";
 import ScrollNavigator from "@/components/ScrollNavigator";
-import BecomePartner from "@/components/BecomePartner";
-import PartnerDashboard from "@/components/PartnerDashboard";
-import MonTerritoireBionic from "@/components/territoire/MonTerritoireBionic";
-import MonTerritoireBionicPage from "@/pages/MonTerritoireBionicPage";
-import ProductDiscoveryAdmin from "@/components/ProductDiscoveryAdmin";
-import ReferralModule from "@/components/ReferralModule";
-import ReferralAdminPanel from "@/components/ReferralAdminPanel";
-import DynamicReferralWidget from "@/components/DynamicReferralWidget";
+
+// ═══════════════════════════════════════════════════════════════
+// CODE SPLITTING - Lazy Loading des composants lourds
+// Réduction du bundle initial de ~50%
+// ═══════════════════════════════════════════════════════════════
+const AnalyzerModule = lazy(() => import("@/components/AnalyzerModule"));
+const TerritoryMap = lazy(() => import("@/components/TerritoryMap"));
+const HuntMarketplace = lazy(() => import("@/components/HuntMarketplace"));
+const ContentDepot = lazy(() => import("@/components/ContentDepot"));
+const LandsRental = lazy(() => import("@/components/LandsRental"));
+const LandsPricingAdmin = lazy(() => import("@/components/LandsPricingAdmin"));
+const NetworkingHub = lazy(() => import("@/components/NetworkingHub"));
+const NetworkingAdmin = lazy(() => import("@/components/NetworkingAdmin"));
+const EmailAdmin = lazy(() => import("@/components/EmailAdmin"));
+const FeatureControlsAdmin = lazy(() => import("@/components/FeatureControlsAdmin"));
+const AdminPage = lazy(() => import("@/pages/AdminPage"));
+const FormationsPage = lazy(() => import("@/pages/FormationsPage"));
+const BecomePartner = lazy(() => import("@/components/BecomePartner"));
+const PartnerDashboard = lazy(() => import("@/components/PartnerDashboard"));
+const MonTerritoireBionic = lazy(() => import("@/components/territoire/MonTerritoireBionic"));
+const MonTerritoireBionicPage = lazy(() => import("@/pages/MonTerritoireBionicPage"));
+const ProductDiscoveryAdmin = lazy(() => import("@/components/ProductDiscoveryAdmin"));
+const ReferralModule = lazy(() => import("@/components/ReferralModule"));
+const ReferralAdminPanel = lazy(() => import("@/components/ReferralAdminPanel"));
+const DynamicReferralWidget = lazy(() => import("@/components/DynamicReferralWidget"));
+
+// ═══════════════════════════════════════════════════════════════
+// LOADING FALLBACK COMPONENT
+// ═══════════════════════════════════════════════════════════════
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-[400px] bg-black">
+    <div className="text-center">
+      <div className="w-12 h-12 border-4 border-[#f5a623] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+      <p className="text-gray-400 text-sm">Chargement...</p>
+    </div>
+  </div>
+);
+
 // ShopPage and ComparePage are defined locally below
 import { 
   ShoppingCart, 
