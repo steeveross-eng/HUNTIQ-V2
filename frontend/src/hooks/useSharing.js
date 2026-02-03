@@ -220,14 +220,6 @@ export const useHuntingGroups = (userId) => {
       setLoading(false);
     }
   }, [userId, fetchMyGroups]);
-    
-    try {
-      const result = await apiRequest(`/api/groups/${userId}/my-groups`);
-      setMyGroups(result);
-    } catch (e) {
-      console.error('Error fetching groups:', e);
-    }
-  }, [userId]);
 
   // Découvrir les groupes publics
   const discoverGroups = useCallback(async (search = '') => {
