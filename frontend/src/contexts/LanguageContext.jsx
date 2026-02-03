@@ -13,7 +13,7 @@ export const BRAND_NAMES = {
     company: "Chasse Bionic™",
     tagline: "Votre parcours guidé vers une chasse parfaite",
     slogan: "La science valide ce que le terrain confirme.™",
-    logo: "/logos/bionic-logo-main.png"
+    logo: "/logos/bionic-logo-main.webp"
   },
   en: {
     full: "Bionic Hunt™",
@@ -21,7 +21,7 @@ export const BRAND_NAMES = {
     company: "Bionic Hunt™",
     tagline: "Your guided path to a perfect hunt",
     slogan: "Science validates what the field confirms.™",
-    logo: "/logos/bionic-logo-main.png"
+    logo: "/logos/bionic-logo-main.webp"
   }
 };
 
