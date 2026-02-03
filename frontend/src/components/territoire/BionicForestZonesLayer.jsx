@@ -441,6 +441,7 @@ const QuebecWMSProxyLayer = ({
         URL.revokeObjectURL(imageOverlay.url);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, map, source, layer]);
   
   if (!visible || !imageOverlay) return null;
