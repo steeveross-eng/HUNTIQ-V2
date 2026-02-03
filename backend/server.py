@@ -811,6 +811,124 @@ async def toggle_maintenance_mode(update: MaintenanceModeUpdate):
     }
 
 # ============================================
+# HEALTH CHECK ENDPOINT
+# ============================================
+
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Vérifier la connexion MongoDB
+        await db.command("ping")
+        mongo_status = "connected"
+    except Exception as e:
+        mongo_status = f"error: {str(e)}"
+    
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2.1.0",
+        "services": {
+            "mongodb": mongo_status,
+            "api": "running"
+        }
+    }
+
+# ============================================
+# TERRITORY RANKING & HOTSPOTS
+# ============================================
+
+@api_router.get("/territory/rankings")
+async def get_territory_rankings(
+    region: Optional[str] = None,
+    espece: Optional[str] = "ORIGNAL",
+    limit: int = 10
+):
+    """Récupère les classements des territoires par score BIONIC"""
+    try:
+        # Simuler des rankings basés sur les données
+        rankings = []
+        regions = ["Québec", "Mauricie", "Laurentides", "Saguenay", "Outaouais"]
+        
+        for i, r in enumerate(regions[:limit]):
+            score = 95 - (i * 5) + (hash(r + espece) % 10)
+            rankings.append({
+                "rank": i + 1,
+                "region": r,
+                "score": min(100, max(60, score)),
+                "espece": espece,
+                "factors": {
+                    "habitat": score - 5 + (i % 3),
+                    "densite": score - 10 + (i % 5),
+                    "accessibilite": score + 5 - (i % 4)
+                },
+                "trend": "up" if i % 2 == 0 else "stable"
+            })
+        
+        if region:
+            rankings = [r for r in rankings if region.lower() in r["region"].lower()]
+        
+        return {
+            "success": True,
+            "rankings": rankings,
+            "total": len(rankings),
+            "espece": espece,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching rankings: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/territory/hotspots")
+async def get_territory_hotspots(
+    lat: Optional[float] = 46.8139,
+    lng: Optional[float] = -71.2080,
+    radius_km: Optional[float] = 50,
+    espece: Optional[str] = "ORIGNAL"
+):
+    """Récupère les hotspots GPS pour une zone donnée"""
+    try:
+        # Générer des hotspots simulés autour de la position
+        hotspots = []
+        import math
+        
+        for i in range(12):
+            angle = (i * 30) * math.pi / 180
+            dist = (i % 3 + 1) * (radius_km / 5)
+            
+            h_lat = lat + (dist / 111.32) * math.cos(angle)
+            h_lng = lng + (dist / (111.32 * math.cos(lat * math.pi / 180))) * math.sin(angle)
+            
+            score = 85 - (i * 3) + (hash(f"{h_lat}{h_lng}") % 15)
+            
+            hotspots.append({
+                "id": f"hotspot-{i+1}",
+                "lat": round(h_lat, 6),
+                "lng": round(h_lng, 6),
+                "score": min(100, max(55, score)),
+                "type": ["habitat", "alimentation", "repos", "corridor"][i % 4],
+                "espece": espece,
+                "confidence": round(0.7 + (hash(str(i)) % 30) / 100, 2),
+                "last_activity": (datetime.now(timezone.utc) - timedelta(hours=i*2)).isoformat()
+            })
+        
+        # Trier par score
+        hotspots.sort(key=lambda x: x["score"], reverse=True)
+        
+        return {
+            "success": True,
+            "hotspots": hotspots,
+            "center": {"lat": lat, "lng": lng},
+            "radius_km": radius_km,
+            "espece": espece,
+            "total": len(hotspots),
+            "generated_at": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching hotspots: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
 # PRODUCTS ENDPOINTS
 # ============================================
 
